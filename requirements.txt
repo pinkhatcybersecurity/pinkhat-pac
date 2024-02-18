@@ -1,0 +1,4 @@
+pyyaml
+loguru
+python-hcl2
+pytest==8.0.0
