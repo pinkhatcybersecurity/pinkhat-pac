@@ -1,10 +1,10 @@
 from iacparsers.terraform_aws.ebs.terraform_aws_ebs_encryption_core import (
-    TerraformAwsEbsEncryptionCore,
+    TFAwsEbsEncryptionCore,
 )
 from iacparsers.vulnerability_definition import VulnerabilityDefinition
 
 
-class TerraformAwsElastiCacheReplicationGroup(TerraformAwsEbsEncryptionCore):
+class TFAwsElastiCacheReplicationGroup(TFAwsEbsEncryptionCore):
     """
     Description of *aws_elasticache_cluster* terraform module:
     https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_cluster
@@ -15,30 +15,30 @@ class TerraformAwsElastiCacheReplicationGroup(TerraformAwsEbsEncryptionCore):
 
     MODULE_NAME = "aws_elasticache_cluster"
     SECURITY_CHECKS = [
-        lambda file_name, terraform_resource_name, terraform_resource_values: TerraformAwsElastiCacheReplicationGroup._security_check_transit_encryption_enabled(
+        lambda file_name, tf_resource_name, tf_resource_values: TFAwsElastiCacheReplicationGroup._sec_check_transit_encryption_enabled(
             file_name=file_name,
-            terraform_resource_name=terraform_resource_name,
-            terraform_resource_values=terraform_resource_values,
+            tf_resource_name=tf_resource_name,
+            tf_resource_values=tf_resource_values,
         ),
-        lambda file_name, terraform_resource_name, terraform_resource_values: TerraformAwsElastiCacheReplicationGroup._security_check_at_rest_encryption_enabled(
+        lambda file_name, tf_resource_name, tf_resource_values: TFAwsElastiCacheReplicationGroup._sec_check_at_rest_encryption_enabled(
             file_name=file_name,
-            terraform_resource_name=terraform_resource_name,
-            terraform_resource_values=terraform_resource_values,
+            tf_resource_name=tf_resource_name,
+            tf_resource_values=tf_resource_values,
         ),
     ]
 
     @classmethod
-    def _get_security_checks(cls) -> list:
+    def _get_sec_checks(cls) -> list:
         return cls.SECURITY_CHECKS
 
     @classmethod
-    def _security_check_at_rest_encryption_enabled(
+    def _sec_check_at_rest_encryption_enabled(
         cls,
         file_name: str,
-        terraform_resource_name: dict,
-        terraform_resource_values: dict,
+        tf_resource_name: dict,
+        tf_resource_values: dict,
     ):
-        if terraform_resource_values.get("at_rest_encryption_enabled", False) is False:
+        if tf_resource_values.get("at_rest_encryption_enabled", False) is False:
             return VulnerabilityDefinition(
                 file_path=file_name,
                 category="Terraform AWS",
@@ -46,27 +46,27 @@ class TerraformAwsElastiCacheReplicationGroup(TerraformAwsEbsEncryptionCore):
                 severity="High",
                 cwe="CWE-311",
                 module=cls.MODULE_NAME,
-                vulnerability=f"Resource {cls.MODULE_NAME} name: {terraform_resource_name}"
+                vulnerability=f"Resource {cls.MODULE_NAME} name: {tf_resource_name}"
                 f" doesn't enable encryption",
-                line_of_code=terraform_resource_values.get("__start_line__"),
+                line_of_code=tf_resource_values.get("__start_line__"),
             )
 
     @classmethod
-    def _security_check_transit_encryption_enabled(
+    def _sec_check_transit_encryption_enabled(
         cls,
         file_name: str,
-        terraform_resource_name: dict,
-        terraform_resource_values: dict,
+        tf_resource_name: dict,
+        tf_resource_values: dict,
     ):
         """
         https://docs.aws.amazon.com/AmazonElastiCache/latest/mem-ug/in-transit-encryption.html
 
         :param file_name:
-        :param terraform_resource_name:
-        :param terraform_resource_values:
+        :param tf_resource_name:
+        :param tf_resource_values:
         :return:
         """
-        if terraform_resource_values.get("transit_encryption_enabled", False) is False:
+        if tf_resource_values.get("transit_encryption_enabled", False) is False:
             return VulnerabilityDefinition(
                 file_path=file_name,
                 category="Terraform AWS",
@@ -74,7 +74,7 @@ class TerraformAwsElastiCacheReplicationGroup(TerraformAwsEbsEncryptionCore):
                 severity="High",
                 cwe="CWE-311",
                 module=cls.MODULE_NAME,
-                vulnerability=f"Resource {cls.MODULE_NAME} name: {terraform_resource_name}"
+                vulnerability=f"Resource {cls.MODULE_NAME} name: {tf_resource_name}"
                 f" doesn't enable encryption",
-                line_of_code=terraform_resource_values.get("__start_line__"),
+                line_of_code=tf_resource_values.get("__start_line__"),
             )

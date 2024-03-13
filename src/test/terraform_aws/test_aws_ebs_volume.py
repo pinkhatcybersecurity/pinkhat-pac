@@ -16,7 +16,7 @@ def test_resource_aws_ebs_volume():
             assert vulnerability.cwe == "CWE-311"
             assert vulnerability.category == "Terraform AWS"
             assert vulnerability.severity == "High"
-            assert vulnerability.location in [
+            assert vulnerability.description in [
                 (
                     f"Resource {TerraformAwsEbsVolume.MODULE_NAME} name: without_encryption"
                     " doesn't enable encryption"

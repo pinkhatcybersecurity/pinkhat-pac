@@ -10,11 +10,11 @@ from iacparsers.vulnerability_definition import VulnerabilityDefinition
 class AnsiblePermissionCore(AnsibleSecurityCheckCore):
     @classmethod
     @abstractmethod
-    def _get_security_checks(cls) -> list:
+    def _get_sec_checks(cls) -> list:
         raise NotImplementedError()
 
     @classmethod
-    def _security_check_file_permissions(
+    def _sec_check_file_permissions(
         cls,
         file_name: str,
         component: dict,

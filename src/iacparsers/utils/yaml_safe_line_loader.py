@@ -1,5 +1,3 @@
-import yaml
-from yaml.composer import Composer
 from yaml.loader import SafeLoader
 
 
@@ -22,6 +20,6 @@ class SafeLineLoader(SafeLoader):
     def load(cls, stream):
         loader = cls(stream)
         try:
-            return loader.get_single_data(), loader.locations
+            return loader.get_single_data(), loader.descriptions
         finally:
             loader.dispose()

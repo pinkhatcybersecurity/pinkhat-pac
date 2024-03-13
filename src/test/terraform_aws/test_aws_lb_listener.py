@@ -5,39 +5,30 @@ from iacparsers.terraform_core import TerraformCore
 test_results = [
     {
         "category": "Terraform AWS",
-        "cwe": "CWE-311",
-        "file_path": "aws_elasticache_cluster.tf",
+        "cwe": "CWE-664",
+        "description": "Resource aws_lb_listener name: vulnerable_protocol there is no enabled deletion protection",
+        "file_path": "aws_lb_listener.tf",
         "line_of_code": 1,
-        "description": "Resource aws_elasticache_cluster name: transit_enabled doesn't enable encryption",
-        "module": "aws_elasticache_cluster",
+        "module": "aws_lb_listener",
         "severity": "High",
-        "vulnerability_type": "Encrypt Sensitive Data at Rest",
+        "vulnerability_type": "Enable Deletion Protection",
     },
     {
         "category": "Terraform AWS",
-        "cwe": "CWE-311",
-        "file_path": "aws_elasticache_cluster.tf",
-        "line_of_code": 11,
-        "description": "Resource aws_elasticache_cluster name: no_encryption_in_transit doesn't enable encryption",
-        "module": "aws_elasticache_cluster",
-        "severity": "High",
-        "vulnerability_type": "Encrypt Sensitive Data at Transit",
-    },
-    {
-        "category": "Terraform AWS",
-        "cwe": "CWE-311",
-        "file_path": "aws_elasticache_cluster.tf",
-        "line_of_code": 11,
-        "description": "Resource aws_elasticache_cluster name: no_encryption_in_transit doesn't enable encryption",
-        "module": "aws_elasticache_cluster",
-        "severity": "High",
-        "vulnerability_type": "Encrypt Sensitive Data at Rest",
+        "cwe": "CWE-295",
+        "description": "Resource aws_lb_listener name: mutual_authentication_ignore_cert"
+        " client certificate expiry is ignored.",
+        "file_path": "aws_lb_listener.tf",
+        "line_of_code": 7,
+        "module": "aws_lb_listener",
+        "severity": "Medium",
+        "vulnerability_type": "Improper Certificate Validation",
     },
 ]
 
 
-def test_resource_aws_elasticache_cluster():
-    test_file_name = "aws_elasticache_cluster.tf"
+def test_aws_lb():
+    test_file_name = "aws_lb_listener.tf"
     test_file_path = os.path.join("test", "terraform_aws", "test_files", test_file_name)
     with open(test_file_path) as f:
         results = TerraformCore.run_scan(file_name=test_file_name, content=f.read())

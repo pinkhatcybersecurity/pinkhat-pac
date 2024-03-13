@@ -16,7 +16,7 @@ class AnsibleBuiltinCopy(AnsiblePermissionCore):
     """
 
     SECURITY_CHECKS = [
-        lambda file_name, component: AnsibleBuiltinCopy._security_check_file_permissions(
+        lambda file_name, component: AnsibleBuiltinCopy._sec_check_file_permissions(
             file_name=file_name,
             component=component,
             module_name=AnsibleBuiltinCopy.MODULE_NAME,
@@ -25,5 +25,5 @@ class AnsibleBuiltinCopy(AnsiblePermissionCore):
     MODULE_NAME = "ansible.builtin.copy"
 
     @classmethod
-    def _get_security_checks(cls) -> list:
+    def _get_sec_checks(cls) -> list:
         return cls.SECURITY_CHECKS

@@ -1,7 +1,7 @@
 import os.path
 
 from iacparsers.terraform_aws.ebs.terraform_aws_ebs_snapshot_copy import (
-    TerraformAwsEbsSnapshotCopy,
+    TFAwsEbsSnapshotCopy,
 )
 from iacparsers.terraform_aws.ebs.terraform_aws_ebs_volume import TerraformAwsEbsVolume
 from iacparsers.terraform_core import TerraformCore
@@ -15,23 +15,23 @@ def test_resource_aws_ebs_snapshot_copy():
         assert 3 == len(results)
         for vulnerability in results:
             assert vulnerability.module in [
-                TerraformAwsEbsSnapshotCopy.MODULE_NAME,
+                TFAwsEbsSnapshotCopy.MODULE_NAME,
                 TerraformAwsEbsVolume.MODULE_NAME,
             ]
             assert vulnerability.file_path == test_file_name
             assert vulnerability.cwe == "CWE-311"
             assert vulnerability.category == "Terraform AWS"
             assert vulnerability.severity == "High"
-            assert vulnerability.location in [
+            assert vulnerability.description in [
                 (
                     f"Resource {TerraformAwsEbsVolume.MODULE_NAME} name: simple_volume doesn't enable encryption"
                 ),
                 (
-                    f"Resource {TerraformAwsEbsSnapshotCopy.MODULE_NAME} name: vulnerable"
+                    f"Resource {TFAwsEbsSnapshotCopy.MODULE_NAME} name: vulnerable"
                     " doesn't enable encryption"
                 ),
                 (
-                    f"Resource {TerraformAwsEbsSnapshotCopy.MODULE_NAME} name: vulnerable_false"
+                    f"Resource {TFAwsEbsSnapshotCopy.MODULE_NAME} name: vulnerable_false"
                     " doesn't enable encryption"
                 ),
             ]

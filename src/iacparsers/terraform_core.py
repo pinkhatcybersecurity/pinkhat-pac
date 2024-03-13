@@ -2,29 +2,31 @@ import hcl2
 from loguru import logger
 
 from iacparsers.terraform_aws.dynamodb.terraform_aws_dynamodb_table import (
-    TerraformAwsDynamodbTable,
+    TFAwsDynamodbTable,
 )
 from iacparsers.terraform_aws.ebs.terraform_aws_ebs_encryption_by_default import (
-    TerraformAwsEbsEncryptionByDefault,
+    TFAwsEbsEncryptionByDefault,
 )
 from iacparsers.terraform_aws.ebs.terraform_aws_ebs_snapshot_copy import (
-    TerraformAwsEbsSnapshotCopy,
+    TFAwsEbsSnapshotCopy,
 )
 from iacparsers.terraform_aws.ebs.terraform_aws_ebs_snapshot_import import (
-    TerraformAwsEbsSnapshotImport,
+    TFAwsEbsSnapshotImport,
 )
 from iacparsers.terraform_aws.ebs.terraform_aws_ebs_volume import TerraformAwsEbsVolume
 from iacparsers.terraform_aws.elasticache.terraform_aws_elasticache_cluster import (
-    TerraformAwsElastiCacheCluster,
+    TFAwsElastiCacheCluster,
 )
 from iacparsers.terraform_aws.elasticache.terraform_aws_elasticache_replication_group import (
-    TerraformAwsElastiCacheReplicationGroup,
+    TFAwsElastiCacheReplicationGroup,
+)
+from iacparsers.terraform_aws.elb.terraform_aws_lb import TFAwsLB
+from iacparsers.terraform_aws.elb.terraform_aws_lb_listener import TFAwsLBListener
+from iacparsers.terraform_aws.rds.terraform_aws_db_instance import (
+    TFAwsDBInstance,
 )
 from iacparsers.terraform_aws.rds.terraform_aws_rds_cluster import (
-    TerraformAwsRdsCluster,
-)
-from iacparsers.terraform_aws.rds.terraform_aws_db_instance import (
-    TerraformAwsDBInstance,
+    TFAwsRdsCluster,
 )
 from iacparsers.vulnerability_definition import VulnerabilityDefinition
 
@@ -33,34 +35,45 @@ class TerraformCore:
     FILE_EXTENSION = [".tf"]
     iac_modules = {
         # EBS Group
-        TerraformAwsEbsEncryptionByDefault.MODULE_NAME: lambda file_name, component: TerraformAwsEbsEncryptionByDefault.terraform_resource_parser(
+        TFAwsEbsEncryptionByDefault.MODULE_NAME: lambda file_name,
+                                                        component: TFAwsEbsEncryptionByDefault.terraform_resource_parser(
             file_name=file_name, component=component
         ),
         TerraformAwsEbsVolume.MODULE_NAME: lambda file_name, component: TerraformAwsEbsVolume.terraform_resource_parser(
             file_name=file_name, component=component
         ),
-        TerraformAwsEbsSnapshotCopy.MODULE_NAME: lambda file_name, component: TerraformAwsEbsSnapshotCopy.terraform_resource_parser(
+        TFAwsEbsSnapshotCopy.MODULE_NAME: lambda file_name, component: TFAwsEbsSnapshotCopy.terraform_resource_parser(
             file_name=file_name, component=component
         ),
-        TerraformAwsEbsSnapshotImport.MODULE_NAME: lambda file_name, component: TerraformAwsEbsSnapshotImport.terraform_resource_parser(
+        TFAwsEbsSnapshotImport.MODULE_NAME: lambda file_name,
+                                                   component: TFAwsEbsSnapshotImport.terraform_resource_parser(
             file_name=file_name, component=component
         ),
         # DynamoDB
-        TerraformAwsDynamodbTable.MODULE_NAME: lambda file_name, component: TerraformAwsDynamodbTable.terraform_resource_parser(
+        TFAwsDynamodbTable.MODULE_NAME: lambda file_name, component: TFAwsDynamodbTable.terraform_resource_parser(
             file_name=file_name, component=component
         ),
         # RDS
-        TerraformAwsRdsCluster.MODULE_NAME: lambda file_name, component: TerraformAwsRdsCluster.terraform_resource_parser(
+        TFAwsRdsCluster.MODULE_NAME: lambda file_name, component: TFAwsRdsCluster.terraform_resource_parser(
             file_name=file_name, component=component
         ),
-        TerraformAwsDBInstance.MODULE_NAME: lambda file_name, component: TerraformAwsDBInstance.terraform_resource_parser(
+        TFAwsDBInstance.MODULE_NAME: lambda file_name, component: TFAwsDBInstance.terraform_resource_parser(
             file_name=file_name, component=component
         ),
         # ElastiCache
-        TerraformAwsElastiCacheCluster.MODULE_NAME: lambda file_name, component: TerraformAwsElastiCacheCluster.terraform_resource_parser(
+        TFAwsElastiCacheCluster.MODULE_NAME: lambda file_name,
+                                                    component: TFAwsElastiCacheCluster.terraform_resource_parser(
             file_name=file_name, component=component
         ),
-        TerraformAwsElastiCacheReplicationGroup.MODULE_NAME: lambda file_name, component: TerraformAwsElastiCacheReplicationGroup.terraform_resource_parser(
+        TFAwsElastiCacheReplicationGroup.MODULE_NAME: lambda file_name,
+                                                             component: TFAwsElastiCacheReplicationGroup.terraform_resource_parser(
+            file_name=file_name, component=component
+        ),
+        # ELB
+        TFAwsLB.MODULE_NAME: lambda file_name, component: TFAwsLB.terraform_resource_parser(
+            file_name=file_name, component=component
+        ),
+        TFAwsLBListener.MODULE_NAME: lambda file_name, component: TFAwsLBListener.terraform_resource_parser(
             file_name=file_name, component=component
         ),
     }
@@ -69,7 +82,7 @@ class TerraformCore:
     @staticmethod
     def run_scan(file_name: str, content: str) -> list[VulnerabilityDefinition]:
         results = []
-        file_extension = file_name[file_name.rfind(".") :]
+        file_extension = file_name[file_name.rfind("."):]
         if file_extension not in TerraformCore.FILE_EXTENSION:
             return results
         resources = hcl2.loads(text=content, with_meta=True)

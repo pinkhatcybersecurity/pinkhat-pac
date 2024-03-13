@@ -1,9 +1,9 @@
 from iacparsers.terraform_aws.ebs.terraform_aws_ebs_encryption_core import (
-    TerraformAwsEbsEncryptionCore,
+    TFAwsEbsEncryptionCore,
 )
 
 
-class TerraformAwsEbsVolume(TerraformAwsEbsEncryptionCore):
+class TerraformAwsEbsVolume(TFAwsEbsEncryptionCore):
     """
     CIS Control 2.2.1 Ensure EBS volume encryption is enabled (Automated)
     Description of *aws_ebs_volume* terraform module:
@@ -15,14 +15,14 @@ class TerraformAwsEbsVolume(TerraformAwsEbsEncryptionCore):
 
     MODULE_NAME = "aws_ebs_volume"
     SECURITY_CHECKS = [
-        lambda file_name, terraform_resource_name, terraform_resource_values: TerraformAwsEbsVolume.security_check_encryption(
+        lambda file_name, tf_resource_name, tf_resource_values: TerraformAwsEbsVolume.security_check_encryption(
             file_name=file_name,
-            terraform_resource_name=terraform_resource_name,
-            terraform_resource_values=terraform_resource_values,
+            tf_resource_name=tf_resource_name,
+            tf_resource_values=tf_resource_values,
             module_name=TerraformAwsEbsVolume.MODULE_NAME,
         )
     ]
 
     @classmethod
-    def _get_security_checks(cls) -> list:
+    def _get_sec_checks(cls) -> list:
         return cls.SECURITY_CHECKS

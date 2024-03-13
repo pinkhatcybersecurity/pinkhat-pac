@@ -15,7 +15,7 @@ class AnsibleBuiltinFile(AnsiblePermissionCore):
     """
 
     SECURITY_CHECKS = [
-        lambda file_name, component: AnsibleBuiltinFile._security_check_file_permissions(
+        lambda file_name, component: AnsibleBuiltinFile._sec_check_file_permissions(
             file_name=file_name,
             component=component,
             module_name=AnsibleBuiltinFile.MODULE_NAME,
@@ -24,5 +24,5 @@ class AnsibleBuiltinFile(AnsiblePermissionCore):
     MODULE_NAME = "ansible.builtin.file"
 
     @classmethod
-    def _get_security_checks(cls) -> list:
+    def _get_sec_checks(cls) -> list:
         return cls.SECURITY_CHECKS
