@@ -1,0 +1,35 @@
+version: 1.0
+policies:
+  - module: Certificate Validation
+    category: "certificate"
+    rules:
+      - name: "Key Length Requirement"
+        link: "certificate"
+        description: >
+          The used cryptographic key should be strong enough to protect data.
+        remediation: >
+          More information about cryptographic keys can be found in this link
+          https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r5.pdf
+        failureMessage: "Public key size is: {{ this.object.public_key.algorithm }} - {{ this.object.public_key.size }}"
+        statement: >
+          this.object.public_key.size >= 2048 or 
+          (this.object.public_key.algorithm.lower() == 'ecc' and this.object.public_key.size >= 224)
+      - name: "Use Strong Cryptographic Hashing Algorithms"
+        link: "certificate"
+        description: >
+          Certificates should use SHA-256 for the hashing algorithm, rather than the older MD5 and SHA-1 algorithms.
+          These have a number of cryptographic weaknesses, and are not trusted by modern browsers.
+        remediation: ""
+        failureMessage: "Hash algorithm detected {{ this.object.signature_algorithm }}"
+        statement: "this.object.signature_hash_algorithm.lower() not in [none, 'sha1', 'md5']"
+      - name: "Certificate lifecycle"
+        link: "certificate"
+        description: >
+          SSL/TLS certificates cannot be issued for longer than 13 months (397 days)
+          https://pkic.org/2020/07/09/one-year-certs/
+        remediation: ""
+        failureMessage: "Certificate lifecycle is too long {{ (this.object.not_after_utc - this.object.not_before_utc).days }} days"
+        statement: >
+          ((this.object.not_after_utc - this.object.not_before_utc).days <= 397)
+          or
+          bool(this.object.extensions.get('basicConstraints', {}).get('ca', false))
