@@ -1,33 +1,48 @@
-import os
 from pathlib import Path
 
 from loguru import logger
 
-from iacparsers.terraform_core import TerraformCore
-from iacparsers.vulnerability_definition import VulnerabilityDefinition
-from iacparsers.yaml_files import YamlFile
+from iacparsers.issue_definition import IssueDefinition
+from iacparsers.scanner.certificate_core import CertificateCore
+from iacparsers.scanner.terraform_core import TerraformCore
+from iacparsers.utils.policy_as_code.policy_as_code_rule_loader import TFRuleLoader
+from iacparsers.scanner.yaml_core import YamlFile
 
 
 class CoreScanning:
-    SCANNERS = [YamlFile, TerraformCore]
-    results: list[VulnerabilityDefinition] = []
+    SCANNERS = [TerraformCore, CertificateCore, YamlFile]
 
-    def start_scanning(self, path: str) -> None:
-        for child in Path(path).rglob("*.*"):
-            file_path = os.path.join(path, child.name)
+    def __init__(self):
+        self._rules = TFRuleLoader()
+        self._results: list[IssueDefinition] = []
+
+    def start_scanning(self, path: str) -> bool:
+        self._rules.load_rules()
+        try:
+            child = Path(path)
             if child.is_file():
-                logger.info(f"Parsing {file_path}")
-                file_extension = file_path[file_path.rfind(".") :]
-                for scanner in self.SCANNERS:
-                    if file_extension in scanner.FILE_EXTENSION:
-                        self.results += scanner.run_scan(
-                            file_name=file_path, content=child.read_text()
-                        )
+                self._scan_file(child=child)
             else:
-                self.start_scanning(path=file_path)
+                self._get_all_files(path=path)
+        except Exception as e:
+            logger.error(str(e))
+            return False
+        return True
 
-    def get_vulnerabilities(self) -> list[VulnerabilityDefinition]:
-        return self.results
+    def _get_all_files(self, path: str):
+        for child in Path(path).rglob("*.*"):
+            if child.is_file():
+                self._scan_file(child)
+            else:
+                self._get_all_files(path=str(child))
+
+    def _scan_file(self, child):
+        logger.info(f"Parsing {child}")
+        for scanner in self.SCANNERS:
+            self._results += scanner(rules=self._rules, child=child).run_scan()
+
+    def get_vulnerabilities(self) -> list[IssueDefinition]:
+        return self._results
 
     def get_vulnerabilities_dict(self) -> list[dict]:
-        return [result.__dict__ for result in self.results]
+        return [result.__dict__ for result in self._results]
