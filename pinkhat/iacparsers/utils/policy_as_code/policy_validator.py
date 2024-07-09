@@ -2,12 +2,12 @@ from typing import Iterator
 
 from loguru import logger
 
-from iacparsers.issue_definition import IssueDefinition
-from iacparsers.utils.graph_builder.graph_core import GraphCore
-from iacparsers.utils.graph_builder.graph_object import GraphObject
-from iacparsers.utils.policy_as_code.policy_as_code_rule_loader import TFRuleLoader
-from iacparsers.utils.policy_as_code.policy_data import PolicyData
-from iacparsers.utils.template_engine.template_engine import TemplateEngine
+from pinkhat.iacparsers.issue_definition import IssueDefinition
+from pinkhat.iacparsers.utils.graph_builder.graph_core import GraphCore
+from pinkhat.iacparsers.utils.graph_builder.graph_object import GraphObject
+from pinkhat.iacparsers.utils.policy_as_code.policy_as_code_rule_loader import TFRuleLoader
+from pinkhat.iacparsers.utils.policy_as_code.policy_data import PolicyData
+from pinkhat.iacparsers.utils.template_engine.template_engine import TemplateEngine
 
 
 class PolicyValidator(TemplateEngine):

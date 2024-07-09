@@ -11,7 +11,7 @@ from jinja2.exceptions import (
 from jinja2.sandbox import SandboxedEnvironment
 from loguru import logger
 
-from iacparsers.utils.graph_builder.graph_object import GraphObject
+from pinkhat.iacparsers.utils.graph_builder.graph_object import GraphObject
 
 
 class TemplateEngine:

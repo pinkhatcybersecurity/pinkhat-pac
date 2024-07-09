@@ -2,11 +2,11 @@ from pathlib import Path
 
 from loguru import logger
 
-from iacparsers.issue_definition import IssueDefinition
-from iacparsers.scanner.certificate_core import CertificateCore
-from iacparsers.scanner.terraform_core import TerraformCore
-from iacparsers.utils.policy_as_code.policy_as_code_rule_loader import TFRuleLoader
-from iacparsers.scanner.yaml_core import YamlFile
+from pinkhat.iacparsers.issue_definition import IssueDefinition
+from pinkhat.iacparsers.scanner.certificate_core import CertificateCore
+from pinkhat.iacparsers.scanner.terraform_core import TerraformCore
+from pinkhat.iacparsers.utils.policy_as_code.policy_as_code_rule_loader import TFRuleLoader
+from pinkhat.iacparsers.scanner.yaml_core import YamlFile
 
 
 class CoreScanning:
