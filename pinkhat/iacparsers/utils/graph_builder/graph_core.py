@@ -1,4 +1,4 @@
-from iacparsers.utils.graph_builder.graph_object import GraphObject
+from pinkhat.iacparsers.utils.graph_builder.graph_object import GraphObject
 
 
 class GraphCore:
