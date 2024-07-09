@@ -1,6 +1,6 @@
 from msgspec import Struct
 
-from iacparsers.utils.policy_as_code.pac_schema.pac_module_schema import PacModuleSchema
+from pinkhat.iacparsers.utils.policy_as_code.pac_schema.pac_module_schema import PacModuleSchema
 
 
 class PacPolicySchema(Struct):
