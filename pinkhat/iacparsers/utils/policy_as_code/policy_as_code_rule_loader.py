@@ -11,7 +11,7 @@ from pinkhat.iacparsers.utils.policy_as_code.policy_data import PolicyData
 
 
 class TFRuleLoader:
-    _POLICIES_DIR = os.path.join("iacparsers", "policies")
+    _POLICIES_DIR = os.path.join("pinkhat", "iacparsers", "policies")
 
     def __init__(self):
         self._policies: list[PacPolicySchema] = []
