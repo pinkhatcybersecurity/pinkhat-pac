@@ -6,8 +6,8 @@ from typing import Iterator
 import msgspec.yaml
 from loguru import logger
 
-from iacparsers.utils.policy_as_code.pac_schema.pac_policy_schema import PacPolicySchema
-from iacparsers.utils.policy_as_code.policy_data import PolicyData
+from pinkhat.iacparsers.utils.policy_as_code.pac_schema.pac_policy_schema import PacPolicySchema
+from pinkhat.iacparsers.utils.policy_as_code.policy_data import PolicyData
 
 
 class TFRuleLoader:
