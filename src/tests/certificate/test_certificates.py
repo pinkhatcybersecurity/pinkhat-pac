@@ -1,6 +1,6 @@
 import os
 
-from tests.terraform_aws.core_config import run_test
+from tests.core_config import run_test
 
 domain_1024_sha1_issues = [
     {
