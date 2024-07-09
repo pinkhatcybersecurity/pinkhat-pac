@@ -1,0 +1,32 @@
+version: 1.0
+policies:
+  - module: Docker Compose validation
+    category: "yaml"
+    rules:
+      - name: "PostgreSQL database password in environmental variables"
+        link: "yaml"
+        description: >
+          Plain text passwords in configuration files might lead to data leakage.
+        remediation: >
+          Consider using docker secrets and passing password via POSTGRES_PASSWORD_FILE 
+          https://hub.docker.com/_/postgres
+        failureMessage: ""
+        report_on: true
+        helper: >-
+          {% set tmp = [] %}
+          {% if this.object.get('services') %}
+            {% for service in this.object.services %}
+              {% set data = this.object.services.get(service) %}
+              {% if data is mapping and data.get('image') and data.get('environment') %}
+                {% set _ = tmp.append({
+                    'graph_name': service, 
+                    'environment': data.get('environment'),
+                    '__start_line__': data.get('__start_line__environment')
+                  })
+                %}
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+          {{ tmp }}
+        statement: >
+          any(helper.environment | map('re_search', '\s?POSTGRES_PASSWORD\s?=') | list) if helper else False
