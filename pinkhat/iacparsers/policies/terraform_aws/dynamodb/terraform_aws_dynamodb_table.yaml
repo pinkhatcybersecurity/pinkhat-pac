@@ -1,0 +1,22 @@
+version: 1.0
+policies:
+  - module: aws_dynamodb_table
+    category: "terraform"
+    rules:
+      - name: "Enable Deletion Protection"
+        link: "aws_dynamodb_table"
+        description: >
+          By default, AWS Dynamo Tables have no table deletion protection (default value is false).
+          Please find more information in the below link:
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table#deletion_protection_enabled
+
+          deletion_protection_enabled: enables deletion protection for table. Defaults to false
+        remediation: >
+          Enable deletion protection by adding deletion_protection_enabled
+
+          resource "aws_dynamodb_table" "dynamo_table_name" {
+            ...
+            deletion_protection_enabled = true
+          }
+          or changing deletion_protection_enabled value to true
+        statement: "this.object.get('deletion_protection_enabled', false) is true"
