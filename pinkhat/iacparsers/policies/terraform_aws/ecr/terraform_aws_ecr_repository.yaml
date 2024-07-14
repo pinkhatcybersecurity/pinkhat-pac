@@ -17,3 +17,24 @@ policies:
             force_delete = false
           }
         statement: "this.object.get('force_delete', false) is false"
+      - name: "ECR Security scanning registry"
+        link: "aws_ecr_repository"
+        description: >
+          The container image might have installed multiple different packages or libraries. Those libraries might contain identified vulnerabilities i.e. CVEs. By default, image scanning is manual and user initiated. It adds unnecessary complexity to the process and might cause that your image won't be never scanned. It is strongly recommended to enable a flag scan_on_push.
+          You can get more information in the link below:
+          https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository#image_scanning_configuration
+          scan_on_push: if true, then image is scanned on the push, if false, then not scanned.
+        remediation: >
+          Enable scan_on_push in your terraform code:
+
+          resource "aws_ecr_repository" "ecr_repository_name" {
+            ...
+            image_scanning_configuration {
+              scan_on_push = true
+            }
+            ...
+          }
+        statement: >
+          any(this.object.get('image_scanning_configuration', []) | selectattr('scan_on_push', 'equalto', true))
+          if this.object.get('image_scanning_configuration') else false
