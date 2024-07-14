@@ -14,6 +14,7 @@ resource "aws_db_instance" "vulnerable_default" {
   allocated_storage           = 100
   auto_minor_version_upgrade  = false
   custom_iam_instance_profile = "AWSRDSCustomInstanceProfile"
+  publicly_accessible         = true
   backup_retention_period     = 5
   db_subnet_group_name        = local.db_subnet_group_name
   engine                      = data.aws_rds_orderable_db_instance.hello_rds.engine
