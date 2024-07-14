@@ -17,3 +17,26 @@ policies:
             maintenance_window          = "Mon:00:00-Mon:03:00"
           }
         statement: "this.object.get('maintenance_window') is not none"
+      - name: "Publicly accessible database"
+        link: "aws_db_instance"
+        description: >
+          Publicly accessible database might lead to data leakage through:
+
+            - security vulnerability in the database
+            - default user name and password
+            - weak passwords
+            - and more
+
+          Database should be hidden and not accessible via internet.
+
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#publicly_accessible
+
+          publicly_accessible - default value is false
+        remediation: >
+          Disable publicly_accessible in aws_db_instance
+
+          resource "aws_db_instance" "db_instance_name" {
+            ...
+            publicly_accessible = false
+          }
+        statement: "this.object.get('publicly_accessible', false) is false"
