@@ -54,6 +54,22 @@ issues = [
         "issue": None,
         "line_of_code": 78,
     },
+    {
+        "file_path": "tests/terraform_aws/test_files/aws_db_instance.tf",
+        "category": "terraform",
+        "rule_name": "Backup retention policy",
+        "module": "aws_db_instance",
+        "graph_name": "aws_db_instance.secret_manager",
+        "description": "Data recovery is a key aspect for the application availability. "
+        "Backup retention period in aws_db_instance defines for how long backup is stored. "
+        "The value is between 0 and 35 days. You can find more information in the link below:\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/"
+        "db_instance#backup_retention_period\n",
+        "remediation": "Create a backup retention policy for aws_db_instance greater than 0\n"
+        'resource "aws_db_instance" "db_instance_name" {\n  ...\n  backup_retention_period = 1\n}\n',
+        "issue": None,
+        "line_of_code": 78,
+    },
 ]
 
 
