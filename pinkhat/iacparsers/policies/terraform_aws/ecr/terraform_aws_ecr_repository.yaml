@@ -1,0 +1,19 @@
+version: 1.0
+policies:
+  - module: aws_ecr_repository
+    category: "terraform"
+    rules:
+      - name: "Enable Deletion Protection"
+        link: "aws_ecr_repository"
+        description: >
+          It's possible to delete ECR even if it contains images.
+          The default option for aws_ecr_repository - force_delete is False
+          force_delete: if true then deletes the repository with existing data in it
+        remediation: >
+          Disable force_delete option by changing it the value to false
+
+          resource "aws_ecr_repository" "ecr_repository_name" {
+            ...
+            force_delete = false
+          }
+        statement: "this.object.get('force_delete', false) is false"
