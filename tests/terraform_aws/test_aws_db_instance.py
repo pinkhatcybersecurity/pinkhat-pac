@@ -41,6 +41,38 @@ issues = [
     {
         "file_path": "tests/terraform_aws/test_files/aws_db_instance.tf",
         "category": "terraform",
+        "rule_name": "Enable Deletion Protection",
+        "module": "aws_db_instance",
+        "graph_name": "aws_db_instance.vulnerable_default",
+        "description": "By default, AWS DB Instance have no database deletion protection (default value is false). "
+        "Please find more information in the below link: "
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#deletion_protection\n"
+        "deletion_protection: enables deletion protection for DB instance. Defaults to false\n",
+        "remediation": "Enable deletion protection by adding deletion_protection\n"
+        'resource "aws_db_instance" "db_instance_name" '
+        "{\n  ...\n  deletion_protection = true\n} or changing deletion_protection value to true\n",
+        "issue": None,
+        "line_of_code": 13,
+    },
+    {
+        "file_path": "tests/terraform_aws/test_files/aws_db_instance.tf",
+        "category": "terraform",
+        "rule_name": "Enable Deletion Protection",
+        "module": "aws_db_instance",
+        "graph_name": "aws_db_instance.test-replica",
+        "description": "By default, AWS DB Instance have no database deletion protection (default value is false). "
+        "Please find more information in the below link: "
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#deletion_protection\n"
+        "deletion_protection: enables deletion protection for DB instance. Defaults to false\n",
+        "remediation": "Enable deletion protection by adding deletion_protection\n"
+        'resource "aws_db_instance" "db_instance_name" '
+        "{\n  ...\n  deletion_protection = true\n} or changing deletion_protection value to true\n",
+        "issue": None,
+        "line_of_code": 39,
+    },
+    {
+        "file_path": "tests/terraform_aws/test_files/aws_db_instance.tf",
+        "category": "terraform",
         "rule_name": "Maintenance Window for OS patching",
         "module": "aws_db_instance",
         "graph_name": "aws_db_instance.secret_manager",
@@ -67,6 +99,22 @@ issues = [
         "db_instance#backup_retention_period\n",
         "remediation": "Create a backup retention policy for aws_db_instance greater than 0\n"
         'resource "aws_db_instance" "db_instance_name" {\n  ...\n  backup_retention_period = 1\n}\n',
+        "issue": None,
+        "line_of_code": 78,
+    },
+    {
+        "file_path": "tests/terraform_aws/test_files/aws_db_instance.tf",
+        "category": "terraform",
+        "rule_name": "Enable Deletion Protection",
+        "module": "aws_db_instance",
+        "graph_name": "aws_db_instance.secret_manager",
+        "description": "By default, AWS DB Instance have no database deletion protection (default value is false). "
+        "Please find more information in the below link: "
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#deletion_protection\n"
+        "deletion_protection: enables deletion protection for DB instance. Defaults to false\n",
+        "remediation": "Enable deletion protection by adding deletion_protection\n"
+        'resource "aws_db_instance" "db_instance_name" '
+        "{\n  ...\n  deletion_protection = true\n} or changing deletion_protection value to true\n",
         "issue": None,
         "line_of_code": 78,
     },

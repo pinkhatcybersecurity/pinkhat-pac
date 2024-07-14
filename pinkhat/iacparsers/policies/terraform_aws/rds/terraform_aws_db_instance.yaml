@@ -56,3 +56,20 @@ policies:
             backup_retention_period = 1
           }
         statement: "this.object.get('backup_retention_period', 0) > 1"
+      - name: "Enable Deletion Protection"
+        link: "aws_db_instance"
+        description: >
+          By default, AWS DB Instance have no database deletion protection (default value is false).
+          Please find more information in the below link:
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#deletion_protection
+
+          deletion_protection: enables deletion protection for DB instance. Defaults to false
+        remediation: >
+          Enable deletion protection by adding deletion_protection
+
+          resource "aws_db_instance" "db_instance_name" {
+            ...
+            deletion_protection = true
+          }
+          or changing deletion_protection value to true
+        statement: "this.object.get('deletion_protection', false) is true"
