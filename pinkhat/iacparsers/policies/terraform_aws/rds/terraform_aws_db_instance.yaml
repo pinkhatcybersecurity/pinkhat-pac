@@ -1,0 +1,19 @@
+version: 1.0
+policies:
+  - module: aws_db_instance
+    category: "terraform"
+    rules:
+      - name: "Maintenance Window for OS patching"
+        link: "aws_db_instance"
+        description: >
+          Not all patches and security fixes are automatically implemented in a database.
+          The required work must be implemented during the maintenance window.
+          https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#OS_Updates
+        remediation: >
+          Provide maintenance window based on your needs
+
+          resource "aws_db_instance" "db_instance_name" {
+            ...
+            maintenance_window          = "Mon:00:00-Mon:03:00"
+          }
+        statement: "this.object.get('maintenance_window') is not none"
