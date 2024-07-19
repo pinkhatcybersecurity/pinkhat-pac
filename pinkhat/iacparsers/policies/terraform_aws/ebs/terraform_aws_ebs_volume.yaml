@@ -1,0 +1,14 @@
+version: 1.0
+policies:
+  - module: aws_ebs_volume
+    category: "terraform"
+    rules:
+      - name: "Encrypt Sensitive Data at Rest"
+        link: "aws_ebs_volume"
+        path: "encrypted"
+        description: >
+          CIS Control 2.2.1 Ensure EBS volume encryption is enabled.
+          Description of *aws_ebs_volume* terraform module:
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ebs_volume
+        remediation: "encrypted: should be set to True. Default option is False"
+        statement: "this.object.get('encrypted', false) is true"
