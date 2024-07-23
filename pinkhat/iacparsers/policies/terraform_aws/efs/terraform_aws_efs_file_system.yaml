@@ -1,0 +1,18 @@
+version: 1.0
+policies:
+  - module: aws_efs_file_system
+    category: "terraform"
+    rules:
+      - name: "Encrypt Sensitive Data at Rest"
+        link: "aws_efs_file_system"
+        description: >
+          Encryption provides protection if the data is stolen, modified or compromised. The data must protected in:
+          - rest
+          - use
+          - and transit
+          CIS 2.4.1 Ensure that encryption is enabled for EFS file systems.
+          Description of *aws_efs_file_system* terraform module:
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_file_system#encrypted
+        remediation: "encrypted: should be set to True. Default option is False"
+        failureMessage: ""
+        statement: "this.object.get('encrypted') is true"
