@@ -1,0 +1,43 @@
+version: 1.0
+policies:
+  - module: aws_efs_file_system
+    category: "terraform"
+    rules:
+      - name: "Encrypt Sensitive Data at Rest"
+        link: "aws_efs_file_system"
+        description: >
+          Encryption provides protection if the data is stolen, modified or compromised. The data must protected in:
+          - rest
+          - use
+          - and transit
+          CIS 2.4.1 Ensure that encryption is enabled for EFS file systems.
+          Description of *aws_efs_file_system* terraform module:
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_file_system#encrypted
+        remediation: "encrypted: should be set to True. Default option is False"
+        failureMessage: ""
+        statement: "this.object.get('encrypted') is true"
+      - name: "Backup policy exists for EFS file system"
+        link: "aws_efs_file_system"
+        description: >
+          There is no backup for EFS policy. It might cause a serious issue in a case of desaster.
+        remediation: >
+          Add backup policy for EFS file system:
+          '''
+          resource "aws_efs_backup_policy" "policy" {
+            file_system_id = aws_efs_file_system.happy_file_system.id
+
+            backup_policy {
+              status = "ENABLED"
+            }
+          }
+          '''
+        statement: >
+          bool(
+            this.parent |
+            selectattr('name', 'startswith', 'aws_efs_backup_policy') |
+            first |
+            attr('object') |
+            dict_item('backup_policy') |
+            selectattr('status', 'equalto', 'ENABLED') |
+            first
+          ) if this.parent else false
