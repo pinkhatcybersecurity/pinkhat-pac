@@ -21,3 +21,20 @@ policies:
           }
           or changing deletion_protection_enabled value to true
         statement: "this.object.get('deletion_protection') is true"
+      - name: "Maintenance Window for OS patching"
+        link: "aws_rds_cluster"
+        description: >
+          Not all patches and security fixes are automatically implemented in a database.
+          The required work must be implemented during the maintenance window.
+
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#preferred_maintenance_window
+
+          https://repost.aws/knowledge-center/rds-maintenance-window
+        remediation: >
+          Provide maintenance window based on your needs
+
+          resource "aws_rds_cluster" "rds_cluster" {
+            ...
+            preferred_maintenance_window = "Mon:00:00-Mon:03:00"
+          }
+        statement: "this.object.get('preferred_maintenance_window') is not none"
