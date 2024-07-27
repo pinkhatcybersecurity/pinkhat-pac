@@ -58,6 +58,21 @@ issues = [
         "line_of_code": 60,
     },
     {
+        "file_path": "tests/terraform_aws/test_files/aws_rds_cluster.tf",
+        "category": "terraform",
+        "rule_name": "Maintenance Window for OS patching",
+        "module": "aws_rds_cluster",
+        "graph_name": "aws_rds_cluster.cloud_watch_enabled_all",
+        "description": "Not all patches and security fixes are automatically implemented in a database. "
+                       "The required work must be implemented during the maintenance window.\n"
+                       "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#preferred_maintenance_window\n"
+                       "https://repost.aws/knowledge-center/rds-maintenance-window\n",
+        "remediation": 'Provide maintenance window based on your needs\nresource "aws_rds_cluster" '
+                       '"rds_cluster" {\n  ...\n  preferred_maintenance_window = "Mon:00:00-Mon:03:00"\n}\n',
+        "issue": None,
+        "line_of_code": 60,
+    },
+    {
         "file_path": os.path.join(
             "tests", "terraform_aws", "test_files", "aws_rds_cluster.tf"
         ),
@@ -72,6 +87,23 @@ issues = [
         "remediation": "Enable deletion protection by adding deletion_protection_enabled\n"
         'resource "aws_rds_cluster" "rds_cluster" '
         "{\n  ...\n  deletion_protection = true\n} or changing deletion_protection_enabled value to true\n",
+        "issue": None,
+        "line_of_code": 77,
+    },
+    {
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_rds_cluster.tf"
+        ),
+        "category": "terraform",
+        "rule_name": "Maintenance Window for OS patching",
+        "module": "aws_rds_cluster",
+        "graph_name": "aws_rds_cluster.cloud_watch_enabled_mssql_all",
+        "description": "Not all patches and security fixes are automatically implemented in a database. "
+                       "The required work must be implemented during the maintenance window.\n"
+                       "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#preferred_maintenance_window\n"
+                       "https://repost.aws/knowledge-center/rds-maintenance-window\n",
+        "remediation": 'Provide maintenance window based on your needs\nresource "aws_rds_cluster" "rds_cluster" '
+                       '{\n  ...\n  preferred_maintenance_window = "Mon:00:00-Mon:03:00"\n}\n',
         "issue": None,
         "line_of_code": 77,
     },
