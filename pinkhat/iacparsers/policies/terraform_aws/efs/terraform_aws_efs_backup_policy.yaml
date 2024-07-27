@@ -1,0 +1,26 @@
+version: 1.0
+policies:
+  - module: aws_efs_backup_policy
+    category: "terraform"
+    rules:
+      - name: "Data Recovery"
+        link: "aws_efs_backup_policy"
+        description: >
+          If there is no backup for EFS policy. It might cause a serious issue in a case of disaster.
+          Please find more information in the below links:
+
+          https://docs.aws.amazon.com/efs/latest/ug/API_BackupPolicy.html
+
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_backup_policy#backup_policy
+        remediation: >
+          Add backup policy for EFS file system:
+          '''
+          resource "aws_efs_backup_policy" "policy" {
+            file_system_id = aws_efs_file_system.happy_file_system.id
+
+            backup_policy {
+              status = "ENABLED"
+            }
+          }
+          '''
+        statement: "bool(this.object.get('backup_policy') | selectattr('status', 'equalto', 'ENABLED') | first)"
