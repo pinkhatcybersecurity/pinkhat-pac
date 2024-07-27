@@ -38,3 +38,35 @@ policies:
             preferred_maintenance_window = "Mon:00:00-Mon:03:00"
           }
         statement: "this.object.get('preferred_maintenance_window') is not none"
+      - name: "Audit Log Management"
+        link: "aws_rds_cluster"
+        description: >
+          Logging and monitoring is a key aspect of running infrastructure.
+          If there is no proper logging then some events or malicious actions might be missed.
+          The below actions can be send to cloudwatch:
+
+          - audit
+
+          - error
+
+          - general
+
+          - slowquery
+
+          - postgresql if engine postgresql
+
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#enabled_cloudwatch_logs_exports
+
+          https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_LogAccess.Procedural.UploadtoCloudWatch.html
+        remediation: >
+          Enable sending RDS logs to cloudwach:
+
+          resource "aws_rds_cluster" "rds_cluster" {
+            ...
+            enabled_cloudwatch_logs_exports = ["audit", "error", "general", "slowquery", "postgresql"]
+          }
+        statement: >
+          not(
+            set(['audit', 'error', 'general', 'slowquery', 'postgresql' if 'postgresql' in this.object.get('engine', '') else '']) -
+            set(this.object.get('enabled_cloudwatch_logs_exports', [])) - set([''])
+          )

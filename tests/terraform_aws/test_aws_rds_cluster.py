@@ -8,6 +8,25 @@ issues = [
             "tests", "terraform_aws", "test_files", "aws_rds_cluster.tf"
         ),
         "category": "terraform",
+        "rule_name": "Audit Log Management",
+        "module": "aws_rds_cluster",
+        "graph_name": "aws_rds_cluster.no_cloud_watch",
+        "description": "Logging and monitoring is a key aspect of running infrastructure. If there is no proper "
+        "logging then some events or malicious actions might be missed. "
+        "The below actions can be send to cloudwatch:\n- audit\n- error\n- general\n- slowquery\n- "
+        "postgresql if engine postgresql\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#enabled_cloudwatch_logs_exports\n"
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_LogAccess.Procedural.UploadtoCloudWatch.html\n",
+        "remediation": 'Enable sending RDS logs to cloudwach:\nresource "aws_rds_cluster" "rds_cluster" {\n  ...\n  '
+        'enabled_cloudwatch_logs_exports = ["audit", "error", "general", "slowquery", "postgresql"]\n}\n',
+        "issue": None,
+        "line_of_code": 1,
+    },
+    {
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_rds_cluster.tf"
+        ),
+        "category": "terraform",
         "rule_name": "Enable Deletion Protection",
         "module": "aws_rds_cluster",
         "graph_name": "aws_rds_cluster.nothing",
@@ -18,6 +37,23 @@ issues = [
         "remediation": "Enable deletion protection by adding deletion_protection_enabled\n"
         'resource "aws_rds_cluster" "rds_cluster" '
         "{\n  ...\n  deletion_protection = true\n} or changing deletion_protection_enabled value to true\n",
+        "issue": None,
+        "line_of_code": 26,
+    },
+    {
+        "file_path": "tests/terraform_aws/test_files/aws_rds_cluster.tf",
+        "category": "terraform",
+        "rule_name": "Audit Log Management",
+        "module": "aws_rds_cluster",
+        "graph_name": "aws_rds_cluster.nothing",
+        "description": "Logging and monitoring is a key aspect of running infrastructure. If there is no proper "
+        "logging then some events or malicious actions might be missed. "
+        "The below actions can be send to cloudwatch:\n- audit\n- error\n- general\n- slowquery\n- "
+        "postgresql if engine postgresql\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#enabled_cloudwatch_logs_exports\n"
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_LogAccess.Procedural.UploadtoCloudWatch.html\n",
+        "remediation": 'Enable sending RDS logs to cloudwach:\nresource "aws_rds_cluster" "rds_cluster" {\n  ...\n  '
+        'enabled_cloudwatch_logs_exports = ["audit", "error", "general", "slowquery", "postgresql"]\n}\n',
         "issue": None,
         "line_of_code": 26,
     },
@@ -36,6 +72,25 @@ issues = [
         "remediation": "Enable deletion protection by adding deletion_protection_enabled\n"
         'resource "aws_rds_cluster" "rds_cluster" '
         "{\n  ...\n  deletion_protection = true\n} or changing deletion_protection_enabled value to true\n",
+        "issue": None,
+        "line_of_code": 42,
+    },
+    {
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_rds_cluster.tf"
+        ),
+        "category": "terraform",
+        "rule_name": "Audit Log Management",
+        "module": "aws_rds_cluster",
+        "graph_name": "aws_rds_cluster.cloud_watch_enabled",
+        "description": "Logging and monitoring is a key aspect of running infrastructure. If there is no proper "
+        "logging then some events or malicious actions might be missed. "
+        "The below actions can be send to cloudwatch:\n- audit\n- error\n- general\n- slowquery\n- "
+        "postgresql if engine postgresql\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#enabled_cloudwatch_logs_exports\n"
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_LogAccess.Procedural.UploadtoCloudWatch.html\n",
+        "remediation": 'Enable sending RDS logs to cloudwach:\nresource "aws_rds_cluster" "rds_cluster" {\n  ...\n  '
+        'enabled_cloudwatch_logs_exports = ["audit", "error", "general", "slowquery", "postgresql"]\n}\n',
         "issue": None,
         "line_of_code": 42,
     },
@@ -64,11 +119,11 @@ issues = [
         "module": "aws_rds_cluster",
         "graph_name": "aws_rds_cluster.cloud_watch_enabled_all",
         "description": "Not all patches and security fixes are automatically implemented in a database. "
-                       "The required work must be implemented during the maintenance window.\n"
-                       "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#preferred_maintenance_window\n"
-                       "https://repost.aws/knowledge-center/rds-maintenance-window\n",
+        "The required work must be implemented during the maintenance window.\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#preferred_maintenance_window\n"
+        "https://repost.aws/knowledge-center/rds-maintenance-window\n",
         "remediation": 'Provide maintenance window based on your needs\nresource "aws_rds_cluster" '
-                       '"rds_cluster" {\n  ...\n  preferred_maintenance_window = "Mon:00:00-Mon:03:00"\n}\n',
+        '"rds_cluster" {\n  ...\n  preferred_maintenance_window = "Mon:00:00-Mon:03:00"\n}\n',
         "issue": None,
         "line_of_code": 60,
     },
@@ -99,11 +154,11 @@ issues = [
         "module": "aws_rds_cluster",
         "graph_name": "aws_rds_cluster.cloud_watch_enabled_mssql_all",
         "description": "Not all patches and security fixes are automatically implemented in a database. "
-                       "The required work must be implemented during the maintenance window.\n"
-                       "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#preferred_maintenance_window\n"
-                       "https://repost.aws/knowledge-center/rds-maintenance-window\n",
+        "The required work must be implemented during the maintenance window.\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#preferred_maintenance_window\n"
+        "https://repost.aws/knowledge-center/rds-maintenance-window\n",
         "remediation": 'Provide maintenance window based on your needs\nresource "aws_rds_cluster" "rds_cluster" '
-                       '{\n  ...\n  preferred_maintenance_window = "Mon:00:00-Mon:03:00"\n}\n',
+        '{\n  ...\n  preferred_maintenance_window = "Mon:00:00-Mon:03:00"\n}\n',
         "issue": None,
         "line_of_code": 77,
     },
