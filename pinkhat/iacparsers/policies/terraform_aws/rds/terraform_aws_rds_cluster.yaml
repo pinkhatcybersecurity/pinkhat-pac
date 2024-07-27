@@ -1,0 +1,23 @@
+version: 1.0
+policies:
+  - module: aws_rds_cluster
+    category: "terraform"
+    rules:
+      - name: "Enable Deletion Protection"
+        link: "aws_rds_cluster"
+        description: >
+          By default, AWS RDS have no deletion protection (default value is false).
+          Please find more information in the link below:
+          
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#deletion_protection
+
+          deletion_protection: enables deletion protection for aws_rds_cluster. The defaults is false
+        remediation: >
+          Enable deletion protection by adding deletion_protection_enabled
+
+          resource "aws_rds_cluster" "rds_cluster" {
+            ...
+            deletion_protection = true
+          }
+          or changing deletion_protection_enabled value to true
+        statement: "this.object.get('deletion_protection') is true"
