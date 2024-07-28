@@ -62,6 +62,25 @@ issues = [
             "tests", "terraform_aws", "test_files", "aws_rds_cluster.tf"
         ),
         "category": "terraform",
+        "rule_name": "Encrypt Sensitive Data at Rest",
+        "module": "aws_rds_cluster",
+        "graph_name": "aws_rds_cluster.nothing",
+        "description": "Encryption provides protection if the data is stolen, modified or compromised. "
+        "The data must protected in:\n- rest\n- use\n- and transit\n\n"
+        "Storage encryption, if is set to true, protects data at rest. The default behaviour is:"
+        "\n- engine_mode: serverless, then the flag is equal true\n"
+        "- engine_mode: provisioned, then the flag is equal false\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#storage_encrypted\n",
+        "remediation": 'Enable encryption in RDS cluster:\n\'\'\' resource "aws_rds_cluster" "rds_cluster" {\n  ...\n'
+        "  storage_encrypted  = true\n} '''\n",
+        "issue": None,
+        "line_of_code": 26,
+    },
+    {
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_rds_cluster.tf"
+        ),
+        "category": "terraform",
         "rule_name": "Enable Deletion Protection",
         "module": "aws_rds_cluster",
         "graph_name": "aws_rds_cluster.cloud_watch_enabled",
@@ -99,6 +118,25 @@ issues = [
             "tests", "terraform_aws", "test_files", "aws_rds_cluster.tf"
         ),
         "category": "terraform",
+        "rule_name": "Encrypt Sensitive Data at Rest",
+        "module": "aws_rds_cluster",
+        "graph_name": "aws_rds_cluster.cloud_watch_enabled",
+        "description": "Encryption provides protection if the data is stolen, modified or compromised. "
+        "The data must protected in:\n- rest\n- use\n- and transit\n\n"
+        "Storage encryption, if is set to true, protects data at rest. The default behaviour is:"
+        "\n- engine_mode: serverless, then the flag is equal true\n"
+        "- engine_mode: provisioned, then the flag is equal false\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#storage_encrypted\n",
+        "remediation": 'Enable encryption in RDS cluster:\n\'\'\' resource "aws_rds_cluster" "rds_cluster" {\n  ...\n'
+        "  storage_encrypted  = true\n} '''\n",
+        "issue": None,
+        "line_of_code": 42,
+    },
+    {
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_rds_cluster.tf"
+        ),
+        "category": "terraform",
         "rule_name": "Enable Deletion Protection",
         "module": "aws_rds_cluster",
         "graph_name": "aws_rds_cluster.cloud_watch_enabled_all",
@@ -113,7 +151,9 @@ issues = [
         "line_of_code": 60,
     },
     {
-        "file_path": "tests/terraform_aws/test_files/aws_rds_cluster.tf",
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_rds_cluster.tf"
+        ),
         "category": "terraform",
         "rule_name": "Maintenance Window for OS patching",
         "module": "aws_rds_cluster",
@@ -124,6 +164,25 @@ issues = [
         "https://repost.aws/knowledge-center/rds-maintenance-window\n",
         "remediation": 'Provide maintenance window based on your needs\nresource "aws_rds_cluster" '
         '"rds_cluster" {\n  ...\n  preferred_maintenance_window = "Mon:00:00-Mon:03:00"\n}\n',
+        "issue": None,
+        "line_of_code": 60,
+    },
+    {
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_rds_cluster.tf"
+        ),
+        "category": "terraform",
+        "rule_name": "Encrypt Sensitive Data at Rest",
+        "module": "aws_rds_cluster",
+        "graph_name": "aws_rds_cluster.cloud_watch_enabled_all",
+        "description": "Encryption provides protection if the data is stolen, modified or compromised. "
+        "The data must protected in:\n- rest\n- use\n- and transit\n\n"
+        "Storage encryption, if is set to true, protects data at rest. The default behaviour is:"
+        "\n- engine_mode: serverless, then the flag is equal true\n"
+        "- engine_mode: provisioned, then the flag is equal false\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#storage_encrypted\n",
+        "remediation": 'Enable encryption in RDS cluster:\n\'\'\' resource "aws_rds_cluster" "rds_cluster" {\n  ...\n'
+        "  storage_encrypted  = true\n} '''\n",
         "issue": None,
         "line_of_code": 60,
     },
@@ -159,6 +218,25 @@ issues = [
         "https://repost.aws/knowledge-center/rds-maintenance-window\n",
         "remediation": 'Provide maintenance window based on your needs\nresource "aws_rds_cluster" "rds_cluster" '
         '{\n  ...\n  preferred_maintenance_window = "Mon:00:00-Mon:03:00"\n}\n',
+        "issue": None,
+        "line_of_code": 77,
+    },
+    {
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_rds_cluster.tf"
+        ),
+        "category": "terraform",
+        "rule_name": "Encrypt Sensitive Data at Rest",
+        "module": "aws_rds_cluster",
+        "graph_name": "aws_rds_cluster.cloud_watch_enabled_mssql_all",
+        "description": "Encryption provides protection if the data is stolen, modified or compromised. "
+        "The data must protected in:\n- rest\n- use\n- and transit\n\n"
+        "Storage encryption, if is set to true, protects data at rest. The default behaviour is:"
+        "\n- engine_mode: serverless, then the flag is equal true\n"
+        "- engine_mode: provisioned, then the flag is equal false\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#storage_encrypted\n",
+        "remediation": 'Enable encryption in RDS cluster:\n\'\'\' resource "aws_rds_cluster" "rds_cluster" {\n  ...\n'
+        "  storage_encrypted  = true\n} '''\n",
         "issue": None,
         "line_of_code": 77,
     },
