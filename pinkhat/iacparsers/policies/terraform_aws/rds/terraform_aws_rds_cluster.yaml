@@ -70,3 +70,36 @@ policies:
             set(['audit', 'error', 'general', 'slowquery', 'postgresql' if 'postgresql' in this.object.get('engine', '') else '']) -
             set(this.object.get('enabled_cloudwatch_logs_exports', [])) - set([''])
           )
+      - name: "Encrypt Sensitive Data at Rest"
+        link: "aws_rds_cluster"
+        description: >
+          Encryption provides protection if the data is stolen, modified or compromised. The data must protected in:
+
+          - rest
+
+          - use
+
+          - and transit
+
+
+          Storage encryption, if is set to true, protects data at rest. The default behaviour is:
+
+          - engine_mode: serverless, then the flag is equal true
+
+          - engine_mode: provisioned, then the flag is equal false
+
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#storage_encrypted
+        remediation: >
+          Enable encryption in RDS cluster:
+
+          '''
+          resource "aws_rds_cluster" "rds_cluster" {
+            ...
+            storage_encrypted  = true
+          }
+          '''
+        statement: >
+          (this.object.get('storage_encrypted', true) is true)
+          if this.object.get('engine_mode', '') == 'serverless'
+          else
+          (this.object.get('storage_encrypted', false) is true)
