@@ -4,7 +4,26 @@ from tests.core_config import run_test
 
 issues = [
     {
-        "file_path": "tests/terraform_aws/test_files/aws_db_instance.tf",
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_db_instance.tf"
+        ),
+        "category": "terraform",
+        "rule_name": "Encrypt Sensitive Data at Rest",
+        "module": "aws_db_instance",
+        "graph_name": "aws_db_instance.vulnerable_default",
+        "description": "Encryption provides protection if the data is stolen, "
+        "modified or compromised. The data must protected in:\n- rest\n- use\n- and transit\nT"
+        "he default value of storage_encrypted is False.\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#storage_encrypted\n",
+        "remediation": 'Enable encryption in DB Instance:\n\'\'\' resource "aws_db_instance" "db_instance" {\n'
+        "  ...\n  storage_encrypted  = true\n} '''\n",
+        "issue": None,
+        "line_of_code": 13,
+    },
+    {
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_db_instance.tf"
+        ),
         "category": "terraform",
         "rule_name": "Maintenance Window for OS patching",
         "module": "aws_db_instance",
@@ -20,7 +39,9 @@ issues = [
         "line_of_code": 13,
     },
     {
-        "file_path": "tests/terraform_aws/test_files/aws_db_instance.tf",
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_db_instance.tf"
+        ),
         "category": "terraform",
         "rule_name": "Publicly accessible database",
         "module": "aws_db_instance",
@@ -39,7 +60,9 @@ issues = [
         "line_of_code": 13,
     },
     {
-        "file_path": "tests/terraform_aws/test_files/aws_db_instance.tf",
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_db_instance.tf"
+        ),
         "category": "terraform",
         "rule_name": "Enable Deletion Protection",
         "module": "aws_db_instance",
@@ -55,7 +78,9 @@ issues = [
         "line_of_code": 13,
     },
     {
-        "file_path": "tests/terraform_aws/test_files/aws_db_instance.tf",
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_db_instance.tf"
+        ),
         "category": "terraform",
         "rule_name": "Enable Deletion Protection",
         "module": "aws_db_instance",
@@ -71,7 +96,26 @@ issues = [
         "line_of_code": 39,
     },
     {
-        "file_path": "tests/terraform_aws/test_files/aws_db_instance.tf",
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_db_instance.tf"
+        ),
+        "category": "terraform",
+        "rule_name": "Encrypt Sensitive Data at Rest",
+        "module": "aws_db_instance",
+        "graph_name": "aws_db_instance.secret_manager",
+        "description": "Encryption provides protection if the data is stolen, "
+        "modified or compromised. The data must protected in:\n- rest\n- use\n- and transit\nT"
+        "he default value of storage_encrypted is False.\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#storage_encrypted\n",
+        "remediation": 'Enable encryption in DB Instance:\n\'\'\' resource "aws_db_instance" "db_instance" {\n'
+        "  ...\n  storage_encrypted  = true\n} '''\n",
+        "issue": None,
+        "line_of_code": 78,
+    },
+    {
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_db_instance.tf"
+        ),
         "category": "terraform",
         "rule_name": "Maintenance Window for OS patching",
         "module": "aws_db_instance",
@@ -87,7 +131,9 @@ issues = [
         "line_of_code": 78,
     },
     {
-        "file_path": "tests/terraform_aws/test_files/aws_db_instance.tf",
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_db_instance.tf"
+        ),
         "category": "terraform",
         "rule_name": "Backup retention policy",
         "module": "aws_db_instance",
@@ -103,7 +149,9 @@ issues = [
         "line_of_code": 78,
     },
     {
-        "file_path": "tests/terraform_aws/test_files/aws_db_instance.tf",
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_db_instance.tf"
+        ),
         "category": "terraform",
         "rule_name": "Enable Deletion Protection",
         "module": "aws_db_instance",
