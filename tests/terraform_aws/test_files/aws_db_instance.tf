@@ -84,5 +84,5 @@ resource "aws_db_instance" "secret_manager" {
   instance_class    = "db.t2.medium"
   username          = "dbadmin"
   password          = aws_secretsmanager_secret_version.password.secret_string
-  enabled_cloudwatch_logs_exports = ["audit", "error", "general", "slowquery", "postgresql"]
+  enabled_cloudwatch_logs_exports = ["update", "postgresql"]
 }
