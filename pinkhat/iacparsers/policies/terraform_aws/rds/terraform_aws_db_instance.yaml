@@ -3,6 +3,30 @@ policies:
   - module: aws_db_instance
     category: "terraform"
     rules:
+      - name: "Encrypt Sensitive Data at Rest"
+        link: "aws_db_instance"
+        description: >
+          Encryption provides protection if the data is stolen, modified or compromised. The data must protected in:
+
+          - rest
+
+          - use
+
+          - and transit
+
+          The default value of storage_encrypted is False.
+
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#storage_encrypted
+        remediation: >
+          Enable encryption in DB Instance:
+
+          '''
+          resource "aws_db_instance" "db_instance" {
+            ...
+            storage_encrypted  = true
+          }
+          '''
+        statement: "this.object.get('storage_encrypted', false) is true"
       - name: "Maintenance Window for OS patching"
         link: "aws_db_instance"
         description: >
