@@ -97,3 +97,68 @@ policies:
           }
           or changing deletion_protection value to true
         statement: "this.object.get('deletion_protection', false) is true"
+      - name: "Audit Log Management"
+        link: "aws_db_instance"
+        description: >
+          Logging and monitoring is a key aspect of running infrastructure. If there is no proper logging then some events or malicious actions might be missed. The below actions can be send to cloudwatch:
+
+          - audit
+
+          - error
+
+          - general
+
+          - slowquery
+
+          - postgresql if engine postgresql
+
+          The following values are valid for each DB engine:
+
+          - RDS for Db2 - diag.log | notify.log
+
+          - RDS for MariaDB - audit | error | general | slowquery
+
+          - RDS for Microsoft SQL Server - agent | error
+
+          - RDS for MySQL - audit | error | general | slowquery
+
+          - RDS for Oracle - alert | audit | listener | trace | oemagent
+
+          - RDS for PostgreSQL - postgresql | upgrade
+
+
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#enabled_cloudwatch_logs_exports
+
+          https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_CreateDBInstance.html
+
+          https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_LogAccess.Procedural.UploadtoCloudWatch.html
+        remediation: >
+          Enable sending DB instance logs to cloudwach:
+
+          resource "aws_db_instance" "db_instance" {
+            ...
+            engine = "sqlserver-ex"
+            enabled_cloudwatch_logs_exports = ["agent", "error"]
+          }
+        helper: >
+          {% set tmp = false %}
+          {% set exports = this.object.get('enabled_cloudwatch_logs_exports') %}
+          {% if exports %}
+            {% set engine = this.object.get('engine', '').lower() %}
+            {% if 'postgresql' in engine %}
+              {% set tmp = not bool(set(['postgresql', 'update']) - set(exports)) %}
+            {% elif 'oracle' in engine %}
+              {% set tmp = not bool(set(['alert', 'audit', 'listener', 'trace', 'oemagent']) - set(exports)) %}
+            {% elif 'mysql' in engine %}
+              {% set tmp = not bool(set(['audit', 'error', 'general', 'slowquery']) - set(exports)) %}
+            {% elif 'sqlserver' in engine %}
+              {% set tmp = not bool(set(['agent', 'error']) - set(exports)) %}
+            {% elif 'mariadb' in engine %}
+              {% set tmp = not bool(set(['audit', 'error', 'general', 'slowquery']) - set(exports)) %}
+            {% elif 'db2' in engine %}
+              {% set tmp = not bool(set(['diag.log', 'notify.log']) - set(exports)) %}
+            {% endif %}
+          {% endif %}
+          {{ tmp }}
+        statement: >
+          bool(helper)
