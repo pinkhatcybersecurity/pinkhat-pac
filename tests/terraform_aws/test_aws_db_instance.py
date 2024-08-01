@@ -82,6 +82,32 @@ issues = [
             "tests", "terraform_aws", "test_files", "aws_db_instance.tf"
         ),
         "category": "terraform",
+        "rule_name": "Audit Log Management",
+        "module": "aws_db_instance",
+        "graph_name": "aws_db_instance.vulnerable_default",
+        "description": "Logging and monitoring is a key aspect of running infrastructure. "
+        "If there is no proper logging then some events or malicious actions might be missed. "
+        "The below actions can be send to cloudwatch:\n- audit\n- error\n- general\n- slowquery\n- "
+        "postgresql if engine postgresql\nThe following values are valid for each DB engine:\n"
+        "- RDS for Db2 - diag.log | notify.log\n"
+        "- RDS for MariaDB - audit | error | general | slowquery\n"
+        "- RDS for Microsoft SQL Server - agent | error\n"
+        "- RDS for MySQL - audit | error | general | slowquery\n"
+        "- RDS for Oracle - alert | audit | listener | trace | oemagent\n"
+        "- RDS for PostgreSQL - postgresql | upgrade\n\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#enabled_cloudwatch_logs_exports\n"
+        "https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_CreateDBInstance.html\n"
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_LogAccess.Procedural.UploadtoCloudWatch.html\n",
+        "remediation": 'Enable sending DB instance logs to cloudwach:\nresource "aws_db_instance" "db_instance" {'
+        '\n  ...\n  engine = "sqlserver-ex"\n  enabled_cloudwatch_logs_exports = ["agent", "error"]\n}\n',
+        "issue": None,
+        "line_of_code": 13,
+    },
+    {
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_db_instance.tf"
+        ),
+        "category": "terraform",
         "rule_name": "Enable Deletion Protection",
         "module": "aws_db_instance",
         "graph_name": "aws_db_instance.test-replica",
@@ -92,6 +118,32 @@ issues = [
         "remediation": "Enable deletion protection by adding deletion_protection\n"
         'resource "aws_db_instance" "db_instance_name" '
         "{\n  ...\n  deletion_protection = true\n} or changing deletion_protection value to true\n",
+        "issue": None,
+        "line_of_code": 39,
+    },
+    {
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_db_instance.tf"
+        ),
+        "category": "terraform",
+        "rule_name": "Audit Log Management",
+        "module": "aws_db_instance",
+        "graph_name": "aws_db_instance.test-replica",
+        "description": "Logging and monitoring is a key aspect of running infrastructure. "
+        "If there is no proper logging then some events or malicious actions might be missed. "
+        "The below actions can be send to cloudwatch:\n- audit\n- error\n- general\n- slowquery\n- "
+        "postgresql if engine postgresql\nThe following values are valid for each DB engine:\n"
+        "- RDS for Db2 - diag.log | notify.log\n"
+        "- RDS for MariaDB - audit | error | general | slowquery\n"
+        "- RDS for Microsoft SQL Server - agent | error\n"
+        "- RDS for MySQL - audit | error | general | slowquery\n"
+        "- RDS for Oracle - alert | audit | listener | trace | oemagent\n"
+        "- RDS for PostgreSQL - postgresql | upgrade\n\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#enabled_cloudwatch_logs_exports\n"
+        "https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_CreateDBInstance.html\n"
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_LogAccess.Procedural.UploadtoCloudWatch.html\n",
+        "remediation": 'Enable sending DB instance logs to cloudwach:\nresource "aws_db_instance" "db_instance" {'
+        '\n  ...\n  engine = "sqlserver-ex"\n  enabled_cloudwatch_logs_exports = ["agent", "error"]\n}\n',
         "issue": None,
         "line_of_code": 39,
     },
