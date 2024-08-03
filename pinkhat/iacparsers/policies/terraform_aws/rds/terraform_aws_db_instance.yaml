@@ -162,3 +162,56 @@ policies:
           {{ tmp }}
         statement: >
           bool(helper)
+      - name: "Plaintext password"
+        link: "aws_db_instance"
+        description: >
+          Password shouldn't be stored in a plain text. It causes a risk to the protected resource because anyone
+          who has read access to the source file can read it and try to utilize it.
+
+          https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-secrets-manager.html
+        remediation: >
+          In terraform there are multiple ways to pass a password:
+
+          - using random_password resource
+
+            https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password
+
+            ```
+            resource "random_password" "password" {
+              length           = 16
+              special          = true
+              override_special = "!#$%&*()-_=+[]{}<>:?"
+            }
+
+            resource "aws_db_instance" "db_instance" {
+              ...
+              username          = "<service_account_name>"
+              password          = random_password.password.result
+            }
+            ```
+
+          - make sure you store your password in secure place, consider using SecretManager
+
+            https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#managed-master-passwords-via-secrets-manager-default-kms-key
+
+            https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#managed-master-passwords-via-secrets-manager-specific-kms-key
+
+            ```
+            resource "aws_kms_key" "super_secure_kms_key" {
+              description = "Protects the database key"
+            }
+
+            resource "aws_db_instance" "db_secret_manager" {
+              ...
+              username                    = "<service_account_name>"
+              manage_master_user_password = true
+              master_user_secret_kms_key_id = aws_kms_key.super_secure_kms_key.key_id
+            }
+            ```
+        statement: >
+          (
+            re_search(this.object.password, '^(\\${?)aws_secretsmanager_secret_version\.[a-z0-9]*\.secret_string(\\}?)')
+            or
+            re_search(this.object.password, '^(\\${?)random_password\.[a-z0-9]*\.result(\\}?)')
+          )
+          if 'password' in this.object else true
