@@ -108,6 +108,37 @@ issues = [
             "tests", "terraform_aws", "test_files", "aws_db_instance.tf"
         ),
         "category": "terraform",
+        "rule_name": "Plaintext password",
+        "module": "aws_db_instance",
+        "graph_name": "aws_db_instance.vulnerable_default",
+        "description": "Password shouldn't be stored in a plain text. It causes a risk to the protected resource "
+        "because anyone who has read access to the source file can read it and try to utilize it.\n"
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-secrets-manager.html\n",
+        "remediation": "In terraform there are multiple ways to pass a password:\n- using random_password resource"
+        "\n\n  https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password"
+        '\n\n  ```\n  resource "random_password" "password" {\n    length           = 16'
+        '\n    special          = true\n    override_special = "!#$%&*()-_=+[]{}<>:?"\n  }'
+        '\n\n  resource "aws_db_instance" "db_instance" {\n    ...'
+        '\n    username          = "<service_account_name>"\n'
+        "    password          = random_password.password.result\n  }\n  ```\n\n"
+        "- make sure you store your password in secure place, consider using SecretManager\n\n  "
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#managed-master-"
+        "passwords-via-secrets-manager-default-kms-key\n\n  "
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#"
+        "managed-master-passwords-via-secrets-manager-specific-kms-key\n\n  ```"
+        '\n  resource "aws_kms_key" "super_secure_kms_key" {\n    description = "Protects the database key"\n'
+        '  }\n\n  resource "aws_db_instance" "db_secret_manager" {\n    ...\n'
+        '    username                    = "<service_account_name>"\n'
+        "    manage_master_user_password = true\n"
+        "    master_user_secret_kms_key_id = aws_kms_key.super_secure_kms_key.key_id\n  }\n  ```\n",
+        "issue": None,
+        "line_of_code": 13,
+    },
+    {
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_db_instance.tf"
+        ),
+        "category": "terraform",
         "rule_name": "Enable Deletion Protection",
         "module": "aws_db_instance",
         "graph_name": "aws_db_instance.test-replica",
