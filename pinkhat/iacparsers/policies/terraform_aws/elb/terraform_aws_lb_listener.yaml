@@ -1,0 +1,20 @@
+version: 1.0
+policies:
+  - module: aws_lb_listener
+    category: "terraform"
+    rules:
+      - name: "Expired certificate verification for mutual authentication"
+        link: "aws_lb_listener"
+        description: >
+          Expired certificates for mutual authentication might cause very serious cybersecurity issues.
+          If an application accepts expired certificates, then mostly developers disable verify certificate parameter.
+          It impacts trust between systems and there is ability for man in the middle attacks (MITM).
+
+          ignore_client_certificate_expiry - if true bypass expiry date. Default value is false
+
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener#mutual_authentication
+        remediation: >
+          Disable or remove ignore_client_certificate_expiry in aws_lb_listener resource.
+        statement: >
+          (this.object.mutual_authentication.get('ignore_client_certificate_expiry', false) is false)
+          if 'mutual_authentication' in this.object else true
