@@ -38,11 +38,8 @@ jobs:
     - name: Test with pytest
       run: |
         pytest --cov --cov-report xml:coverage.xml
-  coverage:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Test Coverage
-        uses: orgoro/coverage@v3.2
-        with:
-          coverageFile: coverage.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Test Coverage
+      uses: orgoro/coverage@v3.2
+      with:
+        coverageFile: coverage.xml
+        token: ${{ secrets.GITHUB_TOKEN }}
