@@ -29,6 +29,6 @@ class YamlFile(Core):
                 # and other features in the future. Unfortunately yaml.safe_load doesn't allow me
                 # to add any information about loader. Under the hood, safe_load used SafeLoader in Loader parameter.
                 # SafeLineLoader inherit SafeLoader, then the application should be safe.
-                object_in_graph=yaml.load(file.read(), Loader=SafeLineLoader),
+                object_in_graph=yaml.load(file.read(), Loader=SafeLineLoader),  # nosec
             )
         return list(self._policy_validator.check_policies(category="yaml"))
