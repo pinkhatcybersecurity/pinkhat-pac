@@ -4,7 +4,9 @@ import yaml
 
 from pinkhat.iacparsers.issue_definition import IssueDefinition
 from pinkhat.iacparsers.scanner.core import Core
-from pinkhat.iacparsers.utils.policy_as_code.policy_as_code_rule_loader import TFRuleLoader
+from pinkhat.iacparsers.utils.policy_as_code.policy_as_code_rule_loader import (
+    TFRuleLoader,
+)
 from pinkhat.iacparsers.utils.yaml_safe_line_loader import SafeLineLoader
 
 
@@ -22,6 +24,11 @@ class YamlFile(Core):
                 name="",
                 child_name=None,
                 link="yaml",
-                object_in_graph=yaml.load(file.read(), Loader=SafeLineLoader),
+                # yaml.load might be reported by bandit or other SAST tools
+                # and yaml.safe_load is recommended to be used. I need line of code
+                # and other features in the future. Unfortunately yaml.safe_load doesn't allow me
+                # to add any information about loader. Under the hood, safe_load used SafeLoader in Loader parameter.
+                # SafeLineLoader inherit SafeLoader, then the application should be safe.
+                object_in_graph=yaml.load(file.read(), Loader=SafeLineLoader),  # nosec
             )
         return list(self._policy_validator.check_policies(category="yaml"))

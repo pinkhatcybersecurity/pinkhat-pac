@@ -44,3 +44,8 @@ jobs:
       with:
         coverageFile: coverage.xml
         token: ${{ secrets.GITHUB_TOKEN }}
+    - name: SAST bandit check
+      uses: mdegis/bandit-action@v1.0
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        path: "./pinkhat/"
