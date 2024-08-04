@@ -18,3 +18,46 @@ policies:
         statement: >
           (this.object.mutual_authentication.get('ignore_client_certificate_expiry', false) is false)
           if 'mutual_authentication' in this.object else true
+      - name: "Encrypt Sensitive Data in Transit"
+        link: "aws_lb_listener"
+        description: >
+          Data send over the internet must be encrypted to protect information from unauthorized disclosure or
+          modifications. End to end encryption should be used. TLS is the common cryptographic protocol.
+          If a client sends HTTP then it should be redirected to HTTPS.
+
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener#redirect-action
+        remediation: >
+          Disable or redirect HTTP traffic to HTTPS
+
+          ```
+          resource "aws_lb_listener" "lb_listener" {
+            ...
+            port              = "80"
+            protocol          = "HTTP"
+
+            default_action {
+              type = "redirect"
+
+              redirect {
+                port        = "443"
+                protocol    = "HTTPS"
+                status_code = "HTTP_301"
+              }
+            }
+          }
+          ```
+        report_on: true
+        helper: >
+          {% set result = false %}
+          {% if this.object.get('protocol', 'http').lower() == 'http' %}
+            {% set result = true %}
+            {% set default_action = this.object.get('default_action') %}
+            {% if default_action and default_action[0].get('type') == 'redirect' %}
+              {% set redirect = default_action[0].get('redirect') %}
+              {% if redirect and redirect[0].protocol.lower() == 'https' and redirect[0].status_code.lower() == 'http_301' %}
+                {% set result = false %}
+              {% endif %}
+            {% endif %}
+          {% endif %}
+          {{ result }}
+        statement: "bool(helper)"

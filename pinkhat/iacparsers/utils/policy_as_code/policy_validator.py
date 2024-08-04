@@ -5,7 +5,9 @@ from loguru import logger
 from pinkhat.iacparsers.issue_definition import IssueDefinition
 from pinkhat.iacparsers.utils.graph_builder.graph_core import GraphCore
 from pinkhat.iacparsers.utils.graph_builder.graph_object import GraphObject
-from pinkhat.iacparsers.utils.policy_as_code.policy_as_code_rule_loader import TFRuleLoader
+from pinkhat.iacparsers.utils.policy_as_code.policy_as_code_rule_loader import (
+    TFRuleLoader,
+)
 from pinkhat.iacparsers.utils.policy_as_code.policy_data import PolicyData
 from pinkhat.iacparsers.utils.template_engine.template_engine import TemplateEngine
 
@@ -37,7 +39,7 @@ class PolicyValidator(TemplateEngine):
                             graph_name=graph_name,
                             graph_object=graph_object,
                             issue_check=issue_check,
-                            helper=helper
+                            helper=helper,
                         )
                 else:
                     yield from self._run_check(
@@ -78,16 +80,20 @@ class PolicyValidator(TemplateEngine):
             category=issue_check.policy.category,
             rule_name=issue_check.rule.name,
             module=issue_check.policy.module,
-            graph_name=helper.get('graph_name') if helper and type(helper) is dict else graph_name,
+            graph_name=(
+                helper.get("graph_name")
+                if helper and type(helper) is dict
+                else graph_name
+            ),
             description=issue_check.rule.description,
             remediation=issue_check.rule.remediation,
             issue=failure_message,
-            line_of_code=self._get_start_line(graph_object=graph_object, helper=helper)
+            line_of_code=self._get_start_line(graph_object=graph_object, helper=helper),
         )
 
     @staticmethod
     def _get_start_line(graph_object, helper: dict) -> int | None:
-        if helper and type(helper):
+        if helper and type(helper) is dict:
             return helper.get("__start_line__")
         if type(graph_object.object) is dict:
             return graph_object.object.get("__start_line__")
