@@ -20,15 +20,19 @@ class YamlFile(Core):
         if self._child.suffix not in self.FILE_EXTENSION:
             return []
         with self._child.open() as file:
-            self._graph_builder.add_graph_object(
-                name="",
-                child_name=None,
-                link="yaml",
-                # yaml.load might be reported by bandit or other SAST tools
-                # and yaml.safe_load is recommended to be used. I need line of code
-                # and other features in the future. Unfortunately yaml.safe_load doesn't allow me
-                # to add any information about loader. Under the hood, safe_load used SafeLoader in Loader parameter.
-                # SafeLineLoader inherit SafeLoader, then the application should be safe.
-                object_in_graph=yaml.load(file.read(), Loader=SafeLineLoader),  # nosec
-            )
+            # yaml.load might be reported by bandit or other SAST tools
+            # and yaml.safe_load is recommended to be used. I need line of code
+            # and other features in the future. Unfortunately yaml.safe_load doesn't allow me
+            # to add any information about loader. Under the hood, safe_load used SafeLoader in Loader parameter.
+            # SafeLineLoader inherit SafeLoader, then the application should be safe.
+            objects = yaml.load(file.read(), Loader=SafeLineLoader)  # nosec
+            # yaml.load might return a list, if there are multiple different entries in the file
+            objects_in_graph = objects if list == type(objects) else [objects]
+            for object_in_graph in objects_in_graph:
+                self._graph_builder.add_graph_object(
+                    name="",
+                    child_name=None,
+                    link="yaml",
+                    object_in_graph=object_in_graph,
+                )
         return list(self._policy_validator.check_policies(category="yaml"))

@@ -5,7 +5,9 @@ from loguru import logger
 from pinkhat.iacparsers.issue_definition import IssueDefinition
 from pinkhat.iacparsers.scanner.certificate_core import CertificateCore
 from pinkhat.iacparsers.scanner.terraform_core import TerraformCore
-from pinkhat.iacparsers.utils.policy_as_code.policy_as_code_rule_loader import TFRuleLoader
+from pinkhat.iacparsers.utils.policy_as_code.policy_as_code_rule_loader import (
+    TFRuleLoader,
+)
 from pinkhat.iacparsers.scanner.yaml_core import YamlFile
 
 
