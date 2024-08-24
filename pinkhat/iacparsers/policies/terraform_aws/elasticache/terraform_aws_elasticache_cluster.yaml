@@ -22,3 +22,21 @@ policies:
             ...
           }
         statement: "this.object.get('transit_encryption_enabled', false) is true"
+      - name: "Maintenance Window for OS patching"
+        link: "aws_elasticache_cluster"
+        description: >
+          Not all patches and security fixes are automatically implemented in a database.
+          The required work must be implemented during the maintenance window.
+
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_cluster#maintenance_window
+
+          https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#OS_Updates
+        remediation: >
+          Enable transit_encryption_enabled in aws_elasticache_cluster.
+
+          resource "aws_elasticache_cluster" "elasticache_cluster" {
+            ...
+            maintenance_window = 'sun:10:00-sun:11:00'
+            ...
+          }
+        statement: "this.object.get('maintenance_window') is not none"
