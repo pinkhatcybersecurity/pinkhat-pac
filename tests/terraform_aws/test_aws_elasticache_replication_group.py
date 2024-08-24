@@ -71,6 +71,28 @@ issues = [
         "issue": None,
         "line_of_code": 17,
     },
+    {
+        "file_path": os.path.join(
+            "tests",
+            "terraform_aws",
+            "test_files",
+            "aws_elasticache_replication_group.tf",
+        ),
+        "category": "terraform",
+        "rule_name": "Maintenance Window for OS patching",
+        "module": "aws_elasticache_cluster",
+        "graph_name": "aws_elasticache_cluster.replica",
+        "description": "Not all patches and security fixes are automatically implemented in a database. "
+        "The required work must be implemented during the maintenance window.\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/"
+        "elasticache_cluster#maintenance_window\n"
+        "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#OS_Updates\n",
+        "remediation": "Enable transit_encryption_enabled in aws_elasticache_cluster.\n"
+        'resource "aws_elasticache_cluster" "elasticache_cluster" {\n  ...\n'
+        "  maintenance_window = 'sun:10:00-sun:11:00'\n  ...\n}\n",
+        "issue": None,
+        "line_of_code": 17,
+    },
 ]
 
 
