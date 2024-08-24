@@ -1,0 +1,23 @@
+version: 1.0
+policies:
+  - module: aws_elasticache_replication_group
+    category: "terraform"
+    rules:
+      - name: "Encrypt Sensitive Data at Transit"
+        link: "aws_elasticache_replication_group"
+        description: >
+          Data send over the internet must be encrypted to protect information from unauthorized disclosure or
+          modifications. End to end encryption should be used. TLS is the common cryptographic protocol.
+
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_replication_group#transit_encryption_enabled
+
+          https://docs.aws.amazon.com/AmazonElastiCache/latest/mem-ug/in-transit-encryption.html
+        remediation: >
+          Enable transit_encryption_enabled in aws_elasticache_replication_group.
+
+          resource "aws_elasticache_replication_group" "elasticache_group" {
+            ...
+            transit_encryption_enabled = true
+            ...
+          }
+        statement: "this.object.get('transit_encryption_enabled', false) is true"
