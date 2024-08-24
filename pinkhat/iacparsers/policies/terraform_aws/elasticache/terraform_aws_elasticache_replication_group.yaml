@@ -21,3 +21,24 @@ policies:
             ...
           }
         statement: "this.object.get('transit_encryption_enabled', false) is true"
+      - name: "Encrypt Sensitive Data at Rest"
+        link: "aws_elasticache_replication_group"
+        description: >
+          Encryption provides protection if the data is stolen, modified or compromised. The data must protected in:
+
+          - rest
+          - use
+          - and transit
+
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_replication_group#at_rest_encryption_enabled
+
+          https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/at-rest-encryption.html
+        remediation: >
+          Enable at_rest_encryption_enabled in aws_elasticache_replication_group.
+
+          resource "aws_elasticache_replication_group" "elasticache_group" {
+            ...
+            at_rest_encryption_enabled = true
+            ...
+          }
+        statement: "this.object.get('at_rest_encryption_enabled', false) is true"

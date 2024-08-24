@@ -34,6 +34,28 @@ issues = [
             "aws_elasticache_replication_group.tf",
         ),
         "category": "terraform",
+        "rule_name": "Encrypt Sensitive Data at Rest",
+        "module": "aws_elasticache_replication_group",
+        "graph_name": "aws_elasticache_replication_group.example",
+        "description": "Encryption provides protection if the data is stolen, modified or compromised. "
+        "The data must protected in:\n- rest - use - and transit\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/"
+        "elasticache_replication_group#at_rest_encryption_enabled\n"
+        "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/at-rest-encryption.html\n",
+        "remediation": "Enable at_rest_encryption_enabled in aws_elasticache_replication_group.\n"
+        'resource "aws_elasticache_replication_group" "elasticache_group" {\n  ...\n'
+        "  at_rest_encryption_enabled = true\n  ...\n}\n",
+        "issue": None,
+        "line_of_code": 1,
+    },
+    {
+        "file_path": os.path.join(
+            "tests",
+            "terraform_aws",
+            "test_files",
+            "aws_elasticache_replication_group.tf",
+        ),
+        "category": "terraform",
         "rule_name": "Encrypt Sensitive Data at Transit",
         "module": "aws_elasticache_cluster",
         "graph_name": "aws_elasticache_cluster.replica",
