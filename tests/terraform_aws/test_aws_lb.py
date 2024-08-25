@@ -68,7 +68,7 @@ issues = [
         "line_of_code": 59,
     },
     {
-        "file_path": "tests/terraform_aws/test_files/aws_lb.tf",
+        "file_path": os.path.join("tests", "terraform_aws", "test_files", "aws_lb.tf"),
         "category": "terraform",
         "rule_name": "Disabled Access Logs for Application Load Balancer",
         "module": "aws_lb",
