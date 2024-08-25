@@ -20,3 +20,42 @@ policies:
             ...
           }
         statement: "this.object.get('enable_deletion_protection') is true"
+      - name: "Disabled Access Logs for Application Load Balancer"
+        link: "aws_lb"
+        description: >
+          Enabling access logs for Elastic Load Balancing provides information about request received by load balancer.
+          Log entries contains information about:
+
+          - date time
+
+          - client IP address
+
+          - request paths
+
+          - server responses
+
+          Access logs are very important to analyze traffic and troubleshoot connectivity issues.
+          
+          load_balancer_type: if 'application' type, then enabled flag should be set to True in access_logs.
+          Default option is False"
+
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb#access_logs
+          
+          https://docs.aws.amazon.com/elasticloadbalancing/latest/application/enable-access-logging.html
+        remediation: >
+          Enable access logs in aws_lb.
+
+
+          resource "aws_lb" "lb" {
+            ...
+            access_logs {
+              bucket  = aws_s3_bucket.lb_logs.id
+              prefix  = "test-lb"
+              enabled = true
+            }
+            ...
+          }
+        statement: >
+          bool(this.object.get('access_logs',[{}])[0].get('enabled', false)) 
+          if this.object.load_balancer_type == 'application' 
+          else true
