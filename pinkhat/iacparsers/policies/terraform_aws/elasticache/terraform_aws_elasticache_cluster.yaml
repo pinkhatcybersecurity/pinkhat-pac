@@ -40,3 +40,50 @@ policies:
             ...
           }
         statement: "this.object.get('maintenance_window') is not none"
+      - name: "Audit Log Management"
+        link: "aws_elasticache_cluster"
+        description: >
+          Logging and monitoring is a key aspect of running infrastructure. If there is no proper logging then some events or malicious actions might be missed. The below actions can be send to cloudwatch or kinesis:
+
+          - slow-log
+
+          - engine-log
+
+          The feature is available only for Redis
+
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_cluster#log_delivery_configuration
+
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_cluster#log-delivery-configuration
+
+          https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Log_Delivery.html
+        remediation: >
+          Enable sending slow and engine logs to Cloudwatch or Kinesis
+
+
+          resource "aws_elasticache_cluster" "elasticache" {
+            ...
+            engine            = "redis"
+            ...
+            log_delivery_configuration {
+              destination      = aws_cloudwatch_log_group.example.name
+              destination_type = "cloudwatch-logs"
+              log_format       = "text"
+              log_type         = "slow-log"
+            }
+            log_delivery_configuration {
+              destination      = aws_kinesis_firehose_delivery_stream.example.name
+              destination_type = "kinesis-firehose"
+              log_format       = "json"
+              log_type         = "engine-log"
+            }
+          }
+        helper: >
+          {% set tmp = {'results': []} %}
+          {% if this.object.get("engine") == 'redis' %}
+            {% for log_config in this.object.get("log_delivery_configuration", []) %}
+              {% set _ = tmp.results.append(log_config.get('log_type')) %}
+            {% endfor %}
+          {% endif %}
+          {{ tmp }}
+        statement: >
+          bool('engine-log' in helper.results and 'slow-log' in helper.results) if this.object.get("engine") == 'redis' else true
