@@ -94,6 +94,8 @@ class PolicyValidator(TemplateEngine):
     @staticmethod
     def _get_start_line(graph_object, helper: dict) -> int | None:
         if helper and type(helper) is dict:
-            return helper.get("__start_line__", graph_object.object.get("__start_line__"))
+            return helper.get(
+                "__start_line__", graph_object.object.get("__start_line__")
+            )
         if type(graph_object.object) is dict:
             return graph_object.object.get("__start_line__")
