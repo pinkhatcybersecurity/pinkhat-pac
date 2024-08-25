@@ -23,6 +23,30 @@ issues = [
         "line_of_code": 1,
     },
     {
+        "file_path": "tests/terraform_aws/test_files/aws_elasticache_cluster.tf",
+        "category": "terraform",
+        "rule_name": "Audit Log Management",
+        "module": "aws_elasticache_cluster",
+        "graph_name": None,
+        "description": "Logging and monitoring is a key aspect of running infrastructure. "
+        "If there is no proper logging then some events or malicious actions might be missed. "
+        "The below actions can be send to cloudwatch or kinesis:\n- slow-log\n- engine-log\n"
+        "The feature is available only for Redis\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_cluster#log_delivery_configuration\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_cluster#log-delivery-configuration\n"
+        "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Log_Delivery.html\n",
+        "remediation": "Enable sending slow and engine logs to Cloudwatch or Kinesis\n\n"
+        'resource "aws_elasticache_cluster" "elasticache" {\n  ...\n  engine            = "redis"\n'
+        "  ...\n  log_delivery_configuration {\n    destination      = aws_cloudwatch_log_group.example.name\n"
+        '    destination_type = "cloudwatch-logs"\n    log_format       = "text"\n'
+        '    log_type         = "slow-log"\n  }\n'
+        "  log_delivery_configuration {\n    destination      = aws_kinesis_firehose_delivery_stream.example.name\n"
+        '    destination_type = "kinesis-firehose"\n    log_format       = "json"\n'
+        '    log_type         = "engine-log"\n  }\n}\n',
+        "issue": None,
+        "line_of_code": 1,
+    },
+    {
         "file_path": os.path.join(
             "tests", "terraform_aws", "test_files", "aws_elasticache_cluster.tf"
         ),
@@ -39,6 +63,30 @@ issues = [
         "remediation": "Enable transit_encryption_enabled in aws_elasticache_cluster.\n"
         'resource "aws_elasticache_cluster" "elasticache_cluster" {\n  ...\n'
         "  transit_encryption_enabled = true\n  ...\n}\n",
+        "issue": None,
+        "line_of_code": 11,
+    },
+    {
+        "file_path": "tests/terraform_aws/test_files/aws_elasticache_cluster.tf",
+        "category": "terraform",
+        "rule_name": "Audit Log Management",
+        "module": "aws_elasticache_cluster",
+        "graph_name": None,
+        "description": "Logging and monitoring is a key aspect of running infrastructure. "
+        "If there is no proper logging then some events or malicious actions might be missed. "
+        "The below actions can be send to cloudwatch or kinesis:\n- slow-log\n- engine-log\n"
+        "The feature is available only for Redis\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_cluster#log_delivery_configuration\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_cluster#log-delivery-configuration\n"
+        "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Log_Delivery.html\n",
+        "remediation": "Enable sending slow and engine logs to Cloudwatch or Kinesis\n\n"
+        'resource "aws_elasticache_cluster" "elasticache" {\n  ...\n  engine            = "redis"\n'
+        "  ...\n  log_delivery_configuration {\n    destination      = aws_cloudwatch_log_group.example.name\n"
+        '    destination_type = "cloudwatch-logs"\n    log_format       = "text"\n'
+        '    log_type         = "slow-log"\n  }\n'
+        "  log_delivery_configuration {\n    destination      = aws_kinesis_firehose_delivery_stream.example.name\n"
+        '    destination_type = "kinesis-firehose"\n    log_format       = "json"\n'
+        '    log_type         = "engine-log"\n  }\n}\n',
         "issue": None,
         "line_of_code": 11,
     },
@@ -117,6 +165,32 @@ issues = [
         "remediation": "Enable transit_encryption_enabled in aws_elasticache_cluster.\n"
         'resource "aws_elasticache_cluster" "elasticache_cluster" {\n  ...\n'
         "  maintenance_window = 'sun:10:00-sun:11:00'\n  ...\n}\n",
+        "issue": None,
+        "line_of_code": 42,
+    },
+    {
+        "file_path": os.path.join(
+            "tests", "terraform_aws", "test_files", "aws_elasticache_cluster.tf"
+        ),
+        "category": "terraform",
+        "rule_name": "Audit Log Management",
+        "module": "aws_elasticache_cluster",
+        "graph_name": None,
+        "description": "Logging and monitoring is a key aspect of running infrastructure. "
+        "If there is no proper logging then some events or malicious actions might be missed. "
+        "The below actions can be send to cloudwatch or kinesis:\n- slow-log\n- engine-log\n"
+        "The feature is available only for Redis\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_cluster#log_delivery_configuration\n"
+        "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticache_cluster#log-delivery-configuration\n"
+        "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Log_Delivery.html\n",
+        "remediation": "Enable sending slow and engine logs to Cloudwatch or Kinesis\n\n"
+        'resource "aws_elasticache_cluster" "elasticache" {\n  ...\n  engine            = "redis"\n'
+        "  ...\n  log_delivery_configuration {\n    destination      = aws_cloudwatch_log_group.example.name\n"
+        '    destination_type = "cloudwatch-logs"\n    log_format       = "text"\n'
+        '    log_type         = "slow-log"\n  }\n'
+        "  log_delivery_configuration {\n    destination      = aws_kinesis_firehose_delivery_stream.example.name\n"
+        '    destination_type = "kinesis-firehose"\n    log_format       = "json"\n'
+        '    log_type         = "engine-log"\n  }\n}\n',
         "issue": None,
         "line_of_code": 42,
     },
