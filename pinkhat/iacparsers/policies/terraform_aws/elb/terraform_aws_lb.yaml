@@ -1,0 +1,22 @@
+version: 1.0
+policies:
+  - module: aws_lb
+    category: "terraform"
+    rules:
+      - name: "Enable Deletion Protection"
+        link: "aws_lb"
+        description: >
+          By default, AWS LB Instance have no deletion protection (default value is false).
+          The resource might be accidentally deleted and cause damage.
+          Please find more information in the link below:
+
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb#enable_deletion_protection
+        remediation: >
+          Enable delete protection by setting enable_deletion_protection to true in aws_lb. Defaults to false
+
+          resource "aws_lb" "test" {
+            ...
+            enable_deletion_protection = true
+            ...
+          }
+        statement: "this.object.get('enable_deletion_protection') is true"
