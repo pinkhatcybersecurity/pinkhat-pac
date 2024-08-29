@@ -59,3 +59,48 @@ policies:
           bool(this.object.get('access_logs',[{}])[0].get('enabled', false)) 
           if this.object.load_balancer_type == 'application' 
           else true
+      - name: "Disabled Connection Logs for Application Load Balancer"
+        link: "aws_lb"
+        description: >
+          Enabling connection logs for Elastic Load Balancing provides information about request received by load
+          balancer. Log entries contains information about:
+
+          - date time
+
+          - client IP address
+
+          - client port
+
+          - listener port
+
+          - TLS cipher and protocol used
+
+          - connection status
+
+          - client certificate details
+
+          Access logs are very important to analyze traffic and troubleshoot connectivity issues.
+          load_balancer_type: if 'application' type, then enabled flag should be set to True in connection_logs.
+          Default option is False"
+
+          https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb#connection_logs
+
+          https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-connection-logs.html
+        remediation: >
+          Enable access logs in aws_lb.
+
+          resource "aws_lb" "lb" {
+            ...
+            connection_logs {
+              bucket  = aws_s3_bucket.lb_logs.id
+              prefix  = "test-lb"
+              enabled = true
+            }
+            ...
+          }
+        statement: >
+          bool(
+            this.object.get('connection_logs', [{}])[0].get('enabled', false)
+          )
+          if this.object.load_balancer_type == 'application'
+          else true
