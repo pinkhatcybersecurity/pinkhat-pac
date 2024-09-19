@@ -2,16 +2,16 @@ import ast
 
 from kuzu import Connection
 
-from iacparsers.utils.graph_db.graph_schema.attribute_graph_db import AttributeGraphDb
-from iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from iacparsers.utils.graph_db.graph_schema.binop_graph_db import BinOpGraphDb
-from iacparsers.utils.graph_db.graph_schema.constant_graph_db import ConstantGraphDb
-from iacparsers.utils.graph_db.graph_schema.joinedstr_graph_db import JoinedStrGraphDb
-from iacparsers.utils.graph_db.graph_schema.keyword_graph_db import KeywordGraphDb
-from iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
-from iacparsers.utils.graph_db.graph_schema.starred_graph_db import StarredGraphDb
-from iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
-from iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
+from pinkhat.iacparsers.utils.graph_db.graph_schema.attribute_graph_db import AttributeGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.binop_graph_db import BinOpGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import ConstantGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.joinedstr_graph_db import JoinedStrGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.keyword_graph_db import KeywordGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.starred_graph_db import StarredGraphDb
+from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
+from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
 class CallGraphDb(BaseGraphDb):

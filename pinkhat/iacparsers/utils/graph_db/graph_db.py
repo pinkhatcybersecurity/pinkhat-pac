@@ -7,39 +7,39 @@ import pandas
 from kuzu import Connection
 from loguru import logger
 
-from iacparsers.utils.graph_db.graph_schema.arg_graph_db import ArgGraphDb
-from iacparsers.utils.graph_db.graph_schema.assign_graph_db import AssignGraphDb
-from iacparsers.utils.graph_db.graph_schema.attribute_graph_db import AttributeGraphDb
-from iacparsers.utils.graph_db.graph_schema.binop_graph_db import BinOpGraphDb
-from iacparsers.utils.graph_db.graph_schema.bool_op_graph_db import BoolOpGraphDb
-from iacparsers.utils.graph_db.graph_schema.call_graph_db import CallGraphDb
-from iacparsers.utils.graph_db.graph_schema.class_def_graph_db import ClassDefGraphDb
-from iacparsers.utils.graph_db.graph_schema.compare_graph_db import CompareGraphDb
-from iacparsers.utils.graph_db.graph_schema.constant_graph_db import ConstantGraphDb
-from iacparsers.utils.graph_db.graph_schema.except_handler_graph_db import (
+from pinkhat.iacparsers.utils.graph_db.graph_schema.arg_graph_db import ArgGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.assign_graph_db import AssignGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.attribute_graph_db import AttributeGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.binop_graph_db import BinOpGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.bool_op_graph_db import BoolOpGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.call_graph_db import CallGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.class_def_graph_db import ClassDefGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.compare_graph_db import CompareGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import ConstantGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.except_handler_graph_db import (
     ExceptHandlerGraphDb,
 )
-from iacparsers.utils.graph_db.graph_schema.expr_graph_db import ExprGraphDb
-from iacparsers.utils.graph_db.graph_schema.for_graph_db import ForGraphDb
-from iacparsers.utils.graph_db.graph_schema.formatted_value_graph_db import (
+from pinkhat.iacparsers.utils.graph_db.graph_schema.expr_graph_db import ExprGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.for_graph_db import ForGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.formatted_value_graph_db import (
     FormattedValueGraphDb,
 )
-from iacparsers.utils.graph_db.graph_schema.function_def_graph_db import (
+from pinkhat.iacparsers.utils.graph_db.graph_schema.function_def_graph_db import (
     FunctionDefGraphDb,
 )
-from iacparsers.utils.graph_db.graph_schema.global_graph_db import GlobalGraphDb
-from iacparsers.utils.graph_db.graph_schema.if_graph_db import IfGraphDb
-from iacparsers.utils.graph_db.graph_schema.is_graph_db import IsGraphDb
-from iacparsers.utils.graph_db.graph_schema.joinedstr_graph_db import JoinedStrGraphDb
-from iacparsers.utils.graph_db.graph_schema.keyword_graph_db import KeywordGraphDb
-from iacparsers.utils.graph_db.graph_schema.list_graph_db import ListGraphDb
-from iacparsers.utils.graph_db.graph_schema.module_graph_db import ModuleGraphDb
-from iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
-from iacparsers.utils.graph_db.graph_schema.raise_graph_db import RaiseGraphDb
-from iacparsers.utils.graph_db.graph_schema.return_graph_db import ReturnGraphDb
-from iacparsers.utils.graph_db.graph_schema.starred_graph_db import StarredGraphDb
-from iacparsers.utils.graph_db.graph_schema.try_graph_db import TryGraphDb
-from iacparsers.utils.graph_db.graph_schema.tuple_graph_db import TupleGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.global_graph_db import GlobalGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.if_graph_db import IfGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.is_graph_db import IsGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.joinedstr_graph_db import JoinedStrGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.keyword_graph_db import KeywordGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.list_graph_db import ListGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.module_graph_db import ModuleGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.raise_graph_db import RaiseGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.return_graph_db import ReturnGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.starred_graph_db import StarredGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.try_graph_db import TryGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.tuple_graph_db import TupleGraphDb
 
 
 class GraphDb:
@@ -177,3 +177,7 @@ class GraphDb:
         resp = self._conn.execute(query=query, parameters=params)
         if resp:
             return resp.get_as_df()
+
+    def close(self):
+        if self._conn:
+            self._conn.close()

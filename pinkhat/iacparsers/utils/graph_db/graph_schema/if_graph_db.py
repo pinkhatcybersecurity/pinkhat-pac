@@ -2,12 +2,12 @@ import ast
 
 from kuzu import Connection
 
-from iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from iacparsers.utils.graph_db.graph_schema.bool_op_graph_db import BoolOpGraphDb
-from iacparsers.utils.graph_db.graph_schema.compare_graph_db import CompareGraphDb
-from iacparsers.utils.graph_db.graph_schema.expr_graph_db import ExprGraphDb
-from iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
-from iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
+from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.bool_op_graph_db import BoolOpGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.compare_graph_db import CompareGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.expr_graph_db import ExprGraphDb
+from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
+from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
 class IfGraphDb(BaseGraphDb):

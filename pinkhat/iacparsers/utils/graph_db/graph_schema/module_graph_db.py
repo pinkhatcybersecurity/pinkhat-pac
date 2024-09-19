@@ -2,18 +2,18 @@ import ast
 
 from kuzu import Connection
 
-from iacparsers.utils.graph_db.graph_schema.assign_graph_db import AssignGraphDb
-from iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from iacparsers.utils.graph_db.graph_schema.class_def_graph_db import ClassDefGraphDb
-from iacparsers.utils.graph_db.graph_schema.expr_graph_db import ExprGraphDb
-from iacparsers.utils.graph_db.graph_schema.for_graph_db import ForGraphDb
-from iacparsers.utils.graph_db.graph_schema.function_def_graph_db import (
+from pinkhat.iacparsers.utils.graph_db.graph_schema.assign_graph_db import AssignGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.class_def_graph_db import ClassDefGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.expr_graph_db import ExprGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.for_graph_db import ForGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.function_def_graph_db import (
     FunctionDefGraphDb,
 )
-from iacparsers.utils.graph_db.graph_schema.if_graph_db import IfGraphDb
-from iacparsers.utils.graph_db.graph_schema.try_graph_db import TryGraphDb
-from iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
-from iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
+from pinkhat.iacparsers.utils.graph_db.graph_schema.if_graph_db import IfGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.try_graph_db import TryGraphDb
+from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
+from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
 class ModuleGraphDb(BaseGraphDb):

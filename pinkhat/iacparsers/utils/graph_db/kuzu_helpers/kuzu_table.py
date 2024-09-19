@@ -3,7 +3,7 @@ import re
 from kuzu import Connection
 from loguru import logger
 
-from iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
+from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 
 
 class Table:

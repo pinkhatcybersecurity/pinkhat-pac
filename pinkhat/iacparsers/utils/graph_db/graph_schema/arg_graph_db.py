@@ -2,9 +2,9 @@ import ast
 
 from kuzu import Connection
 
-from iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
-from iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
+from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
+from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
+from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
 class ArgGraphDb(BaseGraphDb):
@@ -43,7 +43,7 @@ class ArgGraphDb(BaseGraphDb):
     def add(self, value: ast.arg, file_path: str):
         self._arg_table.add(
             params={
-                "annotation": value.annotation,
+                # "annotation": value.annotation,
                 "arg": value.arg,
                 "col_offset": value.col_offset,
                 "end_col_offset": value.end_col_offset,
