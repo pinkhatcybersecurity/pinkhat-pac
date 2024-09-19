@@ -2,8 +2,8 @@ import os
 
 import pandas
 
-from iacparsers.utils.graph_db.graph_db import GraphDb
-from iacparsers.utils.peg.grammar import Grammar
+from pinkhat.iacparsers.utils.graph_db.graph_db import GraphDb
+from pinkhat.iacparsers.utils.peg.grammar import Grammar
 
 graph_db: GraphDb
 names = [
