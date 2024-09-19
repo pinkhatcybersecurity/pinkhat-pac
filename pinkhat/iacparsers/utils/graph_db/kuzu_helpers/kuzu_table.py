@@ -7,6 +7,8 @@ from iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 
 
 class Table:
+    _PREFIXES = ["lineno", "col_offset", "end_lineno", "end_col_offset"]
+
     def __init__(self, name: str, conn: Connection, *args):
         self._name = name
         self._conn = conn
@@ -42,7 +44,8 @@ class Table:
         if not re.search(r"^[A-Za-z0-9_]*$", to_table):
             self._raise_error(error=f"The table name is not alpha {to_table}")
         self._conn.execute(
-            f"CREATE REL TABLE {prefix}_{to_table}_{self._name}_Rel(FROM {self._name} TO {to_table} {',' + extra_fields if extra_fields else ''})"
+            f"CREATE REL TABLE {prefix}_{to_table}_{self._name}_Rel(FROM {self._name} TO {to_table}"
+            f" {',' + extra_fields if extra_fields else ''}, ONE_ONE)"
         )
 
     def add(self, params: dict):
@@ -61,17 +64,27 @@ class Table:
     ):
         condition = "u1.file_path = $file_path AND u2.file_path = $file_path"
         params = {"file_path": file_path}
+        """
+        There are a few corner cases for example:
+        a = 1
+        a = a + 1
+        So, if there are only two factors like line of code and file path in the where parameter
+        then two elements will be returned for line number 2. That's the reason why more factors
+        must be used in the SQL query, if the graph is generated.
+        """
         if hasattr(parent_value, "lineno"):
-            params["u1_lineno"] = parent_value.lineno
-            condition = f"{condition} AND u1.lineno = $u1_lineno"
+            for prf in self._PREFIXES:
+                params[f"u1_{prf}"] = getattr(parent_value, prf)
+                condition = f"{condition} AND u1.{prf} = $u1_{prf}"
         if hasattr(child_value, "lineno"):
-            params["u2_lineno"] = child_value.lineno
-            condition = f"{condition} AND u2.lineno = $u2_lineno"
+            for prf in self._PREFIXES:
+                params[f"u2_{prf}"] = getattr(child_value, prf)
+                condition = f"{condition} AND u2.{prf} = $u2_{prf}"
         self._conn.execute(
             query=f"""
                 MATCH (u1:{self._name}), (u2:{to_table}) WHERE 
                 {condition}
-                CREATE (u1)-[:{prefix}_{to_table}_{self._name}_Rel]->(u2)
+                CREATE (u1)-[:{prefix}_{to_table}_{self._name}_Rel {{file_path:'{file_path}'}}]->(u2)
                 """,
             parameters=params,
         )

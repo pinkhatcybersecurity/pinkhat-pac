@@ -29,6 +29,11 @@ class ClassDefGraphDb(BaseGraphDb):
             "prefix": "Base",
             "extra_fields": "lineno INT, file_path STRING",
         },
+        {
+            "to_table": TABLE_NAME,
+            "prefix": "Body",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
     ]
 
     def __init__(self, conn: Connection):

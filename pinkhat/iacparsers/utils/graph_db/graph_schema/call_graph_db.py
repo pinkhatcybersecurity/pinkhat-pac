@@ -67,7 +67,7 @@ class CallGraphDb(BaseGraphDb):
 
     def __init__(self, conn: Connection):
         super().__init__(conn=conn)
-        self._call_table = Table(
+        self._table = Table(
             self.TABLE_NAME,
             self._conn,
             Column(name="p_id", column_type="SERIAL", primary_key=True),
@@ -81,18 +81,18 @@ class CallGraphDb(BaseGraphDb):
     def initialize(self, stmt: dict, expr: dict):
         self._stmt = stmt
         self._expr = expr
-        self._call_table.create()
+        self._table.create()
 
     def create_rel(self):
         for rel in self._rels:
-            self._call_table.create_relationship(
+            self._table.create_relationship(
                 to_table=rel.get("to_table"),
                 prefix=rel.get("prefix"),
                 extra_fields=rel.get("extra_fields"),
             )
 
     def add(self, value: ast.Call, file_path: str):
-        self._call_table.add(
+        self._table.add(
             params={
                 "col_offset": value.col_offset,
                 "end_col_offset": value.end_col_offset,
@@ -106,12 +106,12 @@ class CallGraphDb(BaseGraphDb):
             stmt.add(value=value.func, file_path=file_path)
             self._conn.execute(
                 query=f"""
-                    MATCH (u1:{self._call_table.name}), (u2:{type(value.func).__name__}) WHERE 
+                    MATCH (u1:{self._table.name}), (u2:{type(value.func).__name__}) WHERE 
                     u1.lineno = $u1_lineno AND
                     u1.file_path = $file_path AND
                     u2.lineno = $u2_lineno AND
                     u2.file_path = $file_path
-                    CREATE (u1)-[:Func_{type(value.func).__name__}_{self._call_table.name}_Rel]->(u2)
+                    CREATE (u1)-[:Func_{type(value.func).__name__}_{self._table.name}_Rel]->(u2)
                     """,
                 parameters={
                     "u1_lineno": value.lineno,
@@ -126,7 +126,7 @@ class CallGraphDb(BaseGraphDb):
         for keyword in value.keywords:
             stmt = self._get_stmt(value=keyword)
             if stmt:
-                self._call_table.add_relation(
+                self._table.add_relation(
                     to_table=stmt.TABLE_NAME,
                     parent_value=value,
                     child_value=keyword,
@@ -139,7 +139,7 @@ class CallGraphDb(BaseGraphDb):
             stmt = self._get_stmt(value=arg)
             if stmt:
                 stmt.add(value=arg, file_path=file_path)
-                self._call_table.add_relation(
+                self._table.add_relation(
                     to_table=stmt.TABLE_NAME,
                     parent_value=value,
                     child_value=arg,

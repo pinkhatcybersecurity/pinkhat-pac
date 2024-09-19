@@ -2,10 +2,12 @@ import ast
 
 from kuzu import Connection
 
+from iacparsers.utils.graph_db.graph_schema import NameGraphDb
 from iacparsers.utils.graph_db.graph_schema.arg_graph_db import ArgGraphDb
 from iacparsers.utils.graph_db.graph_schema.assign_graph_db import AssignGraphDb
 from iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from iacparsers.utils.graph_db.graph_schema.call_graph_db import CallGraphDb
+from iacparsers.utils.graph_db.graph_schema.constant_graph_db import ConstantGraphDb
 from iacparsers.utils.graph_db.graph_schema.expr_graph_db import ExprGraphDb
 from iacparsers.utils.graph_db.graph_schema.global_graph_db import GlobalGraphDb
 from iacparsers.utils.graph_db.graph_schema.return_graph_db import ReturnGraphDb
@@ -83,6 +85,21 @@ class FunctionDefGraphDb(BaseGraphDb):
         },
         {
             "to_table": GlobalGraphDb.TABLE_NAME,
+            "prefix": "Body",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": ConstantGraphDb.TABLE_NAME,
+            "prefix": "Default",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": NameGraphDb.TABLE_NAME,
+            "prefix": "Decorator",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": "ClassDef",
             "prefix": "Body",
             "extra_fields": "lineno INT, file_path STRING",
         },

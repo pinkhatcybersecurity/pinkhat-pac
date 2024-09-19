@@ -2,6 +2,7 @@ import ast
 
 from kuzu import Connection
 
+from iacparsers.utils.graph_db.graph_schema.attribute_graph_db import AttributeGraphDb
 from iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
 from iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
@@ -15,7 +16,12 @@ class FormattedValueGraphDb(BaseGraphDb):
             "to_table": NameGraphDb.TABLE_NAME,
             "prefix": "Value",
             "extra_fields": "lineno INT, file_path STRING",
-        }
+        },
+        {
+            "to_table": AttributeGraphDb.TABLE_NAME,
+            "prefix": "Value",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
     ]
 
     def __init__(self, conn: Connection):
