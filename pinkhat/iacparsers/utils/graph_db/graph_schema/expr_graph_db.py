@@ -2,10 +2,11 @@ import ast
 
 from kuzu import Connection
 
-from iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from iacparsers.utils.graph_db.graph_schema.call_graph_db import CallGraphDb
-from iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
-from iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
+from pinkhat.iacparsers.utils.graph_db.graph_schema import AttributeGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.call_graph_db import CallGraphDb
+from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
+from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
 class ExprGraphDb(BaseGraphDb):
@@ -15,7 +16,12 @@ class ExprGraphDb(BaseGraphDb):
             "to_table": CallGraphDb.TABLE_NAME,
             "prefix": "Value",
             "extra_fields": "lineno INT, file_path STRING",
-        }
+        },
+        {
+            "to_table": AttributeGraphDb.TABLE_NAME,
+            "prefix": "Value",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
     ]
 
     def __init__(self, conn: Connection):

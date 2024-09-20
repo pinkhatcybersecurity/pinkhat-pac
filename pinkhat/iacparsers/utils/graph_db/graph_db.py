@@ -3,37 +3,43 @@ import shutil
 from pathlib import Path
 
 import kuzu
+import pandas
 from kuzu import Connection
 from loguru import logger
 
-from iacparsers.utils.graph_db.graph_schema.arg_graph_db import ArgGraphDb
-from iacparsers.utils.graph_db.graph_schema.assign_graph_db import AssignGraphDb
-from iacparsers.utils.graph_db.graph_schema.attribute_graph_db import AttributeGraphDb
-from iacparsers.utils.graph_db.graph_schema.binop_graph_db import BinOpGraphDb
-from iacparsers.utils.graph_db.graph_schema.call_graph_db import CallGraphDb
-from iacparsers.utils.graph_db.graph_schema.class_def_graph_db import ClassDefGraphDb
-from iacparsers.utils.graph_db.graph_schema.constant_graph_db import ConstantGraphDb
-from iacparsers.utils.graph_db.graph_schema.except_handler_graph_db import (
+from pinkhat.iacparsers.utils.graph_db.graph_schema.arg_graph_db import ArgGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.assign_graph_db import AssignGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.attribute_graph_db import AttributeGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.binop_graph_db import BinOpGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.bool_op_graph_db import BoolOpGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.call_graph_db import CallGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.class_def_graph_db import ClassDefGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.compare_graph_db import CompareGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import ConstantGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.except_handler_graph_db import (
     ExceptHandlerGraphDb,
 )
-from iacparsers.utils.graph_db.graph_schema.expr_graph_db import ExprGraphDb
-from iacparsers.utils.graph_db.graph_schema.for_graph_db import ForGraphDb
-from iacparsers.utils.graph_db.graph_schema.formatted_value_graph_db import (
+from pinkhat.iacparsers.utils.graph_db.graph_schema.expr_graph_db import ExprGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.for_graph_db import ForGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.formatted_value_graph_db import (
     FormattedValueGraphDb,
 )
-from iacparsers.utils.graph_db.graph_schema.function_def_graph_db import (
+from pinkhat.iacparsers.utils.graph_db.graph_schema.function_def_graph_db import (
     FunctionDefGraphDb,
 )
-from iacparsers.utils.graph_db.graph_schema.global_graph_db import GlobalGraphDb
-from iacparsers.utils.graph_db.graph_schema.joinedstr_graph_db import JoinedStrGraphDb
-from iacparsers.utils.graph_db.graph_schema.keyword_graph_db import KeywordGraphDb
-from iacparsers.utils.graph_db.graph_schema.module_graph_db import ModuleGraphDb
-from iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
-from iacparsers.utils.graph_db.graph_schema.raise_graph_db import RaiseGraphDb
-from iacparsers.utils.graph_db.graph_schema.return_graph_db import ReturnGraphDb
-from iacparsers.utils.graph_db.graph_schema.starred_graph_db import StarredGraphDb
-from iacparsers.utils.graph_db.graph_schema.try_graph_db import TryGraphDb
-from iacparsers.utils.graph_db.graph_schema.tuple_graph_db import TupleGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.global_graph_db import GlobalGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.if_graph_db import IfGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.is_graph_db import IsGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.joinedstr_graph_db import JoinedStrGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.keyword_graph_db import KeywordGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.list_graph_db import ListGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.module_graph_db import ModuleGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.raise_graph_db import RaiseGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.return_graph_db import ReturnGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.starred_graph_db import StarredGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.try_graph_db import TryGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.tuple_graph_db import TupleGraphDb
 
 
 class GraphDb:
@@ -53,7 +59,7 @@ class GraphDb:
 
     def _initialize_expressions(self):
         self._expressions = {
-            ast.BoolOp: None,
+            ast.BoolOp: BoolOpGraphDb(conn=self._conn),
             ast.NamedExpr: None,
             ast.BinOp: BinOpGraphDb(conn=self._conn),
             ast.UnaryOp: None,
@@ -68,7 +74,7 @@ class GraphDb:
             ast.Await: None,
             ast.Yield: None,
             ast.YieldFrom: None,
-            ast.Compare: None,
+            ast.Compare: CompareGraphDb(conn=self._conn),
             ast.Call: CallGraphDb(conn=self._conn),
             ast.FormattedValue: FormattedValueGraphDb(conn=self._conn),
             ast.JoinedStr: JoinedStrGraphDb(conn=self._conn),
@@ -77,7 +83,7 @@ class GraphDb:
             ast.Subscript: None,
             ast.Starred: StarredGraphDb(conn=self._conn),
             ast.Name: NameGraphDb(conn=self._conn),
-            ast.List: None,
+            ast.List: ListGraphDb(conn=self._conn),
             ast.Tuple: TupleGraphDb(conn=self._conn),
             ast.Slice: None,
             ast.Module: ModuleGraphDb(conn=self._conn),
@@ -97,7 +103,7 @@ class GraphDb:
             ast.For: ForGraphDb(conn=self._conn),
             ast.AsyncFor: None,
             ast.While: None,
-            ast.If: None,
+            ast.If: IfGraphDb(conn=self._conn),
             ast.With: None,
             ast.AsyncWith: None,
             ast.Match: None,
@@ -116,6 +122,7 @@ class GraphDb:
             ast.arg: ArgGraphDb(conn=self._conn),
             ast.keyword: KeywordGraphDb(conn=self._conn),
             ast.ExceptHandler: ExceptHandlerGraphDb(conn=self._conn),
+            ast.Is: IsGraphDb(conn=self._conn),
         }
 
     def initialize(self):
@@ -133,36 +140,44 @@ class GraphDb:
                 expr.create_rel()
 
     def add_entries(self, tree: list, file_path: str):
+        """
+        The function is divided in two stages. In the first stage it adds all elements to the graph database
+        During second phase the algorithm can do relationships between elements. There are many different
+        combinations in classes and other functions i.e.
+
+        ```{code-block} python
+            class big():
+                    def __init__(self):
+                            print(f"big class {self._value}")
+
+                    _value = "happy string"
+
+            big()
+        ```
+        Args:
+            tree: A dict that contains AST
+            file_path: Parsed file
+
+        Returns:
+
+        """
         for value in tree:
             stmt = self._stmt.get(type(value), self._expressions.get(type(value)))
             if stmt:
                 stmt.add(value=value, file_path=file_path)
             else:
                 logger.error(f"Unknown type {type(value)}")
-        res = self._conn.execute(
-            "MATCH (u:Module)-[u1:Body_Assign_Module_Rel]->(u2:Assign)-[u3:Target_Name_Assign_Rel]->(u4:Name) RETURN *"
-        )
-        results = []
-        while res.has_next():
-            results.append(res.get_next())
-        print(results)
-        # if ast.ImportFrom == type(body):
-        #    body: ast.ImportFrom
-        #    self._conn.execute(
-        #        f"""
-        #        CREATE (u:ImportFrom {{
-        #        file_path: '{file_path}',
-        #        col_offset: {body.col_offset},
-        #        end_col_offset: {body.end_col_offset},
-        #        end_lineno: {body.end_lineno},
-        #        level: {body.level},
-        #        lineno: {body.lineno},
-        #        module: '{body.module}'
-        #        }});
-        #        """
-        #    )
 
     def execute(self, query: str):
         response = self._conn.execute(query=query)
         while response.has_next():
             yield response.get_next()
+
+    def get_as_df(self, query: str, params: dict = None) -> pandas.DataFrame:
+        resp = self._conn.execute(query=query, parameters=params)
+        if resp:
+            return resp.get_as_df()
+
+    def close(self):
+        if self._conn:
+            self._conn.close()

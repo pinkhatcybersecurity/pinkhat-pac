@@ -2,10 +2,10 @@ import ast
 
 from kuzu import Connection
 
-from iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
-from iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
-from iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
+from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
+from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
+from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
 class KeywordGraphDb(BaseGraphDb):

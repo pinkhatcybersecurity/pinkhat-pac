@@ -178,7 +178,7 @@ class Parser(Parser):
     def get_expr_name(self, node) -> str:
         """Get a descriptive name for an expression."""
         # See https://github.com/python/cpython/blob/master/Parser/pegen.c#L161
-        assert node is not None
+        assert node is not None # nosec
         node_t = type(node)
         if node_t is ast.Constant:
             v = node.value
