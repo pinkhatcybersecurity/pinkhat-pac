@@ -2,9 +2,19 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema.assign_graph_db import AssignGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.raise_graph_db import RaiseGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.return_graph_db import ReturnGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.named_expr_graph_db import (
+    NamedExprGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.bool_op_graph_db import BoolOpGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.compare_graph_db import CompareGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.bool_op_graph_db import (
+    BoolOpGraphDb,
+)
+from pinkhat.iacparsers.utils.graph_db.graph_schema.compare_graph_db import (
+    CompareGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.expr_graph_db import ExprGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
@@ -36,6 +46,26 @@ class IfGraphDb(BaseGraphDb):
         {
             "to_table": BoolOpGraphDb.TABLE_NAME,
             "prefix": "If",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": NamedExprGraphDb.TABLE_NAME,
+            "prefix": "If",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": ReturnGraphDb.TABLE_NAME,
+            "prefix": "Body",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": AssignGraphDb.TABLE_NAME,
+            "prefix": "Body",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": RaiseGraphDb.TABLE_NAME,
+            "prefix": "OrElse",
             "extra_fields": "lineno INT, file_path STRING",
         },
     ]

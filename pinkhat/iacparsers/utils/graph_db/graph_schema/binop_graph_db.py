@@ -2,9 +2,13 @@ import ast
 
 from kuzu import Connection
 
-from pinkhat.iacparsers.utils.graph_db.graph_schema.attribute_graph_db import AttributeGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.attribute_graph_db import (
+    AttributeGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import ConstantGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import (
+    ConstantGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table

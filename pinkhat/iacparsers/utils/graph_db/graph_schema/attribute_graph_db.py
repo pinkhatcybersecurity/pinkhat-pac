@@ -21,6 +21,11 @@ class AttributeGraphDb(BaseGraphDb):
             "prefix": "Value",
             "extra_fields": "lineno INT, file_path STRING",
         },
+        {
+            "to_table": TABLE_NAME,
+            "prefix": "Value",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
     ]
 
     def __init__(self, conn: Connection):

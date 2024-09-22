@@ -2,9 +2,12 @@ import ast
 
 from kuzu import Connection
 
+from iacparsers.utils.graph_db.graph_schema.while_graph_db import WhileGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.assign_graph_db import AssignGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.class_def_graph_db import ClassDefGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.class_def_graph_db import (
+    ClassDefGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.expr_graph_db import ExprGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.for_graph_db import ForGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.function_def_graph_db import (
@@ -51,6 +54,11 @@ class ModuleGraphDb(BaseGraphDb):
         },
         {
             "to_table": IfGraphDb.TABLE_NAME,
+            "prefix": "Body",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": WhileGraphDb.TABLE_NAME,
             "prefix": "Body",
             "extra_fields": "lineno INT, file_path STRING",
         },
