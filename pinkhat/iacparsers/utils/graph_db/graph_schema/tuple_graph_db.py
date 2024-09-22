@@ -62,7 +62,7 @@ class TupleGraphDb(BaseGraphDb):
 
     def __init__(self, conn: Connection):
         super().__init__(conn=conn)
-        self._tuple_table = Table(
+        self._table = Table(
             self.TABLE_NAME,
             self._conn,
             Column(name="p_id", column_type="SERIAL", primary_key=True),
@@ -76,18 +76,18 @@ class TupleGraphDb(BaseGraphDb):
     def initialize(self, stmt: dict, expr: dict):
         self._stmt = stmt
         self._expr = expr
-        self._tuple_table.create()
+        self._table.create()
 
     def create_rel(self):
         for rel in self._rels:
-            self._tuple_table.create_relationship(
+            self._table.create_relationship(
                 to_table=rel.get("to_table"),
                 prefix=rel.get("prefix"),
                 extra_fields=rel.get("extra_fields"),
             )
 
     def add(self, value: ast.Tuple, file_path: str):
-        self._tuple_table.add(
+        self._table.add(
             params={
                 "col_offset": value.col_offset,
                 "end_col_offset": value.end_col_offset,
@@ -97,24 +97,11 @@ class TupleGraphDb(BaseGraphDb):
             },
         )
         for dim in value.dims:
-            expr = self._get_stmt(value=dim)
-            if expr:
-                expr.add(value=dim, file_path=file_path)
-                self._tuple_table.add_relation(
-                    to_table=expr.TABLE_NAME,
-                    parent_value=value,
-                    child_value=dim,
-                    file_path=file_path,
-                    prefix="Dim",
-                )
+            self._add_relationship(
+                parent_value=value, child_value=dim, file_path=file_path, prefix="Dim"
+            )
+
         for elt in value.elts:
-            expr = self._get_stmt(value=elt)
-            if expr:
-                expr.add(value=elt, file_path=file_path)
-                self._tuple_table.add_relation(
-                    to_table=expr.TABLE_NAME,
-                    parent_value=value,
-                    child_value=elt,
-                    file_path=file_path,
-                    prefix="Elt",
-                )
+            self._add_relationship(
+                parent_value=value, child_value=elt, file_path=file_path, prefix="Elt"
+            )

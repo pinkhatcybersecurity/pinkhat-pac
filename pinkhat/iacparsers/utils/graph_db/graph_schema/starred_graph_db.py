@@ -54,13 +54,9 @@ class StarredGraphDb(BaseGraphDb):
                 "file_path": file_path,
             }
         )
-        stmt = self._get_stmt(value=value.value)
-        if stmt:
-            stmt.add(value=value.value, file_path=file_path)
-            self._table.add_relation(
-                to_table=stmt.TABLE_NAME,
-                parent_value=value,
-                child_value=value.value,
-                file_path=file_path,
-                prefix="Value",
-            )
+        self._add_relationship(
+            parent_value=value,
+            child_value=value.value,
+            file_path=file_path,
+            prefix="Value",
+        )

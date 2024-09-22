@@ -2,6 +2,7 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema import NameGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.assign_graph_db import AssignGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.raise_graph_db import RaiseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.return_graph_db import ReturnGraphDb
@@ -66,6 +67,16 @@ class IfGraphDb(BaseGraphDb):
         {
             "to_table": RaiseGraphDb.TABLE_NAME,
             "prefix": "OrElse",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": NameGraphDb.TABLE_NAME,
+            "prefix": "If",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": TABLE_NAME,
+            "prefix": "Body",
             "extra_fields": "lineno INT, file_path STRING",
         },
     ]
