@@ -7,6 +7,7 @@ class BaseGraphDb:
         self._conn: Connection = conn
         self._stmt = None
         self._expr = None
+        self._table = None
 
     def _get_stmt(self, value):
         if not value:
@@ -15,3 +16,15 @@ class BaseGraphDb:
         if stmt:
             return stmt
         logger.error(f"Unknown type {type(value)}")
+
+    def _add_relationship(self, parent_value, child_value, file_path: str, prefix: str):
+        stmt = self._get_stmt(value=child_value)
+        if stmt:
+            stmt.add(child_value, file_path=file_path)
+            self._table.add_relation(
+                to_table=stmt.TABLE_NAME,
+                parent_value=parent_value,
+                child_value=child_value,
+                file_path=file_path,
+                prefix=prefix,
+            )

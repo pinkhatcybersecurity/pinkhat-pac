@@ -2,10 +2,8 @@ import os
 
 import pandas
 
-from pinkhat.iacparsers.utils.graph_db.graph_db import GraphDb
-from pinkhat.iacparsers.utils.peg.grammar import Grammar
+from tests.graph_ast_python.create_graph_db import create_graph_db
 
-graph_db: GraphDb
 names = [
     {
         "_label": "Name",
@@ -40,21 +38,13 @@ names = [
 ]
 
 
-def test_run_parser():
-    global graph_db
+@create_graph_db
+def test_names(graph_db, grammar):
     file_path = os.path.join(
         "tests", "graph_ast_python", "test_files", "simple_assign.py"
     )
-    grammar: Grammar = Grammar()
-    graph_db = GraphDb()
-    grammar.generate_parser()
-    graph_db.initialize()
     tree = grammar.simple_parser_main(file_path=file_path)
     graph_db.add_entries(tree=tree, file_path=file_path)
-
-
-def test_names():
-    global graph_db
     df: pandas.DataFrame = graph_db.get_as_df(
         query="MATCH (u:Name) RETURN * ORDER BY u.p_id"
     )

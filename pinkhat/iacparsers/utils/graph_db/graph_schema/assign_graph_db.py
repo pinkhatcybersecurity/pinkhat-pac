@@ -2,11 +2,18 @@ import ast
 
 from kuzu import Connection
 
-from pinkhat.iacparsers.utils.graph_db.graph_schema.attribute_graph_db import AttributeGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.attribute_graph_db import (
+    AttributeGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.binop_graph_db import BinOpGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.call_graph_db import CallGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import ConstantGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import (
+    ConstantGraphDb,
+)
+from pinkhat.iacparsers.utils.graph_db.graph_schema.list_comp_graph_db import (
+    ListCompGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.tuple_graph_db import TupleGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
@@ -59,6 +66,11 @@ class AssignGraphDb(BaseGraphDb):
         {
             "to_table": AttributeGraphDb.TABLE_NAME,
             "prefix": "Target",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": ListCompGraphDb.TABLE_NAME,
+            "prefix": "Value",
             "extra_fields": "lineno INT, file_path STRING",
         },
     ]

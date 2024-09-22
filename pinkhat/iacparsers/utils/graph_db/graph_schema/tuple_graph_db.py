@@ -1,12 +1,16 @@
 import ast
 
-import loguru
 from kuzu import Connection
 
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.call_graph_db import CallGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import ConstantGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import (
+    ConstantGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.named_expr_graph_db import (
+    NamedExprGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
@@ -42,6 +46,16 @@ class TupleGraphDb(BaseGraphDb):
         {
             "to_table": ConstantGraphDb.TABLE_NAME,
             "prefix": "Dim",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": NamedExprGraphDb.TABLE_NAME,
+            "prefix": "Dim",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": NamedExprGraphDb.TABLE_NAME,
+            "prefix": "Elt",
             "extra_fields": "lineno INT, file_path STRING",
         },
     ]

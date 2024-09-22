@@ -2,8 +2,14 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema import AttributeGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.named_expr_graph_db import (
+    NamedExprGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.compare_graph_db import CompareGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.compare_graph_db import (
+    CompareGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
@@ -18,6 +24,16 @@ class BoolOpGraphDb(BaseGraphDb):
         },
         {
             "to_table": TABLE_NAME,
+            "prefix": "Value",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": AttributeGraphDb.TABLE_NAME,
+            "prefix": "Value",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": NamedExprGraphDb.TABLE_NAME,
             "prefix": "Value",
             "extra_fields": "lineno INT, file_path STRING",
         },

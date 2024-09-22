@@ -2,26 +2,26 @@ import ast
 
 from kuzu import Connection
 
-from pinkhat.iacparsers.utils.graph_db.graph_schema.attribute_graph_db import (
-    AttributeGraphDb,
+from pinkhat.iacparsers.utils.graph_db.graph_schema import BaseGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.comprehension_graph_db import (
+    ComprehensionGraphDb,
 )
-from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.list_graph_db import ListGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
-class FormattedValueGraphDb(BaseGraphDb):
-    TABLE_NAME: str = "FormattedValue"
+class ListCompGraphDb(BaseGraphDb):
+    TABLE_NAME = "ListComp"
     _rels = [
         {
-            "to_table": NameGraphDb.TABLE_NAME,
-            "prefix": "Value",
+            "to_table": ListGraphDb.TABLE_NAME,
+            "prefix": "Elt",
             "extra_fields": "lineno INT, file_path STRING",
         },
         {
-            "to_table": AttributeGraphDb.TABLE_NAME,
-            "prefix": "Value",
+            "to_table": ComprehensionGraphDb.TABLE_NAME,
+            "prefix": "Generator",
             "extra_fields": "lineno INT, file_path STRING",
         },
     ]
@@ -33,10 +33,8 @@ class FormattedValueGraphDb(BaseGraphDb):
             self._conn,
             Column(name="p_id", column_type="SERIAL", primary_key=True),
             Column(name="col_offset", column_type="INT64"),
-            Column(name="conversion", column_type="INT64"),
             Column(name="end_col_offset", column_type="INT64"),
             Column(name="end_lineno", column_type="INT64"),
-            Column(name="format_spec", column_type="STRING"),
             Column(name="lineno", column_type="INT"),
             Column(name="file_path", column_type="STRING"),
         )
@@ -54,7 +52,7 @@ class FormattedValueGraphDb(BaseGraphDb):
                 extra_fields=rel.get("extra_fields"),
             )
 
-    def add(self, value: ast.FormattedValue, file_path: str):
+    def add(self, value: ast.ListComp, file_path: str):
         self._table.add(
             params={
                 "col_offset": value.col_offset,
@@ -64,13 +62,13 @@ class FormattedValueGraphDb(BaseGraphDb):
                 "file_path": file_path,
             }
         )
-        stmt = self._get_stmt(value=value.value)
-        if stmt:
-            stmt.add(value=value.value, file_path=file_path)
-            self._table.add_relation(
-                to_table=stmt.TABLE_NAME,
+        self._add_relationship(
+            parent_value=value, child_value=value.elt, file_path=file_path, prefix="Elt"
+        )
+        for generator in value.generators:
+            self._add_relationship(
                 parent_value=value,
-                child_value=value.value,
+                child_value=generator,
                 file_path=file_path,
-                prefix="Value",
+                prefix="Generator",
             )

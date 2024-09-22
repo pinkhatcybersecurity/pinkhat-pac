@@ -7,9 +7,12 @@ from pinkhat.iacparsers.utils.graph_db.graph_schema.arg_graph_db import ArgGraph
 from pinkhat.iacparsers.utils.graph_db.graph_schema.assign_graph_db import AssignGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.call_graph_db import CallGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import ConstantGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import (
+    ConstantGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.expr_graph_db import ExprGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.global_graph_db import GlobalGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.if_graph_db import IfGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.return_graph_db import ReturnGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
@@ -100,6 +103,11 @@ class FunctionDefGraphDb(BaseGraphDb):
         },
         {
             "to_table": "ClassDef",
+            "prefix": "Body",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": IfGraphDb.TABLE_NAME,
             "prefix": "Body",
             "extra_fields": "lineno INT, file_path STRING",
         },

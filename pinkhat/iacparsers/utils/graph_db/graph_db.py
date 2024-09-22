@@ -9,13 +9,26 @@ from loguru import logger
 
 from pinkhat.iacparsers.utils.graph_db.graph_schema.arg_graph_db import ArgGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.assign_graph_db import AssignGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.attribute_graph_db import AttributeGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.attribute_graph_db import (
+    AttributeGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.binop_graph_db import BinOpGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.bool_op_graph_db import BoolOpGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.bool_op_graph_db import (
+    BoolOpGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.call_graph_db import CallGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.class_def_graph_db import ClassDefGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.compare_graph_db import CompareGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import ConstantGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.class_def_graph_db import (
+    ClassDefGraphDb,
+)
+from pinkhat.iacparsers.utils.graph_db.graph_schema.compare_graph_db import (
+    CompareGraphDb,
+)
+from pinkhat.iacparsers.utils.graph_db.graph_schema.comprehension_graph_db import (
+    ComprehensionGraphDb,
+)
+from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import (
+    ConstantGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.except_handler_graph_db import (
     ExceptHandlerGraphDb,
 )
@@ -30,16 +43,29 @@ from pinkhat.iacparsers.utils.graph_db.graph_schema.function_def_graph_db import
 from pinkhat.iacparsers.utils.graph_db.graph_schema.global_graph_db import GlobalGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.if_graph_db import IfGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.is_graph_db import IsGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.joinedstr_graph_db import JoinedStrGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.keyword_graph_db import KeywordGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.joinedstr_graph_db import (
+    JoinedStrGraphDb,
+)
+from pinkhat.iacparsers.utils.graph_db.graph_schema.keyword_graph_db import (
+    KeywordGraphDb,
+)
+from pinkhat.iacparsers.utils.graph_db.graph_schema.list_comp_graph_db import (
+    ListCompGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.list_graph_db import ListGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.module_graph_db import ModuleGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.named_expr_graph_db import (
+    NamedExprGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.raise_graph_db import RaiseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.return_graph_db import ReturnGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.starred_graph_db import StarredGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.starred_graph_db import (
+    StarredGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.try_graph_db import TryGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.tuple_graph_db import TupleGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.while_graph_db import WhileGraphDb
 
 
 class GraphDb:
@@ -60,14 +86,14 @@ class GraphDb:
     def _initialize_expressions(self):
         self._expressions = {
             ast.BoolOp: BoolOpGraphDb(conn=self._conn),
-            ast.NamedExpr: None,
+            ast.NamedExpr: NamedExprGraphDb(conn=self._conn),
             ast.BinOp: BinOpGraphDb(conn=self._conn),
             ast.UnaryOp: None,
             ast.Lambda: None,
             ast.IfExp: None,
             ast.Dict: None,
             ast.Set: None,
-            ast.ListComp: None,
+            ast.ListComp: ListCompGraphDb(conn=self._conn),
             ast.SetComp: None,
             ast.DictComp: None,
             ast.GeneratorExp: None,
@@ -102,7 +128,7 @@ class GraphDb:
             ast.AnnAssign: None,
             ast.For: ForGraphDb(conn=self._conn),
             ast.AsyncFor: None,
-            ast.While: None,
+            ast.While: WhileGraphDb(conn=self._conn),
             ast.If: IfGraphDb(conn=self._conn),
             ast.With: None,
             ast.AsyncWith: None,
@@ -123,6 +149,7 @@ class GraphDb:
             ast.keyword: KeywordGraphDb(conn=self._conn),
             ast.ExceptHandler: ExceptHandlerGraphDb(conn=self._conn),
             ast.Is: IsGraphDb(conn=self._conn),
+            ast.comprehension: ComprehensionGraphDb(conn=self._conn),
         }
 
     def initialize(self):

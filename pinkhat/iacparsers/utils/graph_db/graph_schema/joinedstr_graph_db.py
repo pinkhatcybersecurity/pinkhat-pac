@@ -3,7 +3,9 @@ import ast
 from kuzu import Connection
 
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import ConstantGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import (
+    ConstantGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.formatted_value_graph_db import (
     FormattedValueGraphDb,
 )

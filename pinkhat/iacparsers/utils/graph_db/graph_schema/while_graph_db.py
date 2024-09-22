@@ -2,26 +2,26 @@ import ast
 
 from kuzu import Connection
 
-from pinkhat.iacparsers.utils.graph_db.graph_schema.attribute_graph_db import (
-    AttributeGraphDb,
+from pinkhat.iacparsers.utils.graph_db.graph_schema import BaseGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.compare_graph_db import (
+    CompareGraphDb,
 )
-from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.expr_graph_db import ExprGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
-class FormattedValueGraphDb(BaseGraphDb):
-    TABLE_NAME: str = "FormattedValue"
+class WhileGraphDb(BaseGraphDb):
+    TABLE_NAME = "While"
     _rels = [
         {
-            "to_table": NameGraphDb.TABLE_NAME,
-            "prefix": "Value",
+            "to_table": ExprGraphDb.TABLE_NAME,
+            "prefix": "Body",
             "extra_fields": "lineno INT, file_path STRING",
         },
         {
-            "to_table": AttributeGraphDb.TABLE_NAME,
-            "prefix": "Value",
+            "to_table": CompareGraphDb.TABLE_NAME,
+            "prefix": "Test",
             "extra_fields": "lineno INT, file_path STRING",
         },
     ]
@@ -33,10 +33,8 @@ class FormattedValueGraphDb(BaseGraphDb):
             self._conn,
             Column(name="p_id", column_type="SERIAL", primary_key=True),
             Column(name="col_offset", column_type="INT64"),
-            Column(name="conversion", column_type="INT64"),
             Column(name="end_col_offset", column_type="INT64"),
             Column(name="end_lineno", column_type="INT64"),
-            Column(name="format_spec", column_type="STRING"),
             Column(name="lineno", column_type="INT"),
             Column(name="file_path", column_type="STRING"),
         )
@@ -54,7 +52,7 @@ class FormattedValueGraphDb(BaseGraphDb):
                 extra_fields=rel.get("extra_fields"),
             )
 
-    def add(self, value: ast.FormattedValue, file_path: str):
+    def add(self, value: ast.While, file_path: str):
         self._table.add(
             params={
                 "col_offset": value.col_offset,
@@ -62,15 +60,23 @@ class FormattedValueGraphDb(BaseGraphDb):
                 "end_lineno": value.end_lineno,
                 "lineno": value.lineno,
                 "file_path": file_path,
-            }
+            },
         )
-        stmt = self._get_stmt(value=value.value)
-        if stmt:
-            stmt.add(value=value.value, file_path=file_path)
-            self._table.add_relation(
-                to_table=stmt.TABLE_NAME,
+        self._add_relationship(
+            parent_value=value,
+            child_value=value.test,
+            file_path=file_path,
+            prefix="Test",
+        )
+        for body in value.body:
+            self._add_relationship(
+                parent_value=value, child_value=body, file_path=file_path, prefix="Body"
+            )
+
+        for or_else in value.orelse:
+            self._add_relationship(
                 parent_value=value,
-                child_value=value.value,
+                child_value=or_else,
                 file_path=file_path,
-                prefix="Value",
+                prefix="OrElse",
             )

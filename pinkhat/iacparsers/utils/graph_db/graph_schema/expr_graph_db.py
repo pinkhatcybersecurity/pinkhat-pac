@@ -2,6 +2,10 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema.tuple_graph_db import TupleGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.named_expr_graph_db import (
+    NamedExprGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema import AttributeGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.call_graph_db import CallGraphDb
@@ -19,6 +23,16 @@ class ExprGraphDb(BaseGraphDb):
         },
         {
             "to_table": AttributeGraphDb.TABLE_NAME,
+            "prefix": "Value",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": NamedExprGraphDb.TABLE_NAME,
+            "prefix": "Value",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": TupleGraphDb.TABLE_NAME,
             "prefix": "Value",
             "extra_fields": "lineno INT, file_path STRING",
         },
