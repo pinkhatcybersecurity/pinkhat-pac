@@ -2,6 +2,7 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema import ConstantGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.binop_graph_db import BinOpGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
@@ -19,6 +20,11 @@ class ReturnGraphDb(BaseGraphDb):
         },
         {
             "to_table": BinOpGraphDb.TABLE_NAME,
+            "prefix": "Value",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": ConstantGraphDb.TABLE_NAME,
             "prefix": "Value",
             "extra_fields": "lineno INT, file_path STRING",
         },
@@ -60,14 +66,9 @@ class ReturnGraphDb(BaseGraphDb):
                 "file_path": file_path,
             }
         )
-        val = value.value
-        stmt = self._get_stmt(value=val)
-        if stmt:
-            stmt.add(value=val, file_path=file_path)
-            self._table.add_relation(
-                to_table=stmt.TABLE_NAME,
-                parent_value=value,
-                child_value=val,
-                file_path=file_path,
-                prefix="Value",
-            )
+        self._add_relationship(
+            parent_value=value,
+            child_value=value.value,
+            file_path=file_path,
+            prefix="Value",
+        )

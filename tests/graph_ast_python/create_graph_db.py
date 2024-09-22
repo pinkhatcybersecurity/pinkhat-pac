@@ -1,5 +1,3 @@
-import functools
-
 from pinkhat.iacparsers.utils.graph_db.graph_db import GraphDb
 from pinkhat.iacparsers.utils.peg.grammar import Grammar
 
