@@ -158,7 +158,7 @@ def test_compare(graph_db: GraphDb, grammar: Grammar):
     df: pandas.DataFrame = graph_db.get_as_df(
         f"MATCH (a:Compare)-[u2:Op_Compare_Rel]->(b:Constant), (a:Compare)-[u3:Op_Compare_Rel]->(c:Name) "
         f"WHERE u2.index = u3.index "
-        f"RETURN * ORDER BY u2.index, u2._tail"
+        f"RETURN * ORDER BY u2.index, u2._tail, u3.index, u3._tail"
     )
     values = df.values.tolist()
     assert len(values) == len(compare_test_data)
