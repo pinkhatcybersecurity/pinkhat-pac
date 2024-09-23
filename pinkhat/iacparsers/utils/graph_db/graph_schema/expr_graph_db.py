@@ -2,6 +2,7 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema.compare_graph_db import CompareGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.tuple_graph_db import TupleGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.named_expr_graph_db import (
     NamedExprGraphDb,
@@ -33,6 +34,11 @@ class ExprGraphDb(BaseGraphDb):
         },
         {
             "to_table": TupleGraphDb.TABLE_NAME,
+            "prefix": "Value",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": CompareGraphDb.TABLE_NAME,
             "prefix": "Value",
             "extra_fields": "lineno INT, file_path STRING",
         },

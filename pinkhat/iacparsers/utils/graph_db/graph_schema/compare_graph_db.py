@@ -1,7 +1,9 @@
 import ast
 
 from kuzu import Connection
+from loguru import logger
 
+from iacparsers.utils.graph_db.graph_schema.tuple_graph_db import TupleGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import (
     ConstantGraphDb,
@@ -48,6 +50,16 @@ class CompareGraphDb(BaseGraphDb):
             "prefix": "Left",
             "extra_fields": "lineno INT, file_path STRING",
         },
+        {
+            "to_table": TupleGraphDb.TABLE_NAME,
+            "prefix": "Left",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": TupleGraphDb.TABLE_NAME,
+            "prefix": "Comparator",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
     ]
 
     def __init__(self, conn: Connection):
@@ -75,6 +87,16 @@ class CompareGraphDb(BaseGraphDb):
                 prefix=rel.get("prefix"),
                 extra_fields=rel.get("extra_fields"),
             )
+        self._table.create_relationship_group(
+            to_table=[
+                ConstantGraphDb.TABLE_NAME,
+                NameGraphDb.TABLE_NAME,
+                TupleGraphDb.TABLE_NAME,
+                ListGraphDb.TABLE_NAME,
+            ],
+            prefix="Op",
+            extra_fields="index INT, lineno INT, op STRING, file_path STRING",
+        )
 
     def add(self, value: ast.Compare, file_path: str):
         self._table.add(
@@ -86,44 +108,42 @@ class CompareGraphDb(BaseGraphDb):
                 "file_path": file_path,
             }
         )
-        self._parse_left(value=value, file_path=file_path)
-        self._parse_op(value=value, file_path=file_path)
-        self._parse_comparator(value, file_path)
-
-    def _parse_comparator(self, value: ast.Compare, file_path: str):
+        self._add_relationship(
+            parent_value=value,
+            child_value=value.left,
+            file_path=file_path,
+            prefix="Left",
+        )
         for comparator in value.comparators:
-            stmt = self._get_stmt(value=comparator)
-            if stmt:
-                stmt.add(value=comparator, file_path=file_path)
-                self._table.add_relation(
-                    to_table=stmt.TABLE_NAME,
-                    parent_value=value,
-                    child_value=comparator,
-                    file_path=file_path,
-                    prefix="Comparator",
-                )
-
-    def _parse_op(self, value: ast.Compare, file_path: str):
-        for op in value.ops:
-            stmt = self._get_stmt(value=op)
-            if stmt:
-                stmt.add(value=op, file_path=file_path)
-                # self._table.add_relation(
-                #     to_table=stmt.TABLE_NAME,
-                #     parent_value=value,
-                #     child_value=op,
-                #     file_path=file_path,
-                #     prefix="Op",
-                # )
-
-    def _parse_left(self, value: ast.Compare, file_path: str):
-        stmt = self._get_stmt(value=value.left)
-        if stmt:
-            stmt.add(value.left, file_path=file_path)
-            self._table.add_relation(
-                to_table=stmt.TABLE_NAME,
+            self._add_relationship(
                 parent_value=value,
-                child_value=value.left,
+                child_value=comparator,
                 file_path=file_path,
-                prefix="Left",
+                prefix="Comparator",
             )
+        index = 0
+        expressions = {}
+        expressions.update(self._stmt)
+        expressions.update(self._expr)
+        # It's a little bit complicated. First ops element, left and comparators are combined
+        self._table.add_relation_group(
+            stmt=expressions,
+            parent_value=value,
+            child_value=[value.left, value.comparators[0]],
+            file_path=file_path,
+            prefix="Op",
+            extra_field={"op": type(value.ops[0]).__name__, "index": index},
+        )
+        index += 1
+        # Collect the rest of the elements. Go through the list - 1.
+        # The last element is not assigned to anything. So, it can be skipped.
+        for ind in range(len(value.comparators) - 1):
+            self._table.add_relation_group(
+                stmt=expressions,
+                parent_value=value,
+                child_value=[value.comparators[ind], value.comparators[ind + 1]],
+                file_path=file_path,
+                prefix="Op",
+                extra_field={"op": type(value.ops[ind + 1]).__name__, "index": index},
+            )
+            index += 1
