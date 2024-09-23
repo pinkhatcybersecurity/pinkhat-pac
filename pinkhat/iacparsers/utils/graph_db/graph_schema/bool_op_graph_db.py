@@ -2,7 +2,7 @@ import ast
 
 from kuzu import Connection
 
-from iacparsers.utils.graph_db.graph_schema import NameGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema import NameGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema import AttributeGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.named_expr_graph_db import (
     NamedExprGraphDb,

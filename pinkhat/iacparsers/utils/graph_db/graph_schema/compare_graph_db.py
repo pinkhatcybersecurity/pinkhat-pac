@@ -1,9 +1,8 @@
 import ast
 
 from kuzu import Connection
-from loguru import logger
 
-from iacparsers.utils.graph_db.graph_schema.tuple_graph_db import TupleGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.tuple_graph_db import TupleGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import (
     ConstantGraphDb,
