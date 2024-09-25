@@ -2,6 +2,7 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema import NameGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema import AttributeGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.named_expr_graph_db import (
     NamedExprGraphDb,
@@ -34,6 +35,11 @@ class BoolOpGraphDb(BaseGraphDb):
         },
         {
             "to_table": NamedExprGraphDb.TABLE_NAME,
+            "prefix": "Value",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": NameGraphDb.TABLE_NAME,
             "prefix": "Value",
             "extra_fields": "lineno INT, file_path STRING",
         },
@@ -78,13 +84,6 @@ class BoolOpGraphDb(BaseGraphDb):
             },
         )
         for val in value.values:
-            stmt = self._get_stmt(value=val)
-            if stmt:
-                stmt.add(value=val, file_path=file_path)
-                self._table.add_relation(
-                    to_table=stmt.TABLE_NAME,
-                    parent_value=value,
-                    child_value=val,
-                    file_path=file_path,
-                    prefix="Value",
-                )
+            self._add_relationship(
+                parent_value=value, child_value=val, file_path=file_path, prefix="Value"
+            )
