@@ -2,7 +2,7 @@ import os
 
 import pandas
 
-from tests.graph_ast_python.create_graph_db import create_graph_db
+from tests.graph_ast_python.utils import create_graph_db
 
 names = [
     {

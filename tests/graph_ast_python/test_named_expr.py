@@ -4,53 +4,55 @@ import pandas
 
 from pinkhat.iacparsers.utils.graph_db.graph_db import GraphDb
 from pinkhat.iacparsers.utils.peg.grammar import Grammar
-from tests.graph_ast_python.create_graph_db import create_graph_db
+from tests.graph_ast_python.utils import create_graph_db, compare_df_output
 
 named_expr_compare = [
     [
         {
-            "_id": {"offset": 11, "table": 17},
             "_label": "NamedExpr",
             "p_id": 11,
             "col_offset": 7,
             "end_col_offset": 29,
             "end_lineno": 21,
             "lineno": 21,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
         },
         {
-            "_id": {"offset": 0, "table": 20},
             "_label": "Compare",
             "p_id": 0,
             "col_offset": 6,
             "end_col_offset": 40,
             "end_lineno": 21,
             "lineno": 21,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
         },
         {
-            "_src": {"offset": 11, "table": 17},
-            "_dst": {"offset": 0, "table": 20},
             "_label": "Left_NamedExpr_Compare_Rel",
             "lineno": None,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
         },
     ]
 ]
 named_expr_assign = [
     [
         {
-            "_id": {"offset": 0, "table": 17},
             "_label": "NamedExpr",
             "col_offset": 1,
             "end_col_offset": 21,
             "end_lineno": 2,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "lineno": 2,
             "p_id": 0,
         },
         {
-            "_id": {"offset": 0, "table": 10},
             "_label": "Expr",
             "annotation": None,
             "arg": None,
@@ -60,7 +62,9 @@ named_expr_assign = [
             "conversion": None,
             "end_col_offset": 22,
             "end_lineno": 2,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "format_spec": None,
             "id": None,
             "is_async": None,
@@ -77,26 +81,26 @@ named_expr_assign = [
             "value": None,
         },
         {
-            "_dst": {"offset": 0, "table": 17},
             "_label": "Value_NamedExpr_Expr_Rel",
-            "_src": {"offset": 0, "table": 10},
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "lineno": None,
         },
     ],
     [
         {
-            "_id": {"offset": 0, "table": 17},
             "_label": "NamedExpr",
             "col_offset": 1,
             "end_col_offset": 21,
             "end_lineno": 2,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "lineno": 2,
             "p_id": 0,
         },
         {
-            "_id": {"offset": 1, "table": 17},
             "_label": "NamedExpr",
             "annotation": None,
             "arg": None,
@@ -106,7 +110,9 @@ named_expr_assign = [
             "conversion": None,
             "end_col_offset": 20,
             "end_lineno": 2,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "format_spec": None,
             "id": None,
             "is_async": None,
@@ -123,26 +129,26 @@ named_expr_assign = [
             "value": None,
         },
         {
-            "_dst": {"offset": 0, "table": 17},
             "_label": "Value_NamedExpr_NamedExpr_Rel",
-            "_src": {"offset": 1, "table": 17},
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "lineno": None,
         },
     ],
     [
         {
-            "_id": {"offset": 0, "table": 17},
             "_label": "NamedExpr",
             "col_offset": 1,
             "end_col_offset": 21,
             "end_lineno": 2,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "lineno": 2,
             "p_id": 0,
         },
         {
-            "_id": {"offset": 2, "table": 27},
             "_label": "Name",
             "annotation": None,
             "arg": None,
@@ -152,7 +158,9 @@ named_expr_assign = [
             "conversion": None,
             "end_col_offset": 2,
             "end_lineno": 2,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "format_spec": None,
             "id": "z",
             "is_async": None,
@@ -169,26 +177,26 @@ named_expr_assign = [
             "value": None,
         },
         {
-            "_dst": {"offset": 2, "table": 27},
             "_label": "Target_Name_NamedExpr_Rel",
-            "_src": {"offset": 0, "table": 17},
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "lineno": None,
         },
     ],
     [
         {
-            "_id": {"offset": 1, "table": 17},
             "_label": "NamedExpr",
             "col_offset": 7,
             "end_col_offset": 20,
             "end_lineno": 2,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "lineno": 2,
             "p_id": 1,
         },
         {
-            "_id": {"offset": 0, "table": 17},
             "_label": "NamedExpr",
             "annotation": None,
             "arg": None,
@@ -198,7 +206,9 @@ named_expr_assign = [
             "conversion": None,
             "end_col_offset": 21,
             "end_lineno": 2,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "format_spec": None,
             "id": None,
             "is_async": None,
@@ -215,26 +225,26 @@ named_expr_assign = [
             "value": None,
         },
         {
-            "_dst": {"offset": 1, "table": 17},
             "_label": "Value_NamedExpr_NamedExpr_Rel",
-            "_src": {"offset": 0, "table": 17},
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "lineno": None,
         },
     ],
     [
         {
-            "_id": {"offset": 1, "table": 17},
             "_label": "NamedExpr",
             "col_offset": 7,
             "end_col_offset": 20,
             "end_lineno": 2,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "lineno": 2,
             "p_id": 1,
         },
         {
-            "_id": {"offset": 2, "table": 17},
             "_label": "NamedExpr",
             "annotation": None,
             "arg": None,
@@ -244,7 +254,9 @@ named_expr_assign = [
             "conversion": None,
             "end_col_offset": 19,
             "end_lineno": 2,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "format_spec": None,
             "id": None,
             "is_async": None,
@@ -261,26 +273,26 @@ named_expr_assign = [
             "value": None,
         },
         {
-            "_dst": {"offset": 1, "table": 17},
             "_label": "Value_NamedExpr_NamedExpr_Rel",
-            "_src": {"offset": 2, "table": 17},
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "lineno": None,
         },
     ],
     [
         {
-            "_id": {"offset": 1, "table": 17},
             "_label": "NamedExpr",
             "col_offset": 7,
             "end_col_offset": 20,
             "end_lineno": 2,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "lineno": 2,
             "p_id": 1,
         },
         {
-            "_id": {"offset": 1, "table": 27},
             "_label": "Name",
             "annotation": None,
             "arg": None,
@@ -290,7 +302,9 @@ named_expr_assign = [
             "conversion": None,
             "end_col_offset": 8,
             "end_lineno": 2,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "format_spec": None,
             "id": "y",
             "is_async": None,
@@ -307,26 +321,26 @@ named_expr_assign = [
             "value": None,
         },
         {
-            "_dst": {"offset": 1, "table": 27},
             "_label": "Target_Name_NamedExpr_Rel",
-            "_src": {"offset": 1, "table": 17},
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "lineno": None,
         },
     ],
     [
         {
-            "_id": {"offset": 2, "table": 17},
             "_label": "NamedExpr",
             "col_offset": 13,
             "end_col_offset": 19,
             "end_lineno": 2,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "lineno": 2,
             "p_id": 2,
         },
         {
-            "_id": {"offset": 1, "table": 17},
             "_label": "NamedExpr",
             "annotation": None,
             "arg": None,
@@ -336,7 +350,9 @@ named_expr_assign = [
             "conversion": None,
             "end_col_offset": 20,
             "end_lineno": 2,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "format_spec": None,
             "id": None,
             "is_async": None,
@@ -353,26 +369,26 @@ named_expr_assign = [
             "value": None,
         },
         {
-            "_dst": {"offset": 2, "table": 17},
             "_label": "Value_NamedExpr_NamedExpr_Rel",
-            "_src": {"offset": 1, "table": 17},
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "lineno": None,
         },
     ],
     [
         {
-            "_id": {"offset": 2, "table": 17},
             "_label": "NamedExpr",
             "col_offset": 13,
             "end_col_offset": 19,
             "end_lineno": 2,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "lineno": 2,
             "p_id": 2,
         },
         {
-            "_id": {"offset": 0, "table": 24},
             "_label": "Constant",
             "annotation": None,
             "arg": None,
@@ -382,7 +398,9 @@ named_expr_assign = [
             "conversion": None,
             "end_col_offset": 19,
             "end_lineno": 2,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "format_spec": None,
             "id": None,
             "is_async": None,
@@ -399,26 +417,26 @@ named_expr_assign = [
             "value": "0",
         },
         {
-            "_dst": {"offset": 0, "table": 24},
             "_label": "Value_Constant_NamedExpr_Rel",
-            "_src": {"offset": 2, "table": 17},
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "lineno": None,
         },
     ],
     [
         {
-            "_id": {"offset": 2, "table": 17},
             "_label": "NamedExpr",
             "col_offset": 13,
             "end_col_offset": 19,
             "end_lineno": 2,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "lineno": 2,
             "p_id": 2,
         },
         {
-            "_id": {"offset": 0, "table": 27},
             "_label": "Name",
             "annotation": None,
             "arg": None,
@@ -428,7 +446,9 @@ named_expr_assign = [
             "conversion": None,
             "end_col_offset": 14,
             "end_lineno": 2,
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "format_spec": None,
             "id": "x",
             "is_async": None,
@@ -445,10 +465,10 @@ named_expr_assign = [
             "value": None,
         },
         {
-            "_dst": {"offset": 0, "table": 27},
             "_label": "Target_Name_NamedExpr_Rel",
-            "_src": {"offset": 2, "table": 17},
-            "file_path": "tests/graph_ast_python/test_files/named_expr.py",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
             "lineno": None,
         },
     ],
@@ -461,12 +481,9 @@ def test_named_expr_compare(graph_db: GraphDb, grammar: Grammar):
     tree = grammar.simple_parser_main(file_path=file_path)
     graph_db.add_entries(tree=tree, file_path=file_path)
     df: pandas.DataFrame = graph_db.get_as_df(
-        query="MATCH (a:NamedExpr)-[b]-(c:Compare) RETURN * ORDER BY a.p_id"
+        query="MATCH (a:NamedExpr)-[b:Left_NamedExpr_Compare_Rel]-(c:Compare) RETURN * ORDER BY a.p_id"
     )
-    values = df.values.tolist()
-    assert len(values) == len(named_expr_compare)
-    for index in range(0, len(values)):
-        assert values[index] == named_expr_compare[index]
+    compare_df_output(df=df, test_data=named_expr_compare)
 
 
 @create_graph_db
@@ -479,7 +496,4 @@ def test_named_expr_assign(graph_db: GraphDb, grammar: Grammar):
     df: pandas.DataFrame = graph_db.get_as_df(
         query="MATCH (a:NamedExpr)-[b]-(c) WHERE a.lineno=2 RETURN * ORDER BY a.p_id"
     )
-    values = df.values.tolist()
-    assert len(values) == len(named_expr_assign)
-    for index in range(0, len(values)):
-        assert values[index] == named_expr_assign[index]
+    compare_df_output(df=df, test_data=named_expr_assign)

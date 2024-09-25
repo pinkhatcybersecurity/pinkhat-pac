@@ -92,6 +92,7 @@ class CompareGraphDb(BaseGraphDb):
                 NameGraphDb.TABLE_NAME,
                 TupleGraphDb.TABLE_NAME,
                 ListGraphDb.TABLE_NAME,
+                NamedExprGraphDb.TABLE_NAME,
             ],
             prefix="Op",
             extra_fields="index INT, lineno INT, op STRING, file_path STRING",
