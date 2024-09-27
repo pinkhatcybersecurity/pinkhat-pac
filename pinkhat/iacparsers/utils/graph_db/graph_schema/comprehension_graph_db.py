@@ -2,6 +2,7 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema import AttributeGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema import CallGraphDb, NameGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
@@ -21,6 +22,11 @@ class ComprehensionGraphDb(BaseGraphDb):
             "prefix": "Target",
             "extra_fields": "lineno INT, file_path STRING",
         },
+        {
+            "to_table": AttributeGraphDb.TABLE_NAME,
+            "prefix": "Iter",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
     ]
 
     def __init__(self, conn: Connection):
@@ -33,9 +39,8 @@ class ComprehensionGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict, expr: dict):
+    def initialize(self, stmt: dict):
         self._stmt = stmt
-        self._expr = expr
         self._table.create()
 
     def create_rel(self):

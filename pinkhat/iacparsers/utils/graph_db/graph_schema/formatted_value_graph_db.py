@@ -24,6 +24,11 @@ class FormattedValueGraphDb(BaseGraphDb):
             "prefix": "Value",
             "extra_fields": "lineno INT, file_path STRING",
         },
+        {
+            "to_table": "Call",
+            "prefix": "Value",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
     ]
 
     def __init__(self, conn: Connection):
@@ -41,9 +46,8 @@ class FormattedValueGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict, expr: dict):
+    def initialize(self, stmt: dict):
         self._stmt = stmt
-        self._expr = expr
         self._table.create()
 
     def create_rel(self):

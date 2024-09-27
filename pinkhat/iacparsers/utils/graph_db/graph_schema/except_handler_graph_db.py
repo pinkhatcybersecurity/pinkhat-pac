@@ -2,6 +2,8 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema.assign_graph_db import AssignGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.tuple_graph_db import TupleGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.expr_graph_db import ExprGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
@@ -29,6 +31,22 @@ class ExceptHandlerGraphDb(BaseGraphDb):
             "prefix": "Body",
             "extra_fields": "lineno INT, file_path STRING",
         },
+        {
+            # TODO: Fix me circular import
+            "to_table": "Raise",
+            "prefix": "Body",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": AssignGraphDb.TABLE_NAME,
+            "prefix": "Body",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": TupleGraphDb.TABLE_NAME,
+            "prefix": "Type",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
     ]
 
     def __init__(self, conn: Connection):
@@ -45,9 +63,8 @@ class ExceptHandlerGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict, expr: dict):
+    def initialize(self, stmt: dict):
         self._stmt = stmt
-        self._expr = expr
         self._table.create()
 
     def create_rel(self):

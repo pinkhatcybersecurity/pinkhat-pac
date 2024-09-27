@@ -2,6 +2,7 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.call_graph_db import CallGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import (
@@ -16,49 +17,26 @@ from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
 class TupleGraphDb(BaseGraphDb):
-    TABLE_NAME = "Tuple"
-    _rels = [
-        {
-            "to_table": NameGraphDb.TABLE_NAME,
-            "prefix": "Dim",
-            "extra_fields": "lineno INT, file_path STRING",
+    TABLE_NAME = TableName.Tuple.value
+    _rels = {
+        "prefix": {
+            "Dim": [
+                TableName.Attribute.value,
+                TableName.Call.value,
+                TableName.Constant.value,
+                TableName.Name.value,
+                TableName.NamedExpr.value,
+            ],
+            "Elt": [
+                TableName.Attribute.value,
+                TableName.Call.value,
+                TableName.Constant.value,
+                TableName.Name.value,
+                TableName.NamedExpr.value,
+            ],
         },
-        {
-            "to_table": NameGraphDb.TABLE_NAME,
-            "prefix": "Elt",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": CallGraphDb.TABLE_NAME,
-            "prefix": "Dim",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": ConstantGraphDb.TABLE_NAME,
-            "prefix": "Elt",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": CallGraphDb.TABLE_NAME,
-            "prefix": "Elt",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": ConstantGraphDb.TABLE_NAME,
-            "prefix": "Dim",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": NamedExprGraphDb.TABLE_NAME,
-            "prefix": "Dim",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": NamedExprGraphDb.TABLE_NAME,
-            "prefix": "Elt",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-    ]
+        "extra_fields": "lineno INT, file_path STRING",
+    }
 
     def __init__(self, conn: Connection):
         super().__init__(conn=conn)
@@ -73,17 +51,16 @@ class TupleGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict, expr: dict):
+    def initialize(self, stmt: dict):
         self._stmt = stmt
-        self._expr = expr
         self._table.create()
 
     def create_rel(self):
-        for rel in self._rels:
-            self._table.create_relationship(
-                to_table=rel.get("to_table"),
-                prefix=rel.get("prefix"),
-                extra_fields=rel.get("extra_fields"),
+        for prefix, tables in self._rels.get("prefix", {}).items():
+            self._table.create_relationship_group(
+                to_table=tables,
+                prefix=prefix,
+                extra_fields=self._rels.get("extra_fields"),
             )
 
     def add(self, value: ast.Tuple, file_path: str):
@@ -96,12 +73,34 @@ class TupleGraphDb(BaseGraphDb):
                 "file_path": file_path,
             },
         )
-        for dim in value.dims:
-            self._add_relationship(
-                parent_value=value, child_value=dim, file_path=file_path, prefix="Dim"
-            )
+        self._parse_dim(value, file_path)
+        self._parse_elt(value, file_path)
 
+    def _parse_elt(self, value: ast.Tuple, file_path: str):
         for elt in value.elts:
-            self._add_relationship(
-                parent_value=value, child_value=elt, file_path=file_path, prefix="Elt"
+            if stmt := self._get_stmt(value=elt):
+                stmt.add(elt, file_path=file_path)
+        try:
+            self._table.add_relation_group(
+                stmt=self._stmt,
+                parent_value=value,
+                child_value=[elt for elt in value.elts],
+                file_path=file_path,
+                prefix="Elt",
+                extra_field={},
             )
+        except Exception as e:
+            print(e)
+
+    def _parse_dim(self, value: ast.Tuple, file_path: str):
+        for dim in value.dims:
+            if stmt := self._get_stmt(value=dim):
+                stmt.add(dim, file_path=file_path)
+        self._table.add_relation_group(
+            stmt=self._stmt,
+            parent_value=value,
+            child_value=[dim for dim in value.dims],
+            file_path=file_path,
+            prefix="Dim",
+            extra_field={},
+        )

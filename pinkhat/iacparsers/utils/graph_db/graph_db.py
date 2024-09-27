@@ -7,6 +7,7 @@ import pandas
 from kuzu import Connection
 from loguru import logger
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema.not_eq_graph_db import NotEqGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.arg_graph_db import ArgGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.assign_graph_db import AssignGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.attribute_graph_db import (
@@ -78,13 +79,12 @@ class GraphDb:
         self._db = kuzu.Database(self._DATABASE_NAME)
         self._conn: Connection = kuzu.Connection(self._db)
         self._initialize_stmt()
-        self._initialize_expressions()
         self._graph_objects = {
             "module": ModuleGraphDb(conn=self._conn),
         }
 
-    def _initialize_expressions(self):
-        self._expressions = {
+    def _initialize_stmt(self):
+        self._stmt = {
             ast.BoolOp: BoolOpGraphDb(conn=self._conn),
             ast.NamedExpr: NamedExprGraphDb(conn=self._conn),
             ast.BinOp: BinOpGraphDb(conn=self._conn),
@@ -113,10 +113,6 @@ class GraphDb:
             ast.Tuple: TupleGraphDb(conn=self._conn),
             ast.Slice: None,
             ast.Module: ModuleGraphDb(conn=self._conn),
-        }
-
-    def _initialize_stmt(self):
-        self._stmt = {
             ast.FunctionDef: FunctionDefGraphDb(conn=self._conn),
             ast.AsyncFunctionDef: None,
             ast.ClassDef: ClassDefGraphDb(conn=self._conn),
@@ -149,22 +145,17 @@ class GraphDb:
             ast.keyword: KeywordGraphDb(conn=self._conn),
             ast.ExceptHandler: ExceptHandlerGraphDb(conn=self._conn),
             ast.Is: IsGraphDb(conn=self._conn),
+            ast.NotEq: NotEqGraphDb(conn=self._conn),
             ast.comprehension: ComprehensionGraphDb(conn=self._conn),
         }
 
     def initialize(self):
         for stmt in self._stmt.values():
             if stmt:
-                stmt.initialize(stmt=self._stmt, expr=self._expressions)
-        for expr in self._expressions.values():
-            if expr:
-                expr.initialize(stmt=self._stmt, expr=self._expressions)
+                stmt.initialize(stmt=self._stmt)
         for stmt in self._stmt.values():
             if stmt and callable(getattr(stmt, "create_rel", None)):
                 stmt.create_rel()
-        for expr in self._expressions.values():
-            if expr and callable(getattr(expr, "create_rel", None)):
-                expr.create_rel()
 
     def add_entries(self, tree: list, file_path: str):
         """
@@ -189,8 +180,7 @@ class GraphDb:
 
         """
         for value in tree:
-            stmt = self._stmt.get(type(value), self._expressions.get(type(value)))
-            if stmt:
+            if stmt := self._stmt.get(type(value)):
                 stmt.add(value=value, file_path=file_path)
             else:
                 logger.error(f"Unknown type {type(value)}")

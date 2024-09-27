@@ -2,6 +2,11 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema import JoinedStrGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.bool_op_graph_db import (
+    BoolOpGraphDb,
+)
+from pinkhat.iacparsers.utils.graph_db.graph_schema.list_graph_db import ListGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.attribute_graph_db import (
     AttributeGraphDb,
 )
@@ -73,6 +78,21 @@ class AssignGraphDb(BaseGraphDb):
             "prefix": "Value",
             "extra_fields": "lineno INT, file_path STRING",
         },
+        {
+            "to_table": BoolOpGraphDb.TABLE_NAME,
+            "prefix": "Value",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": ListGraphDb.TABLE_NAME,
+            "prefix": "Value",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": JoinedStrGraphDb.TABLE_NAME,
+            "prefix": "Value",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
     ]
 
     def __init__(self, conn: Connection):
@@ -89,9 +109,8 @@ class AssignGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict, expr: dict):
+    def initialize(self, stmt: dict):
         self._stmt = stmt
-        self._expr = expr
         self._assign_table.create()
 
     def create_rel(self):
