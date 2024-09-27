@@ -1,7 +1,6 @@
 import ast
 
 from kuzu import Connection
-from loguru import logger
 
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
@@ -18,16 +17,11 @@ class IsGraphDb(BaseGraphDb):
             self.TABLE_NAME,
             self._conn,
             Column(name="p_id", column_type="SERIAL", primary_key=True),
-            Column(name="col_offset", column_type="INT64"),
-            Column(name="end_col_offset", column_type="INT64"),
-            Column(name="end_lineno", column_type="INT64"),
-            Column(name="lineno", column_type="INT"),
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict, expr: dict):
+    def initialize(self, stmt: dict):
         self._stmt = stmt
-        self._expr = expr
         self._table.create()
 
     def create_rel(self):
@@ -39,14 +33,8 @@ class IsGraphDb(BaseGraphDb):
             )
 
     def add(self, value: ast.Is, file_path: str):
-        logger.warning("Don't forget me!")
-        return
-        # self._table.add(
-        #     params={
-        #         "col_offset": value.col_offset,
-        #         "end_col_offset": value.end_col_offset,
-        #         "end_lineno": value.end_lineno,
-        #         "lineno": value.lineno,
-        #         "file_path": file_path,
-        #     }
-        # )
+        self._table.add(
+            params={
+                "file_path": file_path,
+            }
+        )

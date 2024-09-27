@@ -2,78 +2,35 @@ import ast
 
 from kuzu import Connection
 
-from pinkhat.iacparsers.utils.graph_db.graph_schema.attribute_graph_db import (
-    AttributeGraphDb,
-)
+from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.binop_graph_db import BinOpGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import (
-    ConstantGraphDb,
-)
-from pinkhat.iacparsers.utils.graph_db.graph_schema.joinedstr_graph_db import (
-    JoinedStrGraphDb,
-)
-from pinkhat.iacparsers.utils.graph_db.graph_schema.keyword_graph_db import (
-    KeywordGraphDb,
-)
-from pinkhat.iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.starred_graph_db import (
-    StarredGraphDb,
-)
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
 class CallGraphDb(BaseGraphDb):
-    TABLE_NAME = "Call"
-    _rels = [
-        {"to_table": NameGraphDb.TABLE_NAME, "prefix": "Func"},
-        {
-            "to_table": BinOpGraphDb.TABLE_NAME,
-            "prefix": "Arg",
-            "extra_fields": "lineno INT, file_path STRING",
+    TABLE_NAME = TableName.Call.value
+    _rels = {
+        "prefix": {
+            "Arg": [
+                TABLE_NAME,
+                TableName.BinOp.value,
+                TableName.BoolOp.value,
+                TableName.Name.value,
+                TableName.Attribute.value,
+                TableName.Constant.value,
+                TableName.Starred.value,
+                TableName.JoinedStr.value,
+                TableName.Tuple.value,
+            ],
+            "Keyword": [TableName.keyword.value],
+            "Func": [
+                TableName.Name.value,
+                TableName.Attribute.value,
+            ],
         },
-        {
-            "to_table": NameGraphDb.TABLE_NAME,
-            "prefix": "Arg",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": AttributeGraphDb.TABLE_NAME,
-            "prefix": "Arg",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": ConstantGraphDb.TABLE_NAME,
-            "prefix": "Arg",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": StarredGraphDb.TABLE_NAME,
-            "prefix": "Arg",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": KeywordGraphDb.TABLE_NAME,
-            "prefix": "Keyword",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": AttributeGraphDb.TABLE_NAME,
-            "prefix": "Func",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": JoinedStrGraphDb.TABLE_NAME,
-            "prefix": "Arg",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": TABLE_NAME,
-            "prefix": "Arg",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-    ]
+        "extra_fields": "lineno INT, file_path STRING",
+    }
 
     def __init__(self, conn: Connection):
         super().__init__(conn=conn)
@@ -88,17 +45,16 @@ class CallGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict, expr: dict):
+    def initialize(self, stmt: dict):
         self._stmt = stmt
-        self._expr = expr
         self._table.create()
 
     def create_rel(self):
-        for rel in self._rels:
-            self._table.create_relationship(
-                to_table=rel.get("to_table"),
-                prefix=rel.get("prefix"),
-                extra_fields=rel.get("extra_fields"),
+        for prefix, tables in self._rels.get("prefix", {}).items():
+            self._table.create_relationship_group(
+                to_table=tables,
+                prefix=prefix,
+                extra_fields=self._rels.get("extra_fields"),
             )
 
     def add(self, value: ast.Call, file_path: str):
@@ -111,26 +67,33 @@ class CallGraphDb(BaseGraphDb):
                 "file_path": file_path,
             }
         )
-        stmt = self._get_stmt(value=value.func)
-        if stmt:
+        if stmt := self._get_stmt(value=value.func):
             stmt.add(value=value.func, file_path=file_path)
-            self._conn.execute(
-                query=f"""
-                    MATCH (u1:{self._table.name}), (u2:{type(value.func).__name__}) WHERE 
-                    u1.lineno = $u1_lineno AND
-                    u1.file_path = $file_path AND
-                    u2.lineno = $u2_lineno AND
-                    u2.file_path = $file_path
-                    CREATE (u1)-[:Func_{type(value.func).__name__}_{self._table.name}_Rel]->(u2)
-                    """,
-                parameters={
-                    "u1_lineno": value.lineno,
-                    "u2_lineno": value.func.lineno,
-                    "file_path": file_path,
-                },
-            )
-        self._parse_args(file_path, value)
-        self._parse_keywords(file_path, value)
+        self._table.add_relation_group(
+            stmt=self._stmt,
+            parent_value=value,
+            child_value=[value.func],
+            file_path=file_path,
+            prefix="Func",
+            extra_field={},
+        )
+        # self._conn.execute(
+        #     query=f"""
+        #         MATCH (u1:{self._table.name}), (u2:{type(value.func).__name__}) WHERE
+        #         u1.lineno = $u1_lineno AND
+        #         u1.file_path = $file_path AND
+        #         u2.lineno = $u2_lineno AND
+        #         u2.file_path = $file_path
+        #         CREATE (u1)-[:Func_{type(value.func).__name__}_{self._table.name}_Rel]->(u2)
+        #         """,
+        #     parameters={
+        #         "u1_lineno": value.lineno,
+        #         "u2_lineno": value.func.lineno,
+        #         "file_path": file_path,
+        #     },
+        # )
+        self._parse_args(file_path=file_path, value=value)
+        self._parse_keywords(file_path=file_path, value=value)
 
     def _parse_keywords(self, file_path, value):
         for keyword in value.keywords:
@@ -146,13 +109,13 @@ class CallGraphDb(BaseGraphDb):
 
     def _parse_args(self, file_path: str, value: ast.Call):
         for arg in value.args:
-            stmt = self._get_stmt(value=arg)
-            if stmt:
+            if stmt := self._get_stmt(value=arg):
                 stmt.add(value=arg, file_path=file_path)
-                self._table.add_relation(
-                    to_table=stmt.TABLE_NAME,
-                    parent_value=value,
-                    child_value=arg,
-                    file_path=file_path,
-                    prefix="Arg",
-                )
+        self._table.add_relation_group(
+            stmt=self._stmt,
+            parent_value=value,
+            child_value=[arg for arg in value.args],
+            file_path=file_path,
+            prefix="Arg",
+            extra_field={},
+        )

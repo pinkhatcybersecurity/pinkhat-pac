@@ -29,23 +29,25 @@ class ConstantGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict, expr: dict):
+    def initialize(self, stmt: dict):
         self._stmt = stmt
-        self._expr = expr
         self._constant_table.create()
 
     def add(self, value: ast.Constant, file_path: str):
-        self._constant_table.add(
-            params={
-                "col_offset": value.col_offset,
-                "end_col_offset": value.end_col_offset,
-                "end_lineno": value.end_lineno,
-                "kind": value.kind,
-                "lineno": value.lineno,
-                "type": type(value.value).__name__,
-                "n": value.n,
-                "s": value.s,
-                "value": value.value,
-                "file_path": file_path,
-            },
-        )
+        try:
+            self._constant_table.add(
+                params={
+                    "col_offset": value.col_offset,
+                    "end_col_offset": value.end_col_offset,
+                    "end_lineno": value.end_lineno,
+                    "kind": value.kind,
+                    "lineno": value.lineno,
+                    "type": type(value.value).__name__,
+                    "n": value.n,
+                    "s": value.s,
+                    "value": value.value,
+                    "file_path": file_path,
+                },
+            )
+        except Exception as e:
+            print(e)

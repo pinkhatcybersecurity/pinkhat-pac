@@ -74,9 +74,8 @@ class ModuleGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict, expr: dict):
+    def initialize(self, stmt: dict):
         self._stmt = stmt
-        self._expr = expr
         self._module_table.create()
 
     def create_rel(self):

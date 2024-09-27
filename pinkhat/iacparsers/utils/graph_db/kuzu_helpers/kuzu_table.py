@@ -53,6 +53,14 @@ class Table:
     ):
         if type(to_table) != list:
             self._raise_error(error=f"To table must be a list is {type(to_table)}")
+        if not to_table:
+            self._raise_error(error="Relationship table is empty")
+        # Relationship group requires at least two elements
+        if len(to_table) == 1:
+            self.create_relationship(
+                to_table=to_table[0], prefix=prefix, extra_fields=extra_fields
+            )
+            return
         from_to: str = ""
         for table in to_table:
             if not re.search(r"^[A-Za-z0-9_]*$", table):
@@ -140,6 +148,8 @@ class Table:
         # The number 1 is the main table, let's start index from 2 for child elements
         index = 2
         for child in child_value:
+            if not stmt.get(type(child)):
+                continue
             # Even if it is a relationship group, then all elements must be added in the separated
             # iterations.
             tmp_stmt = condition
@@ -148,6 +158,7 @@ class Table:
             # the parameters in the query
             tmp_params = params.copy()
             if hasattr(child, "lineno"):
+                tmp_params["lineno"] = child.lineno
                 # It has a few parameters required to identify an object and make a relationship
                 for prf in self._PREFIXES:
                     tmp_params[f"u{index}_{prf}"] = getattr(child, prf)

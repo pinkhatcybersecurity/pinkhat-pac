@@ -2,6 +2,10 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema import AttributeGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.assign_graph_db import AssignGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.if_graph_db import IfGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.tuple_graph_db import TupleGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.call_graph_db import CallGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.expr_graph_db import ExprGraphDb
@@ -20,6 +24,21 @@ class ForGraphDb(BaseGraphDb):
         },
         {
             "to_table": NameGraphDb.TABLE_NAME,
+            "prefix": "Iter",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": AttributeGraphDb.TABLE_NAME,
+            "prefix": "Iter",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": NameGraphDb.TABLE_NAME,
+            "prefix": "Target",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": TupleGraphDb.TABLE_NAME,
             "prefix": "Target",
             "extra_fields": "lineno INT, file_path STRING",
         },
@@ -31,6 +50,16 @@ class ForGraphDb(BaseGraphDb):
         {
             "to_table": ExprGraphDb.TABLE_NAME,
             "prefix": "OrElse",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": IfGraphDb.TABLE_NAME,
+            "prefix": "Body",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": AssignGraphDb.TABLE_NAME,
+            "prefix": "Body",
             "extra_fields": "lineno INT, file_path STRING",
         },
     ]
@@ -49,9 +78,8 @@ class ForGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict, expr: dict):
+    def initialize(self, stmt: dict):
         self._stmt = stmt
-        self._expr = expr
         self._table.create()
 
     def create_rel(self):

@@ -2,6 +2,7 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema import CallGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.comprehension_graph_db import (
     ComprehensionGraphDb,
@@ -16,6 +17,11 @@ class ListCompGraphDb(BaseGraphDb):
     _rels = [
         {
             "to_table": ListGraphDb.TABLE_NAME,
+            "prefix": "Elt",
+            "extra_fields": "lineno INT, file_path STRING",
+        },
+        {
+            "to_table": CallGraphDb.TABLE_NAME,
             "prefix": "Elt",
             "extra_fields": "lineno INT, file_path STRING",
         },
@@ -39,9 +45,8 @@ class ListCompGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict, expr: dict):
+    def initialize(self, stmt: dict):
         self._stmt = stmt
-        self._expr = expr
         self._table.create()
 
     def create_rel(self):
