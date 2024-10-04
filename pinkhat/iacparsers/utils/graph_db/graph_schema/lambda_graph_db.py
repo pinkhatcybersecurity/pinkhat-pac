@@ -2,31 +2,24 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.body_relationships import (
     BODY_RELATIONSHIPS,
 )
 from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
-from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
-class FunctionDefGraphDb(BaseGraphDb):
-    TABLE_NAME: str = TableName.FunctionDef.value
+class LambdaGraphDb(BaseGraphDb):
+    TABLE_NAME: str = TableName.Lambda.value
     _rels = {
         "prefix": {
-            "Body": BODY_RELATIONSHIPS,
-            "Returns": [
-                TableName.Attribute.value,
-                TableName.Constant.value,
-                TableName.Name.value,
-                TableName.Tuple.value,
-                TableName.Subscript.value,
-            ],
-            "Decorator": [
+            "Body": BODY_RELATIONSHIPS
+            + [
                 TableName.Attribute.value,
                 TableName.Call.value,
-                TableName.Name.value,
+                TableName.Constant.value,
             ],
             "Default": [
                 TableName.arg.value,
@@ -49,7 +42,6 @@ class FunctionDefGraphDb(BaseGraphDb):
             "PosOnlyArg": [TableName.arg.value],
             "KwOnlyArg": [TableName.arg.value],
             "Kwarg": [TableName.arg.value],
-            "TypeParam": [TableName.arg.value],
         },
         "extra_fields": "lineno INT, file_path STRING",
     }
@@ -64,8 +56,6 @@ class FunctionDefGraphDb(BaseGraphDb):
             Column(name="end_col_offset", column_type="INT64"),
             Column(name="end_lineno", column_type="INT64"),
             Column(name="lineno", column_type="INT"),
-            Column(name="name", column_type="STRING"),
-            Column(name="type_comment", column_type="STRING"),
             Column(name="file_path", column_type="STRING"),
         )
 
@@ -77,45 +67,30 @@ class FunctionDefGraphDb(BaseGraphDb):
                 extra_fields=self._rels.get("extra_fields"),
             )
 
-    def add(self, value: ast.FunctionDef, file_path: str):
+    def add(self, value: ast.Lambda, file_path: str):
         self._table.save(
             params={
                 "col_offset": value.col_offset,
                 "end_col_offset": value.end_col_offset,
                 "end_lineno": value.end_lineno,
                 "lineno": value.lineno,
-                "name": value.name,
-                "type_comment": value.type_comment,
                 "file_path": file_path,
             },
         )
         self._parse_body(value=value, file_path=file_path)
-        self._parse_returns(value=value, file_path=file_path)
-        self._parse_decorators(file_path=file_path, value=value)
-        self._parse_type_params(file_path=file_path, value=value)
-        self._parse_arguments(file_path, value)
+        self._parse_arguments(value=value, file_path=file_path)
 
-    def _parse_returns(self, value: ast.FunctionDef, file_path: str):
-        self._save_relationship(
-            parent_value=value,
-            child_value=value.returns,
-            file_path=file_path,
-            prefix="Returns",
-        )
-
-    def _parse_arguments(self, file_path: str, value: ast.FunctionDef):
+    def _parse_arguments(self, value: ast.Lambda, file_path: str):
         args: ast.arguments = value.args
-        self._parse_args(args=args, file_path=file_path, value=value)
-        self._parse_defaults(args=args, file_path=file_path, value=value)
-        self._parse_kw_defaults(args=args, file_path=file_path, value=value)
-        self._parse_kwarg(args=args, file_path=file_path, value=value)
-        self._parse_kw_only_args(args=args, file_path=file_path, value=value)
-        self._parse_posonlyargs(args=args, file_path=file_path, value=value)
-        self._parse_vararg(args=args, file_path=file_path, value=value)
+        self._parse_args(value=value, args=args, file_path=file_path)
+        self._parse_defaults(value=value, args=args, file_path=file_path)
+        self._parse_kw_defaults(value=value, args=args, file_path=file_path)
+        self._parse_kwarg(value=value, args=args, file_path=file_path)
+        self._parse_kw_only_args(value=value, args=args, file_path=file_path)
+        self._parse_posonlyargs(value=value, args=args, file_path=file_path)
+        self._parse_vararg(value=value, args=args, file_path=file_path)
 
-    def _parse_vararg(
-        self, args: ast.arguments, file_path: str, value: ast.FunctionDef
-    ):
+    def _parse_vararg(self, value: ast.Lambda, args: ast.arguments, file_path: str):
         self._save_relationship(
             parent_value=value,
             child_value=args.vararg,
@@ -124,7 +99,7 @@ class FunctionDefGraphDb(BaseGraphDb):
         )
 
     def _parse_posonlyargs(
-        self, args: ast.arguments, file_path: str, value: ast.FunctionDef
+        self, value: ast.Lambda, args: ast.arguments, file_path: str
     ):
         [
             self._save_relationship(
@@ -137,7 +112,7 @@ class FunctionDefGraphDb(BaseGraphDb):
         ]
 
     def _parse_kw_only_args(
-        self, args: ast.arguments, file_path: str, value: ast.FunctionDef
+        self, value: ast.Lambda, args: ast.arguments, file_path: str
     ):
         [
             self._save_relationship(
@@ -149,7 +124,7 @@ class FunctionDefGraphDb(BaseGraphDb):
             for kwonlyarg in args.kwonlyargs
         ]
 
-    def _parse_kwarg(self, args: ast.arguments, file_path: str, value: ast.FunctionDef):
+    def _parse_kwarg(self, value: ast.Lambda, args: ast.arguments, file_path: str):
         self._save_relationship(
             parent_value=value,
             child_value=args.kwarg,
@@ -158,7 +133,7 @@ class FunctionDefGraphDb(BaseGraphDb):
         )
 
     def _parse_kw_defaults(
-        self, args: ast.arguments, file_path: str, value: ast.FunctionDef
+        self, value: ast.Lambda, args: ast.arguments, file_path: str
     ):
         [
             self._save_relationship(
@@ -170,9 +145,7 @@ class FunctionDefGraphDb(BaseGraphDb):
             for kw_default in args.kw_defaults
         ]
 
-    def _parse_defaults(
-        self, args: ast.arguments, file_path: str, value: ast.FunctionDef
-    ):
+    def _parse_defaults(self, value: ast.Lambda, args: ast.arguments, file_path: str):
         [
             self._save_relationship(
                 parent_value=value,
@@ -183,7 +156,7 @@ class FunctionDefGraphDb(BaseGraphDb):
             for default in args.defaults
         ]
 
-    def _parse_args(self, args: ast.arguments, file_path: str, value: ast.FunctionDef):
+    def _parse_args(self, value: ast.Lambda, args: ast.arguments, file_path: str):
         [
             self._save_relationship(
                 parent_value=value,
@@ -194,35 +167,10 @@ class FunctionDefGraphDb(BaseGraphDb):
             for arg in args.args
         ]
 
-    def _parse_type_params(self, file_path: str, value: ast.FunctionDef):
-        [
-            self._save_relationship(
-                parent_value=value,
-                child_value=type_param,
-                file_path=file_path,
-                prefix="TypeParam",
-            )
-            for type_param in value.type_params
-        ]
-
-    def _parse_decorators(self, file_path: str, value: ast.FunctionDef):
-        [
-            self._save_relationship(
-                parent_value=value,
-                child_value=decorator,
-                file_path=file_path,
-                prefix="Decorator",
-            )
-            for decorator in value.decorator_list
-        ]
-
-    def _parse_body(self, file_path: str, value: ast.FunctionDef):
-        [
-            self._save_relationship(
-                parent_value=value,
-                child_value=body,
-                file_path=file_path,
-                prefix="Body",
-            )
-            for body in value.body
-        ]
+    def _parse_body(self, value: ast.Lambda, file_path: str):
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.body,
+            file_path=file_path,
+            prefix="Body",
+        )

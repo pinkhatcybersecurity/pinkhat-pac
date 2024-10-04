@@ -2,36 +2,36 @@ import ast
 
 from kuzu import Connection
 
-from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
-class TupleGraphDb(BaseGraphDb):
-    TABLE_NAME: str = TableName.Tuple.value
+class AnnAssignGraphDb(BaseGraphDb):
+    TABLE_NAME: str = TableName.AnnAssign.value
     _rels = {
         "prefix": {
-            "Dim": [
+            "Annotation": [
+                TABLE_NAME,
                 TableName.Attribute.value,
-                TableName.BoolOp.value,
+                TableName.BinOp.value,
                 TableName.Call.value,
-                TableName.Constant.value,
-                TableName.Dict.value,
-                TableName.List.value,
                 TableName.Name.value,
-                TableName.NamedExpr.value,
                 TableName.Subscript.value,
             ],
-            "Elt": [
+            "Target": [TableName.Attribute.value, TableName.Name.value],
+            "Value": [
                 TableName.Attribute.value,
+                TableName.Await.value,
                 TableName.BoolOp.value,
+                TableName.BinOp.value,
                 TableName.Call.value,
                 TableName.Constant.value,
                 TableName.Dict.value,
                 TableName.List.value,
+                TableName.ListComp.value,
                 TableName.Name.value,
-                TableName.NamedExpr.value,
                 TableName.Tuple.value,
                 TableName.Subscript.value,
             ],
@@ -49,6 +49,7 @@ class TupleGraphDb(BaseGraphDb):
             Column(name="end_col_offset", column_type="INT64"),
             Column(name="end_lineno", column_type="INT64"),
             Column(name="lineno", column_type="INT"),
+            Column(name="simple", column_type="INT"),
             Column(name="file_path", column_type="STRING"),
         )
 
@@ -60,37 +61,32 @@ class TupleGraphDb(BaseGraphDb):
                 extra_fields=self._rels.get("extra_fields"),
             )
 
-    def add(self, value: ast.Tuple, file_path: str):
+    def add(self, value: ast.AnnAssign, file_path: str):
         self._table.save(
             params={
                 "col_offset": value.col_offset,
                 "end_col_offset": value.end_col_offset,
                 "end_lineno": value.end_lineno,
                 "lineno": value.lineno,
+                "simple": value.simple,
                 "file_path": file_path,
-            },
+            }
         )
-        self._parse_dim(value, file_path)
-        self._parse_elt(value, file_path)
-
-    def _parse_elt(self, value: ast.Tuple, file_path: str):
-        [
-            self._save_relationship(
-                parent_value=value,
-                child_value=elt,
-                file_path=file_path,
-                prefix="Elt",
-            )
-            for elt in value.elts
-        ]
-
-    def _parse_dim(self, value: ast.Tuple, file_path: str):
-        [
-            self._save_relationship(
-                parent_value=value,
-                child_value=dim,
-                file_path=file_path,
-                prefix="Dim",
-            )
-            for dim in value.dims
-        ]
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.target,
+            file_path=file_path,
+            prefix="Target",
+        )
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.value,
+            file_path=file_path,
+            prefix="Value",
+        )
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.annotation,
+            file_path=file_path,
+            prefix="Annotation",
+        )

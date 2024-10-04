@@ -8,33 +8,18 @@ from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
-class TupleGraphDb(BaseGraphDb):
-    TABLE_NAME: str = TableName.Tuple.value
+class YieldGraphDb(BaseGraphDb):
+    TABLE_NAME: str = TableName.Yield.value
     _rels = {
         "prefix": {
-            "Dim": [
+            "Value": [
                 TableName.Attribute.value,
-                TableName.BoolOp.value,
-                TableName.Call.value,
+                TableName.Await.value,
                 TableName.Constant.value,
                 TableName.Dict.value,
-                TableName.List.value,
                 TableName.Name.value,
-                TableName.NamedExpr.value,
                 TableName.Subscript.value,
-            ],
-            "Elt": [
-                TableName.Attribute.value,
-                TableName.BoolOp.value,
-                TableName.Call.value,
-                TableName.Constant.value,
-                TableName.Dict.value,
-                TableName.List.value,
-                TableName.Name.value,
-                TableName.NamedExpr.value,
-                TableName.Tuple.value,
-                TableName.Subscript.value,
-            ],
+            ]
         },
         "extra_fields": "lineno INT, file_path STRING",
     }
@@ -60,7 +45,7 @@ class TupleGraphDb(BaseGraphDb):
                 extra_fields=self._rels.get("extra_fields"),
             )
 
-    def add(self, value: ast.Tuple, file_path: str):
+    def add(self, value: ast.Yield, file_path: str):
         self._table.save(
             params={
                 "col_offset": value.col_offset,
@@ -70,27 +55,9 @@ class TupleGraphDb(BaseGraphDb):
                 "file_path": file_path,
             },
         )
-        self._parse_dim(value, file_path)
-        self._parse_elt(value, file_path)
-
-    def _parse_elt(self, value: ast.Tuple, file_path: str):
-        [
-            self._save_relationship(
-                parent_value=value,
-                child_value=elt,
-                file_path=file_path,
-                prefix="Elt",
-            )
-            for elt in value.elts
-        ]
-
-    def _parse_dim(self, value: ast.Tuple, file_path: str):
-        [
-            self._save_relationship(
-                parent_value=value,
-                child_value=dim,
-                file_path=file_path,
-                prefix="Dim",
-            )
-            for dim in value.dims
-        ]
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.value,
+            file_path=file_path,
+            prefix="Value",
+        )

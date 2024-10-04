@@ -13,14 +13,16 @@ class BoolOpGraphDb(BaseGraphDb):
     _rels = {
         "prefix": {
             "Value": [
+                TABLE_NAME,
                 TableName.Attribute.value,
                 TableName.Call.value,
                 TableName.Compare.value,
                 TableName.Constant.value,
+                TableName.Dict.value,
                 TableName.List.value,
                 TableName.Name.value,
                 TableName.NamedExpr.value,
-                TABLE_NAME,
+                TableName.UnaryOp.value,
             ]
         },
         "extra_fields": "lineno INT, file_path STRING",
@@ -40,10 +42,6 @@ class BoolOpGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict):
-        self._stmt = stmt
-        self._table.create()
-
     def create_rel(self):
         for prefix, tables in self._rels.get("prefix", {}).items():
             self._table.create_relationship_group(
@@ -53,7 +51,7 @@ class BoolOpGraphDb(BaseGraphDb):
             )
 
     def add(self, value: ast.BoolOp, file_path: str):
-        self._table.add(
+        self._table.save(
             params={
                 "col_offset": value.col_offset,
                 "end_col_offset": value.end_col_offset,
@@ -64,13 +62,9 @@ class BoolOpGraphDb(BaseGraphDb):
             },
         )
         for val in value.values:
-            if stmt := self._get_stmt(value=val):
-                stmt.add(value=val, file_path=file_path)
-        self._table.add_relation_group(
-            stmt=self._stmt,
-            parent_value=value,
-            child_value=[val for val in value.values],
-            file_path=file_path,
-            prefix="Value",
-            extra_field={},
-        )
+            self._save_relationship(
+                parent_value=value,
+                child_value=val,
+                file_path=file_path,
+                prefix="Value",
+            )

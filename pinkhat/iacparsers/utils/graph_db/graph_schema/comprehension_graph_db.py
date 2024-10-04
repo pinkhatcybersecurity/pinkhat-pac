@@ -2,32 +2,27 @@ import ast
 
 from kuzu import Connection
 
-from pinkhat.iacparsers.utils.graph_db.graph_schema import AttributeGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema import CallGraphDb, NameGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
+from pinkhat.iacparsers.utils.graph_db.graph_schema import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
-from pinkhat.iacparsers.utils.graph_db.graph_schema import BaseGraphDb
 
 
 class ComprehensionGraphDb(BaseGraphDb):
-    TABLE_NAME = "Comprehension"
-    _rels = [
-        {
-            "to_table": CallGraphDb.TABLE_NAME,
-            "prefix": "Iter",
-            "extra_fields": "lineno INT, file_path STRING",
+    TABLE_NAME: str = "Comprehension"
+    _rels = {
+        "prefix": {
+            "Iter": [
+                TableName.Attribute.value,
+                TableName.Call.value,
+                TableName.Name.value,
+                TableName.Subscript.value,
+            ],
+            "Target": [TableName.Name.value, TableName.Tuple.value],
+            "If": [TableName.Call.value, TableName.Compare.value],
         },
-        {
-            "to_table": NameGraphDb.TABLE_NAME,
-            "prefix": "Target",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": AttributeGraphDb.TABLE_NAME,
-            "prefix": "Iter",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-    ]
+        "extra_fields": "lineno INT, file_path STRING",
+    }
 
     def __init__(self, conn: Connection):
         super().__init__(conn=conn)
@@ -39,39 +34,37 @@ class ComprehensionGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict):
-        self._stmt = stmt
-        self._table.create()
-
     def create_rel(self):
-        for rel in self._rels:
-            self._table.create_relationship(
-                to_table=rel.get("to_table"),
-                prefix=rel.get("prefix"),
-                extra_fields=rel.get("extra_fields"),
+        for prefix, tables in self._rels.get("prefix", {}).items():
+            self._table.create_relationship_group(
+                to_table=tables,
+                prefix=prefix,
+                extra_fields=self._rels.get("extra_fields"),
             )
 
     def add(self, value: ast.comprehension, file_path: str):
-        self._table.add(
+        self._table.save(
             params={
                 "is_async": value.is_async,
                 "file_path": file_path,
             }
         )
-        for if_stmt in value.ifs:
-            self._add_relationship(
+        [
+            self._save_relationship(
                 parent_value=value,
                 child_value=if_stmt,
                 file_path=file_path,
                 prefix="If",
             )
-        self._add_relationship(
+            for if_stmt in value.ifs
+        ]
+        self._save_relationship(
             parent_value=value,
             child_value=value.iter,
             file_path=file_path,
             prefix="Iter",
         )
-        self._add_relationship(
+        self._save_relationship(
             parent_value=value,
             child_value=value.target,
             file_path=file_path,

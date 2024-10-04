@@ -1,31 +1,18 @@
 import ast
 
 from kuzu import Connection
+from loguru import logger
 
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.body_relationships import (
-    BODY_RELATIONSHIPS,
-)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
-class IfGraphDb(BaseGraphDb):
-    TABLE_NAME: str = TableName.If.value
+class NonlocalGraphDb(BaseGraphDb):
+    TABLE_NAME: str = TableName.Nonlocal.value
     _rels = {
         "prefix": {
-            "Body": BODY_RELATIONSHIPS,
-            "Test": [
-                TableName.Attribute.value,
-                TableName.BoolOp.value,
-                TableName.Call.value,
-                TableName.Compare.value,
-                TableName.Name.value,
-                TableName.NamedExpr.value,
-                TableName.UnaryOp.value,
-            ],
-            "OrElse": BODY_RELATIONSHIPS,
         },
         "extra_fields": "lineno INT, file_path STRING",
     }
@@ -51,7 +38,7 @@ class IfGraphDb(BaseGraphDb):
                 extra_fields=self._rels.get("extra_fields"),
             )
 
-    def add(self, value: ast.If, file_path: str):
+    def add(self, value: ast.Nonlocal, file_path: str):
         self._table.save(
             params={
                 "col_offset": value.col_offset,
@@ -59,35 +46,6 @@ class IfGraphDb(BaseGraphDb):
                 "end_lineno": value.end_lineno,
                 "lineno": value.lineno,
                 "file_path": file_path,
-            }
+            },
         )
-        self._parse_test(value=value, file_path=file_path)
-        self._parse_body(value=value, file_path=file_path)
-        [
-            self._save_relationship(
-                parent_value=value,
-                child_value=or_else,
-                file_path=file_path,
-                prefix="OrElse",
-            )
-            for or_else in value.orelse
-        ]
-
-    def _parse_body(self, value: ast.If, file_path: str):
-        [
-            self._save_relationship(
-                parent_value=value,
-                child_value=body,
-                file_path=file_path,
-                prefix="Body",
-            )
-            for body in value.body
-        ]
-
-    def _parse_test(self, value: ast.If, file_path: str):
-        self._save_relationship(
-            parent_value=value,
-            child_value=value.test,
-            file_path=file_path,
-            prefix="Test",
-        )
+        logger.warning("Don't forget about names")

@@ -2,52 +2,28 @@ import ast
 
 from kuzu import Connection
 
-from pinkhat.iacparsers.utils.graph_db.graph_schema.assign_graph_db import AssignGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.tuple_graph_db import TupleGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.body_relationships import (
+    BODY_RELATIONSHIPS,
+)
+from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.expr_graph_db import ExprGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
-
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
 class ExceptHandlerGraphDb(BaseGraphDb):
-    TABLE_NAME: str = "ExceptHandler"
-    _rels = [
-        {
-            "to_table": NameGraphDb.TABLE_NAME,
-            "prefix": "Type",
-            "extra_fields": "lineno INT, file_path STRING",
+    TABLE_NAME: str = TableName.ExceptHandler.value
+    _rels = {
+        "prefix": {
+            "Type": [
+                TableName.Attribute.value,
+                TableName.Name.value,
+                TableName.Tuple.value,
+            ],
+            "Body": BODY_RELATIONSHIPS,
         },
-        {
-            "to_table": ExprGraphDb.TABLE_NAME,
-            "prefix": "Body",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            # TODO: Fix me circular import
-            "to_table": "Try",
-            "prefix": "Body",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            # TODO: Fix me circular import
-            "to_table": "Raise",
-            "prefix": "Body",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": AssignGraphDb.TABLE_NAME,
-            "prefix": "Body",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": TupleGraphDb.TABLE_NAME,
-            "prefix": "Type",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-    ]
+        "extra_fields": "lineno INT, file_path STRING",
+    }
 
     def __init__(self, conn: Connection):
         super().__init__(conn=conn)
@@ -63,20 +39,16 @@ class ExceptHandlerGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict):
-        self._stmt = stmt
-        self._table.create()
-
     def create_rel(self):
-        for rel in self._rels:
-            self._table.create_relationship(
-                to_table=rel.get("to_table"),
-                prefix=rel.get("prefix"),
-                extra_fields=rel.get("extra_fields"),
+        for prefix, tables in self._rels.get("prefix", {}).items():
+            self._table.create_relationship_group(
+                to_table=tables,
+                prefix=prefix,
+                extra_fields=self._rels.get("extra_fields"),
             )
 
     def add(self, value: ast.ExceptHandler, file_path: str):
-        self._table.add(
+        self._table.save(
             params={
                 "col_offset": value.col_offset,
                 "end_col_offset": value.end_col_offset,
@@ -86,30 +58,18 @@ class ExceptHandlerGraphDb(BaseGraphDb):
                 "file_path": file_path,
             }
         )
-        self._parse_type(value=value, file_path=file_path)
-        self._parse_body(value=value, file_path=file_path)
-
-    def _parse_body(self, value: ast.ExceptHandler, file_path: str):
-        for body in value.body:
-            stmt = self._get_stmt(value=body)
-            if stmt:
-                stmt.add(value=body, file_path=file_path)
-                self._table.add_relation(
-                    to_table=stmt.TABLE_NAME,
-                    parent_value=value,
-                    child_value=body,
-                    file_path=file_path,
-                    prefix="Body",
-                )
-
-    def _parse_type(self, value: ast.ExceptHandler, file_path: str):
-        stmt = self._get_stmt(value=value.type)
-        if stmt:
-            stmt.add(value=value.type, file_path=file_path)
-            self._table.add_relation(
-                to_table=stmt.TABLE_NAME,
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.type,
+            file_path=file_path,
+            prefix="Type",
+        )
+        [
+            self._save_relationship(
                 parent_value=value,
-                child_value=value.type,
+                child_value=body,
                 file_path=file_path,
-                prefix="Type",
+                prefix="Body",
             )
+            for body in value.body
+        ]

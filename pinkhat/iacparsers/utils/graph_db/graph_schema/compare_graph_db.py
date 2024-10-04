@@ -19,14 +19,18 @@ class CompareGraphDb(BaseGraphDb):
                 TableName.Name.value,
                 TableName.NamedExpr.value,
                 TableName.Tuple.value,
+                TableName.Subscript.value,
             ],
             "Comparator": [
                 TableName.Attribute.value,
+                TableName.Call.value,
                 TableName.Constant.value,
                 TableName.List.value,
                 TableName.Name.value,
                 TableName.NamedExpr.value,
                 TableName.Tuple.value,
+                TableName.Set.value,
+                TableName.Subscript.value,
             ],
         },
         "extra_fields": "lineno INT, file_path STRING",
@@ -44,10 +48,6 @@ class CompareGraphDb(BaseGraphDb):
             Column(name="lineno", column_type="INT"),
             Column(name="file_path", column_type="STRING"),
         )
-
-    def initialize(self, stmt: dict):
-        self._stmt = stmt
-        self._table.create()
 
     def create_rel(self):
         for prefix, tables in self._rels.get("prefix", {}).items():
@@ -71,7 +71,7 @@ class CompareGraphDb(BaseGraphDb):
         )
 
     def add(self, value: ast.Compare, file_path: str):
-        self._table.add(
+        self._table.save(
             params={
                 "col_offset": value.col_offset,
                 "end_col_offset": value.end_col_offset,
@@ -110,29 +110,20 @@ class CompareGraphDb(BaseGraphDb):
             index += 1
 
     def _parse_comparator(self, value: ast.Compare, file_path: str):
-        for comparator in value.comparators:
-            if stmt := self._get_stmt(value=comparator):
-                stmt.add(value=comparator, file_path=file_path)
-        self._table.add_relation_group(
-            stmt=self._stmt,
-            parent_value=value,
-            child_value=[comparator for comparator in value.comparators],
-            file_path=file_path,
-            prefix="Comparator",
-            extra_field={},
-        )
+        [
+            self._save_relationship(
+                parent_value=value,
+                child_value=comparator,
+                file_path=file_path,
+                prefix="Comparator",
+            )
+            for comparator in value.comparators
+        ]
 
     def _parse_left(self, value: ast.Compare, file_path: str):
-        if stmt := self._get_stmt(value=value.left):
-            stmt.add(value.left, file_path=file_path)
-        try:
-            self._table.add_relation_group(
-                stmt=self._stmt,
-                parent_value=value,
-                child_value=[value.left],
-                file_path=file_path,
-                prefix="Left",
-                extra_field={},
-            )
-        except Exception as e:
-            print(e)
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.left,
+            file_path=file_path,
+            prefix="Left",
+        )

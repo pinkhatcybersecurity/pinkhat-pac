@@ -1,3 +1,6 @@
+import csv
+import os
+
 from kuzu import Connection
 from loguru import logger
 
@@ -8,6 +11,13 @@ class BaseGraphDb:
         self._stmt = None
         self._table = None
 
+    def initialize(self, stmt: dict):
+        self._stmt = stmt
+        self._table.create()
+
+    def p_id(self):
+        return self._table.p_id()
+
     def _get_stmt(self, value):
         if not value:
             return None
@@ -16,14 +26,16 @@ class BaseGraphDb:
             return stmt
         logger.error(f"Unknown type {type(value)}")
 
-    def _add_relationship(self, parent_value, child_value, file_path: str, prefix: str):
-        stmt = self._get_stmt(value=child_value)
-        if stmt:
-            stmt.add(child_value, file_path=file_path)
-            self._table.add_relation(
-                to_table=stmt.TABLE_NAME,
+    def _save_relationship(
+        self, parent_value, child_value, file_path: str, prefix: str
+    ):
+        if stmt := self._get_stmt(value=child_value):
+            stmt.add(value=child_value, file_path=file_path)
+            self._table.save_relation(
+                table=stmt.TABLE_NAME,
                 parent_value=parent_value,
                 child_value=child_value,
+                c_id=stmt.p_id(),
                 file_path=file_path,
                 prefix=prefix,
             )

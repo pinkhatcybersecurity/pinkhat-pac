@@ -44,7 +44,7 @@ class TableName(Enum):
     AsyncFor = ast.AsyncFor.__name__
     While = ast.While.__name__
     If = ast.If.__name__
-    With = ast.With.__name__
+    With = f"{ast.With.__name__}_"  # special database string
     AsyncWith = ast.AsyncWith.__name__
     Match = ast.Match.__name__
     Raise = ast.Raise.__name__
@@ -65,3 +65,5 @@ class TableName(Enum):
     Is = ast.Is.__name__
     NotEq = ast.NotEq.__name__
     comprehension = ast.comprehension.__name__
+    alias = ast.alias.__name__
+    WithItem = ast.withitem.__name__

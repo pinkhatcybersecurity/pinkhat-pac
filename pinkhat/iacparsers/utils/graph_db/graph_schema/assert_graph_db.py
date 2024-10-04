@@ -1,28 +1,23 @@
 import ast
+import csv
+import os.path
 
 from kuzu import Connection
+from loguru import logger
 
-from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
-class ExprGraphDb(BaseGraphDb):
-    TABLE_NAME: str = "Expr"
+class AssertGraphDb(BaseGraphDb):
+    TABLE_NAME: str = TableName.Assert.value
     _rels = {
         "prefix": {
-            "Value": [
-                TableName.Attribute.value,
-                TableName.Await.value,
-                TableName.BinOp.value,
-                TableName.Call.value,
-                TableName.Compare.value,
-                TableName.Constant.value,
-                TableName.NamedExpr.value,
-                TableName.Tuple.value,
-                TableName.Yield.value,
-            ]
+            "Name": [
+                TableName.alias.value,
+            ],
         },
         "extra_fields": "lineno INT, file_path STRING",
     }
@@ -48,7 +43,7 @@ class ExprGraphDb(BaseGraphDb):
                 extra_fields=self._rels.get("extra_fields"),
             )
 
-    def add(self, value: ast.Expr, file_path: str):
+    def add(self, value: ast.Assert, file_path: str):
         self._table.save(
             params={
                 "col_offset": value.col_offset,
@@ -58,9 +53,4 @@ class ExprGraphDb(BaseGraphDb):
                 "file_path": file_path,
             }
         )
-        self._save_relationship(
-            parent_value=value,
-            child_value=value.value,
-            file_path=file_path,
-            prefix="Value",
-        )
+        # logger.warning(f"Don't forget about msg and test")

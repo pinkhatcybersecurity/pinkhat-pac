@@ -38,10 +38,6 @@ class NamedExprGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict):
-        self._stmt = stmt
-        self._table.create()
-
     def create_rel(self):
         for prefix, tables in self._rels.get("prefix", {}).items():
             self._table.create_relationship_group(
@@ -51,7 +47,7 @@ class NamedExprGraphDb(BaseGraphDb):
             )
 
     def add(self, value: ast.NamedExpr, file_path: str):
-        self._table.add(
+        self._table.save(
             params={
                 "col_offset": value.col_offset,
                 "end_col_offset": value.end_col_offset,
@@ -60,22 +56,15 @@ class NamedExprGraphDb(BaseGraphDb):
                 "file_path": file_path,
             }
         )
-        if stmt := self._get_stmt(value=value.value):
-            stmt.add(value=value.value, file_path=file_path)
-            self._table.add_relation_group(
-                stmt=self._stmt,
-                parent_value=value,
-                child_value=[value.value],
-                file_path=file_path,
-                prefix="Value",
-                extra_field={},
-            )
-        if stmt := self._get_stmt(value=value.target):
-            stmt.add(value=value.target, file_path=file_path)
-            self._table.add_relation(
-                to_table=stmt.TABLE_NAME,
-                parent_value=value,
-                child_value=value.target,
-                file_path=file_path,
-                prefix="Target",
-            )
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.value,
+            file_path=file_path,
+            prefix="Value",
+        )
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.target,
+            file_path=file_path,
+            prefix="Target",
+        )

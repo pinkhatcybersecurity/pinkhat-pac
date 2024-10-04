@@ -13,15 +13,24 @@ class BinOpGraphDb(BaseGraphDb):
     _rels = {
         "prefix": {
             "Left": [
+                TABLE_NAME,
                 TableName.Attribute.value,
+                TableName.Call.value,
                 TableName.Constant.value,
+                TableName.JoinedStr.value,
+                TableName.List.value,
                 TableName.Name.value,
+                TableName.Subscript.value,
                 TableName.Tuple.value,
             ],
             "Right": [
+                TABLE_NAME,
                 TableName.Attribute.value,
+                TableName.Call.value,
                 TableName.Constant.value,
+                TableName.JoinedStr.value,
                 TableName.Name.value,
+                TableName.Subscript.value,
             ],
         },
         "extra_fields": "lineno INT, file_path STRING",
@@ -41,10 +50,6 @@ class BinOpGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict):
-        self._stmt = stmt
-        self._table.create()
-
     def create_rel(self):
         for prefix, tables in self._rels.get("prefix", {}).items():
             self._table.create_relationship_group(
@@ -54,7 +59,7 @@ class BinOpGraphDb(BaseGraphDb):
             )
 
     def add(self, value: ast.BinOp, file_path: str):
-        self._table.add(
+        self._table.save(
             params={
                 "col_offset": value.col_offset,
                 "end_col_offset": value.end_col_offset,
@@ -64,23 +69,15 @@ class BinOpGraphDb(BaseGraphDb):
                 "file_path": file_path,
             },
         )
-        if left := self._get_stmt(value=value.left):
-            left.add(value=value.left, file_path=file_path)
-            self._table.add_relation_group(
-                stmt=self._stmt,
-                parent_value=value,
-                child_value=[value.left],
-                file_path=file_path,
-                prefix="Left",
-                extra_field={},
-            )
-        if right := self._get_stmt(value=value.right):
-            right.add(value=value.right, file_path=file_path)
-            self._table.add_relation_group(
-                stmt=self._stmt,
-                parent_value=value,
-                child_value=[value.right],
-                file_path=file_path,
-                prefix="Right",
-                extra_field={},
-            )
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.left,
+            file_path=file_path,
+            prefix="Left",
+        )
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.right,
+            file_path=file_path,
+            prefix="Right",
+        )

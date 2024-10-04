@@ -2,102 +2,47 @@ import ast
 
 from kuzu import Connection
 
-from pinkhat.iacparsers.utils.graph_db.graph_schema import JoinedStrGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.bool_op_graph_db import (
-    BoolOpGraphDb,
-)
-from pinkhat.iacparsers.utils.graph_db.graph_schema.list_graph_db import ListGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.attribute_graph_db import (
-    AttributeGraphDb,
-)
+from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.binop_graph_db import BinOpGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.call_graph_db import CallGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import (
-    ConstantGraphDb,
-)
-from pinkhat.iacparsers.utils.graph_db.graph_schema.list_comp_graph_db import (
-    ListCompGraphDb,
-)
-from pinkhat.iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.tuple_graph_db import TupleGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
 class AssignGraphDb(BaseGraphDb):
-    TABLE_NAME = "Assign"
-    _rels = [
-        {
-            "to_table": NameGraphDb.TABLE_NAME,
-            "prefix": "Target",
-            "extra_fields": "lineno INT, file_path STRING",
+    TABLE_NAME: str = TableName.Assign.value
+    _rels = {
+        "prefix": {
+            "Value": [
+                TableName.Attribute.value,
+                TableName.Await.value,
+                TableName.BinOp.value,
+                TableName.BoolOp.value,
+                TableName.Call.value,
+                TableName.Compare.value,
+                TableName.Constant.value,
+                TableName.Dict.value,
+                TableName.JoinedStr.value,
+                TableName.Lambda.value,
+                TableName.List.value,
+                TableName.ListComp.value,
+                TableName.Name.value,
+                TableName.Tuple.value,
+                TableName.Set.value,
+                TableName.Subscript.value,
+            ],
+            "Target": [
+                TableName.Attribute.value,
+                TableName.Name.value,
+                TableName.Tuple.value,
+                TableName.Subscript.value,
+            ],
         },
-        {
-            "to_table": CallGraphDb.TABLE_NAME,
-            "prefix": "Value",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": NameGraphDb.TABLE_NAME,
-            "prefix": "Value",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": ConstantGraphDb.TABLE_NAME,
-            "prefix": "Value",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": BinOpGraphDb.TABLE_NAME,
-            "prefix": "Value",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": TupleGraphDb.TABLE_NAME,
-            "prefix": "Target",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": TupleGraphDb.TABLE_NAME,
-            "prefix": "Value",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": AttributeGraphDb.TABLE_NAME,
-            "prefix": "Value",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": AttributeGraphDb.TABLE_NAME,
-            "prefix": "Target",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": ListCompGraphDb.TABLE_NAME,
-            "prefix": "Value",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": BoolOpGraphDb.TABLE_NAME,
-            "prefix": "Value",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": ListGraphDb.TABLE_NAME,
-            "prefix": "Value",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": JoinedStrGraphDb.TABLE_NAME,
-            "prefix": "Value",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-    ]
+        "extra_fields": "lineno INT, file_path STRING",
+    }
 
     def __init__(self, conn: Connection):
         super().__init__(conn=conn)
-        self._assign_table = Table(
+        self._table = Table(
             self.TABLE_NAME,
             self._conn,
             Column(name="p_id", column_type="SERIAL", primary_key=True),
@@ -109,20 +54,16 @@ class AssignGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict):
-        self._stmt = stmt
-        self._assign_table.create()
-
     def create_rel(self):
-        for rel in self._rels:
-            self._assign_table.create_relationship(
-                to_table=rel.get("to_table"),
-                prefix=rel.get("prefix"),
-                extra_fields=rel.get("extra_fields"),
+        for prefix, tables in self._rels.get("prefix", {}).items():
+            self._table.create_relationship_group(
+                to_table=tables,
+                prefix=prefix,
+                extra_fields=self._rels.get("extra_fields"),
             )
 
     def add(self, value: ast.Assign, file_path: str):
-        self._assign_table.add(
+        self._table.save(
             params={
                 "col_offset": value.col_offset,
                 "end_col_offset": value.end_col_offset,
@@ -133,23 +74,15 @@ class AssignGraphDb(BaseGraphDb):
             }
         )
         for target in value.targets:
-            stmt = self._get_stmt(target)
-            if stmt:
-                stmt.add(value=target, file_path=file_path)
-                self._assign_table.add_relation(
-                    to_table=stmt.TABLE_NAME,
-                    parent_value=value,
-                    child_value=target,
-                    file_path=file_path,
-                    prefix="Target",
-                )
-        stmt = self._get_stmt(value.value)
-        if stmt:
-            stmt.add(value=value.value, file_path=file_path)
-            self._assign_table.add_relation(
-                to_table=stmt.TABLE_NAME,
+            self._save_relationship(
                 parent_value=value,
-                child_value=value.value,
+                child_value=target,
                 file_path=file_path,
-                prefix="Value",
+                prefix="Target",
             )
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.value,
+            file_path=file_path,
+            prefix="Value",
+        )

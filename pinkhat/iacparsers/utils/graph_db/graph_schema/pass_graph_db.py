@@ -2,30 +2,15 @@ import ast
 
 from kuzu import Connection
 
-from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
+from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
-class ExprGraphDb(BaseGraphDb):
-    TABLE_NAME: str = "Expr"
-    _rels = {
-        "prefix": {
-            "Value": [
-                TableName.Attribute.value,
-                TableName.Await.value,
-                TableName.BinOp.value,
-                TableName.Call.value,
-                TableName.Compare.value,
-                TableName.Constant.value,
-                TableName.NamedExpr.value,
-                TableName.Tuple.value,
-                TableName.Yield.value,
-            ]
-        },
-        "extra_fields": "lineno INT, file_path STRING",
-    }
+class PassGraphDb(BaseGraphDb):
+    TABLE_NAME: str = TableName.Pass.value
+    _rels = {}
 
     def __init__(self, conn: Connection):
         super().__init__(conn=conn)
@@ -48,7 +33,7 @@ class ExprGraphDb(BaseGraphDb):
                 extra_fields=self._rels.get("extra_fields"),
             )
 
-    def add(self, value: ast.Expr, file_path: str):
+    def add(self, value: ast.Pass, file_path: str):
         self._table.save(
             params={
                 "col_offset": value.col_offset,
@@ -57,10 +42,4 @@ class ExprGraphDb(BaseGraphDb):
                 "lineno": value.lineno,
                 "file_path": file_path,
             }
-        )
-        self._save_relationship(
-            parent_value=value,
-            child_value=value.value,
-            file_path=file_path,
-            prefix="Value",
         )
