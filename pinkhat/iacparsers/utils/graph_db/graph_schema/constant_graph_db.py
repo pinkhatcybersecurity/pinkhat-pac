@@ -1,7 +1,6 @@
 import ast
 
 from kuzu import Connection
-from loguru import logger
 
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column

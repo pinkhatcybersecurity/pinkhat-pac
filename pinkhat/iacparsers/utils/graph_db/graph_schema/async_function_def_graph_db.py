@@ -70,14 +70,6 @@ class AsyncFunctionDefGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def create_rel(self):
-        for prefix, tables in self._rels.get("prefix", {}).items():
-            self._table.create_relationship_group(
-                to_table=tables,
-                prefix=prefix,
-                extra_fields=self._rels.get("extra_fields"),
-            )
-
     def add(self, value: ast.AsyncFunctionDef, file_path: str):
         self._table.save(
             params={

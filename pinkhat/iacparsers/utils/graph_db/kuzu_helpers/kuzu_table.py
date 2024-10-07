@@ -57,8 +57,8 @@ class Table:
             self._raise_error(error=f"The table name is not alpha {to_table}")
         rel_name = self._create_rel_file(to_table, prefix, extra_fields)
         self._conn.execute(
-            f"CREATE REL TABLE {rel_name} (FROM {self._name} TO {to_table}"
-            f" {',' + extra_fields if extra_fields else ''}, ONE_ONE)"
+            f"CREATE REL TABLE {rel_name} (FROM {self._name} TO {to_table}, "
+            f"_tail INT {',' + extra_fields if extra_fields else ''}, ONE_ONE)"
         )
 
     def _create_rel_file(self, to_table: str, prefix: str, extra_fields: str) -> str:
@@ -155,113 +155,12 @@ class Table:
         else:
             logger.error(f"Relationship missing {rel_name}")
 
-    def add(self, params: dict):
-        stmt = ""
-        for column in self._columns:
-            if column.name in params:
-                stmt = f"{stmt+',' if stmt else ''}{column.name}:${column.name}"
-
-        self._conn.execute(
-            query=f"CREATE (u:{self._name} {{ {stmt} }});",
-            parameters=params,
-        )
-
-    def add_relation(
-        self, to_table: str, parent_value, child_value, file_path: str, prefix: str
-    ):
-        return
-        condition = "u1.file_path = $file_path AND u2.file_path = $file_path"
-        params = {"file_path": file_path}
-        """
-        There are a few corner cases for example:
-        a = 1
-        a = a + 1
-        So, if there are only two factors like line of code and file path in the where parameter
-        then two elements will be returned for line number 2. That's the reason why more factors
-        must be used in the SQL query, if the graph is generated.
-        """
-        if hasattr(parent_value, "lineno"):
-            for prf in self._PREFIXES:
-                params[f"u1_{prf}"] = getattr(parent_value, prf)
-                condition = f"{condition} AND u1.{prf} = $u1_{prf}"
-        if hasattr(child_value, "lineno"):
-            for prf in self._PREFIXES:
-                params[f"u2_{prf}"] = getattr(child_value, prf)
-                condition = f"{condition} AND u2.{prf} = $u2_{prf}"
-        self._conn.execute(
-            query=f"""
-                MATCH (u1:{self._name}), (u2:{to_table}) WHERE 
-                {condition}
-                CREATE (u1)-[:{prefix}_{to_table}_Rel_{to_table}_{self._name} {{file_path:'{file_path}'}}]->(u2)
-                """,
-            parameters=params,
-        )
-
-    def add_relation_group(
-        self,
-        stmt: dict,
-        parent_value,
-        child_value,
-        file_path: str,
-        prefix: str,
-        extra_field: dict,
-    ):
-        return
-        params = {
-            "file_path": file_path,
-            "lineno": parent_value.lineno if hasattr(parent_value, "lineno") else None,
-            "_tail": 0,
-        }
-        params.update(extra_field)
-        extra_params = ",".join([f"{key}: ${key}" for key in params.keys()])
-        """
-        There are a few corner cases for example:
-        a = 1
-        a = a + 1
-        So, if there are only two factors like line of code and file path in the where parameter
-        then two elements will be returned for line number 2. That's the reason why more factors
-        must be used in the SQL query, if the graph is generated.
-        """
-        condition = ""
-        if hasattr(parent_value, "lineno"):
-            for prf in self._PREFIXES:
-                params[f"u1_{prf}"] = getattr(parent_value, prf)
-                condition = f"{condition} AND u1.{prf} = $u1_{prf}"
-        # The number 1 is the main table, let's start index from 2 for child elements
-        index = 2
-        for child in child_value:
-            if not stmt.get(type(child)):
-                continue
-            # Even if it is a relationship group, then all elements must be added in the separated
-            # iterations.
-            tmp_stmt = condition
-            # It's required to make a copy of the parameters. In the next iteration the previous
-            # will still exist, and then it drops an exceptions about that it can't find
-            # the parameters in the query
-            tmp_params = params.copy()
-            if hasattr(child, "lineno"):
-                tmp_params["lineno"] = child.lineno
-                # It has a few parameters required to identify an object and make a relationship
-                for prf in self._PREFIXES:
-                    tmp_params[f"u{index}_{prf}"] = getattr(child, prf)
-                    tmp_stmt = f"{tmp_stmt} AND u{index}.{prf} = $u{index}_{prf}"
-            query: str = f"""
-            MATCH (u1:{self._name}), (u{index}:{stmt.get(type(child)).TABLE_NAME}) WHERE 
-            u1.file_path = $file_path AND u{index}.file_path = $file_path
-            {tmp_stmt}
-            CREATE (u1)-[u:{prefix}_{self._name}_Rel {{ {extra_params} }}]->(u{index})
-            """
-            try:
-                self._conn.execute(
-                    query=query,
-                    parameters=tmp_params,
-                )
-            except Exception as e:
-                logger.error(f"Error executing {query} - {str(e)}")
-            index += 1
-            params["_tail"] += 1
-
     @staticmethod
     def _raise_error(error: str):
         logger.error(error)
         raise AttributeError(error)
+
+    def close_fd(self):
+        for mapping in self._csv_mapping.values():
+            mapping["fd"].close()
+        self._fd.close()

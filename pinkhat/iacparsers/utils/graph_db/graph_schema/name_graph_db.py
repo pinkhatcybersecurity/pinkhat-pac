@@ -3,12 +3,13 @@ import ast
 from kuzu import Connection
 
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
 class NameGraphDb(BaseGraphDb):
-    TABLE_NAME = "Name"
+    TABLE_NAME: str = TableName.Name.value
 
     def __init__(self, conn: Connection):
         super().__init__(conn=conn)

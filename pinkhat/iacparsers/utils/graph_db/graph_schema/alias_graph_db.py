@@ -10,7 +10,6 @@ from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 class AliasGraphDb(BaseGraphDb):
     TABLE_NAME: str = TableName.alias.value
-    _rels = {}
 
     def __init__(self, conn: Connection):
         super().__init__(conn=conn)
@@ -26,14 +25,6 @@ class AliasGraphDb(BaseGraphDb):
             Column(name="name", column_type="STRING"),
             Column(name="file_path", column_type="STRING"),
         )
-
-    def create_rel(self):
-        for prefix, tables in self._rels.get("prefix", {}).items():
-            self._table.create_relationship_group(
-                to_table=tables,
-                prefix=prefix,
-                extra_fields=self._rels.get("extra_fields"),
-            )
 
     def add(self, value: ast.alias, file_path: str):
         self._table.save(

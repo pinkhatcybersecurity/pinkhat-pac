@@ -11,12 +11,7 @@ from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 class SetGraphDb(BaseGraphDb):
     TABLE_NAME: str = TableName.Set.value
     _rels = {
-        "prefix": {
-            "Elt": [
-                TableName.Constant.value,
-                TableName.Name.value
-            ]
-        },
+        "prefix": {"Elt": [TableName.Constant.value, TableName.Name.value]},
         "extra_fields": "lineno INT, file_path STRING",
     }
 
@@ -32,14 +27,6 @@ class SetGraphDb(BaseGraphDb):
             Column(name="lineno", column_type="INT"),
             Column(name="file_path", column_type="STRING"),
         )
-
-    def create_rel(self):
-        for prefix, tables in self._rels.get("prefix", {}).items():
-            self._table.create_relationship_group(
-                to_table=tables,
-                prefix=prefix,
-                extra_fields=self._rels.get("extra_fields"),
-            )
 
     def add(self, value: ast.Set, file_path: str):
         self._table.save(

@@ -16,7 +16,10 @@ class WithGraphDb(BaseGraphDb):
     _rels = {
         "prefix": {
             "Body": BODY_RELATIONSHIPS,
-            "Item": [TableName.WithItem.value],
+            "Item": {
+                "rels": [TableName.WithItem.value],
+                "extra_fields": "index INT, lineno INT, file_path STRING",
+            }
         },
         "extra_fields": "lineno INT, file_path STRING",
     }
@@ -35,14 +38,6 @@ class WithGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def create_rel(self):
-        for prefix, tables in self._rels.get("prefix", {}).items():
-            self._table.create_relationship_group(
-                to_table=tables,
-                prefix=prefix,
-                extra_fields=self._rels.get("extra_fields"),
-            )
-
     def add(self, value: ast.With, file_path: str):
         self._table.save(
             params={
@@ -54,12 +49,14 @@ class WithGraphDb(BaseGraphDb):
                 "file_path": file_path,
             }
         )
+        index = -1
         [
             self._save_relationship(
                 parent_value=value,
                 child_value=item,
                 file_path=file_path,
                 prefix="Item",
+                extra_field={"index": (index:= index + 1)}
             )
             for item in value.items
         ]

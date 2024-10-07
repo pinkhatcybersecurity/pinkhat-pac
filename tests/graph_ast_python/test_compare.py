@@ -1,7 +1,6 @@
 import os
 
 import pandas
-from pandas.core.interchange.dataframe_protocol import DataFrame
 
 from pinkhat.iacparsers.utils.graph_db.graph_db import GraphDb
 from pinkhat.iacparsers.utils.peg.grammar import Grammar
@@ -31,7 +30,7 @@ compare_test_data = [
             "kind": None,
             "lineno": 1,
             "n": "1",
-            "p_id": 0,
+            "p_id": 1,
             "s": "1",
             "type": "int",
             "value": "1",
@@ -60,7 +59,7 @@ compare_test_data = [
         },
         {
             "_label": "Op_Compare_Rel_Compare_Name",
-            "_tail": 1,
+            "_tail": 0,
             "file_path": os.path.join(
                 "tests", "graph_ast_python", "test_files", "simple_compare.py"
             ),
@@ -92,14 +91,14 @@ compare_test_data = [
             "kind": None,
             "lineno": 1,
             "n": "10",
-            "p_id": 1,
+            "p_id": 3,
             "s": "10",
             "type": "int",
             "value": "10",
         },
         {
             "_label": "Op_Compare_Rel_Compare_Constant",
-            "_tail": 1,
+            "_tail": 0,
             "file_path": os.path.join(
                 "tests", "graph_ast_python", "test_files", "simple_compare.py"
             ),
@@ -117,7 +116,7 @@ compare_test_data = [
             ),
             "id": "a",
             "lineno": 1,
-            "p_id": 0,
+            "p_id": 2,
         },
         {
             "_label": "Op_Compare_Rel_Compare_Name",
@@ -142,6 +141,7 @@ def test_compare(graph_db: GraphDb, grammar: Grammar):
     )
     tree = grammar.simple_parser_main(file_path=file_path)
     graph_db.add_entries(tree=tree, file_path=file_path)
+    graph_db.copy_data_to_graph_db()
     df: pandas.DataFrame = graph_db.get_as_df(
         f"MATCH (a:Compare)-[u2:Op_Compare_Rel]->(b:Constant), (a:Compare)-[u3:Op_Compare_Rel]->(c:Name) "
         f"WHERE u2.index = u3.index "

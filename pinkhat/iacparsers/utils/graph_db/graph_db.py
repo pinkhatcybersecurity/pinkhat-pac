@@ -73,7 +73,9 @@ from pinkhat.iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGra
 from pinkhat.iacparsers.utils.graph_db.graph_schema.named_expr_graph_db import (
     NamedExprGraphDb,
 )
-from pinkhat.iacparsers.utils.graph_db.graph_schema.nonlocal_graph_db import NonlocalGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.nonlocal_graph_db import (
+    NonlocalGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.not_eq_graph_db import NotEqGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.pass_graph_db import PassGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.raise_graph_db import RaiseGraphDb
@@ -218,16 +220,18 @@ class GraphDb:
                 logger.error(f"Unknown type {type(value)}")
 
     def copy_data_to_graph_db(self):
+        [_cls.close_fd() for _cls in self._stmt.values() if _cls is not None]
         for child in self._tmp_data_dir.rglob("*.csv"):
             if child.is_file():
+                table_name: str = f"{child.name[:-(len(child.suffix))]}"
                 try:
                     query_res = self._conn.execute(
-                        f"COPY {child.name[:-(len(child.suffix))]} FROM '{child}' (header=true, parallel=false)"
+                        f"COPY {table_name} FROM '{child}' (header=true, parallel=false)"
                     )
                     while query_res.has_next():
                         logger.info(query_res.get_next()[0])
                 except Exception as e:
-                    logger.error(str(e))
+                    logger.error(f"file: {child}, table: {table_name}, error: {str(e)}")
 
     def execute(self, query: str):
         response = self._conn.execute(query=query)

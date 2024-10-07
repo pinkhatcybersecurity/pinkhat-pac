@@ -1,4 +1,5 @@
 import ast
+from venv import logger
 
 from kuzu import Connection
 
@@ -9,7 +10,6 @@ from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 class ArgGraphDb(BaseGraphDb):
     TABLE_NAME = "Arg"
-    _rels = []
 
     def __init__(self, conn: Connection):
         super().__init__(conn=conn)
@@ -27,14 +27,6 @@ class ArgGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def create_rel(self):
-        for rel in self._rels:
-            self._table.create_relationship(
-                to_table=rel.get("to_table"),
-                prefix=rel.get("prefix"),
-                extra_fields=rel.get("extra_fields"),
-            )
-
     def add(self, value: ast.arg, file_path: str):
         self._table.save(
             params={
@@ -48,3 +40,4 @@ class ArgGraphDb(BaseGraphDb):
                 "file_path": file_path,
             }
         )
+        logger.warning("Don't forget about support annotations")
