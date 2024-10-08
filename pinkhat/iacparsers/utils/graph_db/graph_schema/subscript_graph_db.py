@@ -8,11 +8,26 @@ from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
-class JoinedStrGraphDb(BaseGraphDb):
-    TABLE_NAME: str = TableName.JoinedStr.value
+class SubscriptGraphDb(BaseGraphDb):
+    TABLE_NAME: str = TableName.Subscript.value
     _rels = {
         "prefix": {
-            "Value": [TableName.Constant.value, TableName.FormattedValue.value],
+            "Slice": [
+                TABLE_NAME,
+                TableName.Attribute.value,
+                TableName.Call.value,
+                TableName.Constant.value,
+                TableName.Name.value,
+                TableName.Tuple.value,
+                TableName.UnaryOp.value,
+            ],
+            "Value": [
+                TABLE_NAME,
+                TableName.Attribute.value,
+                TableName.Call.value,
+                TableName.ListComp.value,
+                TableName.Name.value,
+            ],
         },
         "extra_fields": "lineno INT, file_path STRING",
     }
@@ -30,7 +45,7 @@ class JoinedStrGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def add(self, value: ast.JoinedStr, file_path: str):
+    def add(self, value: ast.Subscript, file_path: str):
         self._table.save(
             params={
                 "col_offset": value.col_offset,
@@ -38,14 +53,17 @@ class JoinedStrGraphDb(BaseGraphDb):
                 "end_lineno": value.end_lineno,
                 "lineno": value.lineno,
                 "file_path": file_path,
-            }
+            },
         )
-        [
-            self._save_relationship(
-                parent_value=value,
-                child_value=val,
-                file_path=file_path,
-                prefix="Value",
-            )
-            for val in value.values
-        ]
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.slice,
+            file_path=file_path,
+            prefix="Slice",
+        )
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.value,
+            file_path=file_path,
+            prefix="Value",
+        )

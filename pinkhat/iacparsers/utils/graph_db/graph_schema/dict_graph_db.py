@@ -8,11 +8,33 @@ from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
-class JoinedStrGraphDb(BaseGraphDb):
-    TABLE_NAME: str = TableName.JoinedStr.value
+class DictGraphDb(BaseGraphDb):
+    TABLE_NAME: str = TableName.Dict.value
     _rels = {
         "prefix": {
-            "Value": [TableName.Constant.value, TableName.FormattedValue.value],
+            "Key": [
+                TableName.Attribute.value,
+                TableName.Constant.value,
+                TableName.Name.value,
+                TableName.Subscript.value,
+            ],
+            "Value": [
+                TABLE_NAME,
+                TableName.AnnAssign.value,
+                TableName.Attribute.value,
+                TableName.BinOp.value,
+                TableName.Call.value,
+                TableName.Constant.value,
+                TableName.JoinedStr.value,
+                TableName.Lambda.value,
+                TableName.List.value,
+                TableName.ListComp.value,
+                TableName.Name.value,
+                TableName.Set.value,
+                TableName.Subscript.value,
+                TableName.Tuple.value,
+                TableName.UnaryOp.value,
+            ],
         },
         "extra_fields": "lineno INT, file_path STRING",
     }
@@ -30,7 +52,7 @@ class JoinedStrGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def add(self, value: ast.JoinedStr, file_path: str):
+    def add(self, value: ast.Dict, file_path: str):
         self._table.save(
             params={
                 "col_offset": value.col_offset,
@@ -38,8 +60,17 @@ class JoinedStrGraphDb(BaseGraphDb):
                 "end_lineno": value.end_lineno,
                 "lineno": value.lineno,
                 "file_path": file_path,
-            }
+            },
         )
+        [
+            self._save_relationship(
+                parent_value=value,
+                child_value=key,
+                file_path=file_path,
+                prefix="Key",
+            )
+            for key in value.keys
+        ]
         [
             self._save_relationship(
                 parent_value=value,

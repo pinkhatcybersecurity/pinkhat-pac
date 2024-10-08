@@ -14,14 +14,20 @@ class ReturnGraphDb(BaseGraphDb):
         "prefix": {
             "Value": [
                 TableName.Attribute.value,
+                TableName.Await.value,
                 TableName.Name.value,
                 TableName.BinOp.value,
                 TableName.BoolOp.value,
                 TableName.Call.value,
+                TableName.Compare.value,
                 TableName.Constant.value,
+                TableName.Dict.value,
                 TableName.JoinedStr.value,
+                TableName.List.value,
                 TableName.ListComp.value,
                 TableName.Tuple.value,
+                TableName.Subscript.value,
+                TableName.UnaryOp.value,
             ]
         },
         "extra_fields": "lineno INT, file_path STRING",
@@ -40,20 +46,8 @@ class ReturnGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict):
-        self._stmt = stmt
-        self._table.create()
-
-    def create_rel(self):
-        for prefix, tables in self._rels.get("prefix", {}).items():
-            self._table.create_relationship_group(
-                to_table=tables,
-                prefix=prefix,
-                extra_fields=self._rels.get("extra_fields"),
-            )
-
     def add(self, value: ast.Return, file_path: str):
-        self._table.add(
+        self._table.save(
             params={
                 "col_offset": value.col_offset,
                 "end_col_offset": value.end_col_offset,
@@ -62,14 +56,9 @@ class ReturnGraphDb(BaseGraphDb):
                 "file_path": file_path,
             }
         )
-        try:
-            self._table.add_relation_group(
-                stmt=self._stmt,
-                parent_value=value,
-                child_value=[value.value],
-                file_path=file_path,
-                prefix="Value",
-                extra_field={},
-            )
-        except Exception as e:
-            print(e)
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.value,
+            file_path=file_path,
+            prefix="Value",
+        )

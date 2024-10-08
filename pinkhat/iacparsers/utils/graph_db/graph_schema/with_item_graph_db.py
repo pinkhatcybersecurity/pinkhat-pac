@@ -3,19 +3,17 @@ import ast
 from kuzu import Connection
 
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.body_relationships import (
-    BODY_RELATIONSHIPS,
-)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
-class ModuleGraphDb(BaseGraphDb):
-    TABLE_NAME: str = TableName.Module.value
+class WithItemGraphDb(BaseGraphDb):
+    TABLE_NAME: str = TableName.WithItem.value
     _rels = {
         "prefix": {
-            "Body": BODY_RELATIONSHIPS,
+            "ContextExpr": [TableName.Call.value, TableName.Name.value],
+            "OptionalVar": [TableName.Name.value],
         },
         "extra_fields": "lineno INT, file_path STRING",
     }
@@ -26,17 +24,24 @@ class ModuleGraphDb(BaseGraphDb):
             self.TABLE_NAME,
             self._conn,
             Column(name="p_id", column_type="SERIAL", primary_key=True),
-            Column(name="name", column_type="STRING"),
             Column(name="file_path", column_type="STRING"),
         )
 
-    def add(self, value: ast.Module, file_path: str):
-        module_name = file_path.replace("/", ".")
-        self._table.save(params={"name": module_name, "file_path": file_path})
-        for body in value.body:
-            self._save_relationship(
-                parent_value=value,
-                child_value=body,
-                file_path=file_path,
-                prefix="Body",
-            )
+    def add(self, value: ast.withitem, file_path: str):
+        self._table.save(
+            params={
+                "file_path": file_path,
+            }
+        )
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.context_expr,
+            file_path=file_path,
+            prefix="ContextExpr",
+        )
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.optional_vars,
+            file_path=file_path,
+            prefix="OptionalVar",
+        )

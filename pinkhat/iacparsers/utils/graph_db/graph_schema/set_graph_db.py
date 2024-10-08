@@ -2,18 +2,16 @@ import ast
 
 from kuzu import Connection
 
-from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
-class JoinedStrGraphDb(BaseGraphDb):
-    TABLE_NAME: str = TableName.JoinedStr.value
+class SetGraphDb(BaseGraphDb):
+    TABLE_NAME: str = TableName.Set.value
     _rels = {
-        "prefix": {
-            "Value": [TableName.Constant.value, TableName.FormattedValue.value],
-        },
+        "prefix": {"Elt": [TableName.Constant.value, TableName.Name.value]},
         "extra_fields": "lineno INT, file_path STRING",
     }
 
@@ -30,7 +28,7 @@ class JoinedStrGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def add(self, value: ast.JoinedStr, file_path: str):
+    def add(self, value: ast.Set, file_path: str):
         self._table.save(
             params={
                 "col_offset": value.col_offset,
@@ -38,14 +36,11 @@ class JoinedStrGraphDb(BaseGraphDb):
                 "end_lineno": value.end_lineno,
                 "lineno": value.lineno,
                 "file_path": file_path,
-            }
+            },
         )
         [
             self._save_relationship(
-                parent_value=value,
-                child_value=val,
-                file_path=file_path,
-                prefix="Value",
+                parent_value=value, child_value=elt, file_path=file_path, prefix="Elt"
             )
-            for val in value.values
+            for elt in value.elts
         ]

@@ -2,17 +2,24 @@ import ast
 
 from kuzu import Connection
 
-from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.body_relationships import (
+    BODY_RELATIONSHIPS,
+)
+from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
-class JoinedStrGraphDb(BaseGraphDb):
-    TABLE_NAME: str = TableName.JoinedStr.value
+class WithGraphDb(BaseGraphDb):
+    TABLE_NAME: str = TableName.With.value
     _rels = {
         "prefix": {
-            "Value": [TableName.Constant.value, TableName.FormattedValue.value],
+            "Body": BODY_RELATIONSHIPS,
+            "Item": {
+                "rels": [TableName.WithItem.value],
+                "extra_fields": "index INT, lineno INT, file_path STRING",
+            },
         },
         "extra_fields": "lineno INT, file_path STRING",
     }
@@ -27,25 +34,29 @@ class JoinedStrGraphDb(BaseGraphDb):
             Column(name="end_col_offset", column_type="INT64"),
             Column(name="end_lineno", column_type="INT64"),
             Column(name="lineno", column_type="INT"),
+            Column(name="type_comment", column_type="STRING"),
             Column(name="file_path", column_type="STRING"),
         )
 
-    def add(self, value: ast.JoinedStr, file_path: str):
+    def add(self, value: ast.With, file_path: str):
         self._table.save(
             params={
                 "col_offset": value.col_offset,
                 "end_col_offset": value.end_col_offset,
                 "end_lineno": value.end_lineno,
                 "lineno": value.lineno,
+                "type_comment": value.type_comment,
                 "file_path": file_path,
             }
         )
+        index = -1
         [
             self._save_relationship(
                 parent_value=value,
-                child_value=val,
+                child_value=item,
                 file_path=file_path,
-                prefix="Value",
+                prefix="Item",
+                extra_field={"index": (index := index + 1)},
             )
-            for val in value.values
+            for item in value.items
         ]

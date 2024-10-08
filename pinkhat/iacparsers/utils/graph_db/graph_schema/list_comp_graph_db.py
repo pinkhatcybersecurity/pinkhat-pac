@@ -2,35 +2,28 @@ import ast
 
 from kuzu import Connection
 
-from pinkhat.iacparsers.utils.graph_db.graph_schema import CallGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
 from pinkhat.iacparsers.utils.graph_db.graph_schema import BaseGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.comprehension_graph_db import (
-    ComprehensionGraphDb,
-)
-from pinkhat.iacparsers.utils.graph_db.graph_schema.list_graph_db import ListGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
 class ListCompGraphDb(BaseGraphDb):
-    TABLE_NAME = "ListComp"
-    _rels = [
-        {
-            "to_table": ListGraphDb.TABLE_NAME,
-            "prefix": "Elt",
-            "extra_fields": "lineno INT, file_path STRING",
+    TABLE_NAME: str = TableName.ListComp.value
+    _rels = {
+        "prefix": {
+            "Elt": [
+                TableName.Attribute.value,
+                TableName.Call.value,
+                TableName.Dict.value,
+                TableName.List.value,
+                TableName.Name.value,
+                TableName.Tuple.value,
+            ],
+            "Generator": [TableName.comprehension.value],
         },
-        {
-            "to_table": CallGraphDb.TABLE_NAME,
-            "prefix": "Elt",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": ComprehensionGraphDb.TABLE_NAME,
-            "prefix": "Generator",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-    ]
+        "extra_fields": "lineno INT, file_path STRING",
+    }
 
     def __init__(self, conn: Connection):
         super().__init__(conn=conn)
@@ -45,20 +38,8 @@ class ListCompGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict):
-        self._stmt = stmt
-        self._table.create()
-
-    def create_rel(self):
-        for rel in self._rels:
-            self._table.create_relationship(
-                to_table=rel.get("to_table"),
-                prefix=rel.get("prefix"),
-                extra_fields=rel.get("extra_fields"),
-            )
-
     def add(self, value: ast.ListComp, file_path: str):
-        self._table.add(
+        self._table.save(
             params={
                 "col_offset": value.col_offset,
                 "end_col_offset": value.end_col_offset,
@@ -67,13 +48,18 @@ class ListCompGraphDb(BaseGraphDb):
                 "file_path": file_path,
             }
         )
-        self._add_relationship(
-            parent_value=value, child_value=value.elt, file_path=file_path, prefix="Elt"
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.elt,
+            file_path=file_path,
+            prefix="Elt",
         )
-        for generator in value.generators:
-            self._add_relationship(
+        [
+            self._save_relationship(
                 parent_value=value,
                 child_value=generator,
                 file_path=file_path,
                 prefix="Generator",
             )
+            for generator in value.generators
+        ]

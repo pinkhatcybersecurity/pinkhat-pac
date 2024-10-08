@@ -2,8 +2,11 @@ import ast
 
 from kuzu import Connection
 
-from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.body_relationships import (
+    BODY_RELATIONSHIPS,
+)
+from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
@@ -12,33 +15,17 @@ class IfGraphDb(BaseGraphDb):
     TABLE_NAME: str = TableName.If.value
     _rels = {
         "prefix": {
-            "Body": [
-                TableName.Assign.value,
-                TableName.Expr.value,
-                TableName.For.value,
-                TableName.FunctionDef.value,
-                TableName.Try.value,
-                TableName.Raise.value,
-                TableName.Return.value,
-                TABLE_NAME,
-            ],
-            "If": [
+            "Body": BODY_RELATIONSHIPS,
+            "Test": [
                 TableName.Attribute.value,
                 TableName.BoolOp.value,
                 TableName.Call.value,
                 TableName.Compare.value,
                 TableName.Name.value,
                 TableName.NamedExpr.value,
+                TableName.UnaryOp.value,
             ],
-            "OrElse": [
-                TableName.Assign.value,
-                TableName.Attribute.value,
-                TableName.Expr.value,
-                TableName.For.value,
-                TableName.Raise.value,
-                TableName.Return.value,
-                TABLE_NAME,
-            ],
+            "OrElse": BODY_RELATIONSHIPS,
         },
         "extra_fields": "lineno INT, file_path STRING",
     }
@@ -56,20 +43,8 @@ class IfGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict):
-        self._stmt = stmt
-        self._table.create()
-
-    def create_rel(self):
-        for prefix, tables in self._rels.get("prefix", {}).items():
-            self._table.create_relationship_group(
-                to_table=tables,
-                prefix=prefix,
-                extra_fields=self._rels.get("extra_fields"),
-            )
-
     def add(self, value: ast.If, file_path: str):
-        self._table.add(
+        self._table.save(
             params={
                 "col_offset": value.col_offset,
                 "end_col_offset": value.end_col_offset,
@@ -80,43 +55,31 @@ class IfGraphDb(BaseGraphDb):
         )
         self._parse_test(value=value, file_path=file_path)
         self._parse_body(value=value, file_path=file_path)
-        or_else: ast.If
-        for or_else in value.orelse:
-            if stmt := self._get_stmt(value=or_else):
-                stmt.add(value=or_else, file_path=file_path)
-        self._table.add_relation_group(
-            stmt=self._stmt,
-            parent_value=value,
-            child_value=[or_else for or_else in value.orelse],
-            file_path=file_path,
-            prefix="OrElse",
-            extra_field={},
-        )
+        [
+            self._save_relationship(
+                parent_value=value,
+                child_value=or_else,
+                file_path=file_path,
+                prefix="OrElse",
+            )
+            for or_else in value.orelse
+        ]
 
     def _parse_body(self, value: ast.If, file_path: str):
-        for body in value.body:
-            if stmt := self._get_stmt(value=body):
-                stmt.add(value=body, file_path=file_path)
-        self._table.add_relation_group(
-            stmt=self._stmt,
-            parent_value=value,
-            child_value=[body for body in value.body],
-            file_path=file_path,
-            prefix="Body",
-            extra_field={},
-        )
+        [
+            self._save_relationship(
+                parent_value=value,
+                child_value=body,
+                file_path=file_path,
+                prefix="Body",
+            )
+            for body in value.body
+        ]
 
     def _parse_test(self, value: ast.If, file_path: str):
-        if stmt := self._get_stmt(value=value.test):
-            stmt.add(value=value.test, file_path=file_path)
-            try:
-                self._table.add_relation_group(
-                    stmt=self._stmt,
-                    parent_value=value,
-                    child_value=[value.test],
-                    file_path=file_path,
-                    prefix="If",
-                    extra_field={},
-                )
-            except Exception as e:
-                print(e)
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.test,
+            file_path=file_path,
+            prefix="Test",
+        )

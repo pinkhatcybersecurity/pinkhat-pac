@@ -2,41 +2,30 @@ import ast
 
 from kuzu import Connection
 
-from pinkhat.iacparsers.utils.graph_db.graph_schema.assign_graph_db import AssignGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.return_graph_db import ReturnGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.except_handler_graph_db import (
-    ExceptHandlerGraphDb,
+from pinkhat.iacparsers.utils.graph_db.graph_schema.body_relationships import (
+    BODY_RELATIONSHIPS,
 )
-from pinkhat.iacparsers.utils.graph_db.graph_schema.raise_graph_db import RaiseGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
+from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
 class TryGraphDb(BaseGraphDb):
-    TABLE_NAME: str = "Try"
-    _rels = [
-        {
-            "to_table": RaiseGraphDb.TABLE_NAME,
-            "prefix": "Body",
-            "extra_fields": "lineno INT, file_path STRING",
+    TABLE_NAME: str = TableName.Try.value
+    _rels = {
+        "prefix": {
+            "Body": BODY_RELATIONSHIPS,
+            "FinalBody": [
+                TableName.Assign.value,
+                TableName.Expr.value,
+                TableName.If.value,
+            ],
+            "Handler": [TableName.ExceptHandler.value],
+            "OrElse": [TableName.Expr.value],
         },
-        {
-            "to_table": ExceptHandlerGraphDb.TABLE_NAME,
-            "prefix": "Body",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": AssignGraphDb.TABLE_NAME,
-            "prefix": "Body",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": ReturnGraphDb.TABLE_NAME,
-            "prefix": "Body",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-    ]
+        "extra_fields": "lineno INT, file_path STRING",
+    }
 
     def __init__(self, conn: Connection):
         super().__init__(conn=conn)
@@ -51,20 +40,8 @@ class TryGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict):
-        self._stmt = stmt
-        self._table.create()
-
-    def create_rel(self):
-        for rel in self._rels:
-            self._table.create_relationship(
-                to_table=rel.get("to_table"),
-                prefix=rel.get("prefix"),
-                extra_fields=rel.get("extra_fields"),
-            )
-
     def add(self, value: ast.Try, file_path: str):
-        self._table.add(
+        self._table.save(
             params={
                 "col_offset": value.col_offset,
                 "end_col_offset": value.end_col_offset,
@@ -79,52 +56,45 @@ class TryGraphDb(BaseGraphDb):
         self._parse_or_else(value=value, file_path=file_path)
 
     def _parse_or_else(self, value: ast.Try, file_path: str):
-        for orelse in value.orelse:
-            stmt = self._get_stmt(value=orelse)
-            if stmt:
-                self._table.add_relation(
-                    to_table=stmt.TABLE_NAME,
-                    parent_value=value,
-                    child_value=orelse,
-                    file_path=file_path,
-                    prefix="OrElse",
-                )
+        [
+            self._save_relationship(
+                parent_value=value,
+                child_value=or_else,
+                file_path=file_path,
+                prefix="OrElse",
+            )
+            for or_else in value.orelse
+        ]
 
     def _parse_final_body(self, value: ast.Try, file_path: str):
-        for final in value.finalbody:
-            stmt = self._get_stmt(value=final)
-            if stmt:
-                stmt.add(value=final, file_path=file_path)
-                self._table.add_relation(
-                    to_table=stmt.TABLE_NAME,
-                    parent_value=value,
-                    child_value=final,
-                    file_path=file_path,
-                    prefix="FinalBody",
-                )
+        [
+            self._save_relationship(
+                parent_value=value,
+                child_value=final,
+                file_path=file_path,
+                prefix="FinalBody",
+            )
+            for final in value.finalbody
+        ]
 
     def _parse_handler(self, value: ast.Try, file_path: str):
-        for handler in value.handlers:
-            stmt = self._get_stmt(value=handler)
-            if stmt:
-                stmt.add(value=handler, file_path=file_path)
-                self._table.add_relation(
-                    to_table=stmt.TABLE_NAME,
-                    parent_value=value,
-                    child_value=handler,
-                    file_path=file_path,
-                    prefix="Body",
-                )
+        [
+            self._save_relationship(
+                parent_value=value,
+                child_value=handler,
+                file_path=file_path,
+                prefix="Handler",
+            )
+            for handler in value.handlers
+        ]
 
     def _parse_body(self, value: ast.Try, file_path: str):
-        for body in value.body:
-            stmt = self._get_stmt(value=body)
-            if stmt:
-                stmt.add(value=body, file_path=file_path)
-                self._table.add_relation(
-                    to_table=stmt.TABLE_NAME,
-                    parent_value=value,
-                    child_value=body,
-                    file_path=file_path,
-                    prefix="Body",
-                )
+        [
+            self._save_relationship(
+                parent_value=value,
+                child_value=body,
+                file_path=file_path,
+                prefix="Body",
+            )
+            for body in value.body
+        ]

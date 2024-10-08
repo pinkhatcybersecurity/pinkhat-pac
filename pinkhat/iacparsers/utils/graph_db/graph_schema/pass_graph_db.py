@@ -8,14 +8,9 @@ from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
-class JoinedStrGraphDb(BaseGraphDb):
-    TABLE_NAME: str = TableName.JoinedStr.value
-    _rels = {
-        "prefix": {
-            "Value": [TableName.Constant.value, TableName.FormattedValue.value],
-        },
-        "extra_fields": "lineno INT, file_path STRING",
-    }
+class PassGraphDb(BaseGraphDb):
+    TABLE_NAME: str = TableName.Pass.value
+    _rels = {}
 
     def __init__(self, conn: Connection):
         super().__init__(conn=conn)
@@ -30,7 +25,7 @@ class JoinedStrGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def add(self, value: ast.JoinedStr, file_path: str):
+    def add(self, value: ast.Pass, file_path: str):
         self._table.save(
             params={
                 "col_offset": value.col_offset,
@@ -40,12 +35,3 @@ class JoinedStrGraphDb(BaseGraphDb):
                 "file_path": file_path,
             }
         )
-        [
-            self._save_relationship(
-                parent_value=value,
-                child_value=val,
-                file_path=file_path,
-                prefix="Value",
-            )
-            for val in value.values
-        ]

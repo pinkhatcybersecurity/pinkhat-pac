@@ -2,6 +2,10 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema.body_relationships import (
+    BODY_RELATIONSHIPS,
+)
+from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
 from pinkhat.iacparsers.utils.graph_db.graph_schema import AttributeGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.assign_graph_db import AssignGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.if_graph_db import IfGraphDb
@@ -15,54 +19,22 @@ from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
 class ForGraphDb(BaseGraphDb):
-    TABLE_NAME: str = "For"
-    _rels = [
-        {
-            "to_table": CallGraphDb.TABLE_NAME,
-            "prefix": "Iter",
-            "extra_fields": "lineno INT, file_path STRING",
+    TABLE_NAME: str = TableName.For.value
+    _rels = {
+        "prefix": {
+            "Body": BODY_RELATIONSHIPS,
+            "Iter": [
+                TableName.Attribute.value,
+                TableName.BoolOp.value,
+                TableName.Call.value,
+                TableName.Name.value,
+                TableName.Subscript.value,
+            ],
+            "Target": [TableName.Name.value, TableName.Tuple.value],
+            "OrElse": [TableName.Expr.value],
         },
-        {
-            "to_table": NameGraphDb.TABLE_NAME,
-            "prefix": "Iter",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": AttributeGraphDb.TABLE_NAME,
-            "prefix": "Iter",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": NameGraphDb.TABLE_NAME,
-            "prefix": "Target",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": TupleGraphDb.TABLE_NAME,
-            "prefix": "Target",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": ExprGraphDb.TABLE_NAME,
-            "prefix": "Body",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": ExprGraphDb.TABLE_NAME,
-            "prefix": "OrElse",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": IfGraphDb.TABLE_NAME,
-            "prefix": "Body",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": AssignGraphDb.TABLE_NAME,
-            "prefix": "Body",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-    ]
+        "extra_fields": "lineno INT, file_path STRING",
+    }
 
     def __init__(self, conn: Connection):
         super().__init__(conn=conn)
@@ -78,20 +50,8 @@ class ForGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict):
-        self._stmt = stmt
-        self._table.create()
-
-    def create_rel(self):
-        for rel in self._rels:
-            self._table.create_relationship(
-                to_table=rel.get("to_table"),
-                prefix=rel.get("prefix"),
-                extra_fields=rel.get("extra_fields"),
-            )
-
     def add(self, value: ast.For, file_path: str):
-        self._table.add(
+        self._table.save(
             params={
                 "col_offset": value.col_offset,
                 "end_col_offset": value.end_col_offset,
@@ -101,56 +61,39 @@ class ForGraphDb(BaseGraphDb):
                 "file_path": file_path,
             }
         )
-        self._parse_iter(value=value, file_path=file_path)
-        self._parse_target(value=value, file_path=file_path)
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.iter,
+            file_path=file_path,
+            prefix="Iter",
+        )
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.target,
+            file_path=file_path,
+            prefix="Target",
+        )
         self._parse_body(value=value, file_path=file_path)
         self._parse_or_else(value=value, file_path=file_path)
 
     def _parse_or_else(self, value: ast.For, file_path: str):
-        for orelse in value.orelse:
-            stmt = self._get_stmt(value=orelse)
-            if stmt:
-                self._table.add_relation(
-                    to_table=stmt.TABLE_NAME,
-                    parent_value=value,
-                    child_value=orelse,
-                    file_path=file_path,
-                    prefix="OrElse",
-                )
+        [
+            self._save_relationship(
+                parent_value=value,
+                child_value=or_else,
+                file_path=file_path,
+                prefix="OrElse",
+            )
+            for or_else in value.orelse
+        ]
 
     def _parse_body(self, value: ast.For, file_path: str):
-        for body in value.body:
-            stmt = self._get_stmt(value=body)
-            if stmt:
-                stmt.add(value=body, file_path=file_path)
-                self._table.add_relation(
-                    to_table=stmt.TABLE_NAME,
-                    parent_value=value,
-                    child_value=body,
-                    file_path=file_path,
-                    prefix="Body",
-                )
-
-    def _parse_target(self, value: ast.For, file_path: str):
-        stmt = self._get_stmt(value=value.target)
-        if stmt:
-            stmt.add(value=value.target, file_path=file_path)
-            self._table.add_relation(
-                to_table=stmt.TABLE_NAME,
+        [
+            self._save_relationship(
                 parent_value=value,
-                child_value=value.target,
+                child_value=body,
                 file_path=file_path,
-                prefix="Target",
+                prefix="Body",
             )
-
-    def _parse_iter(self, value: ast.For, file_path: str):
-        stmt = self._get_stmt(value=value.iter)
-        if stmt:
-            stmt.add(value=value.iter, file_path=file_path)
-            self._table.add_relation(
-                to_table=stmt.TABLE_NAME,
-                parent_value=value,
-                child_value=value.iter,
-                file_path=file_path,
-                prefix="Iter",
-            )
+            for body in value.body
+        ]

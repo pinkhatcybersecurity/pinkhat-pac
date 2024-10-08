@@ -2,17 +2,19 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
-from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
-class JoinedStrGraphDb(BaseGraphDb):
-    TABLE_NAME: str = TableName.JoinedStr.value
+class AssertGraphDb(BaseGraphDb):
+    TABLE_NAME: str = TableName.Assert.value
     _rels = {
         "prefix": {
-            "Value": [TableName.Constant.value, TableName.FormattedValue.value],
+            "Name": [
+                TableName.alias.value,
+            ],
         },
         "extra_fields": "lineno INT, file_path STRING",
     }
@@ -30,7 +32,7 @@ class JoinedStrGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def add(self, value: ast.JoinedStr, file_path: str):
+    def add(self, value: ast.Assert, file_path: str):
         self._table.save(
             params={
                 "col_offset": value.col_offset,
@@ -40,12 +42,4 @@ class JoinedStrGraphDb(BaseGraphDb):
                 "file_path": file_path,
             }
         )
-        [
-            self._save_relationship(
-                parent_value=value,
-                child_value=val,
-                file_path=file_path,
-                prefix="Value",
-            )
-            for val in value.values
-        ]
+        # logger.warning(f"Don't forget about msg and test")

@@ -45,6 +45,7 @@ def test_names(graph_db, grammar):
     )
     tree = grammar.simple_parser_main(file_path=file_path)
     graph_db.add_entries(tree=tree, file_path=file_path)
+    graph_db.copy_data_to_graph_db()
     df: pandas.DataFrame = graph_db.get_as_df(
         query="MATCH (u:Name) RETURN * ORDER BY u.p_id"
     )

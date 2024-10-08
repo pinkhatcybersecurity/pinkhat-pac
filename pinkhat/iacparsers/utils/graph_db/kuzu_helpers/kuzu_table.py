@@ -1,3 +1,5 @@
+import csv
+import os
 import re
 
 from kuzu import Connection
@@ -14,10 +16,20 @@ class Table:
         self._conn = conn
         self._columns = args
         self._type_validation()
+        self._csv_mapping = {}
+        self._fd = open(os.path.join("tmp_data", f"{self._name}.csv"), "w", newline="")
+        self._csv = csv.writer(self._fd)
+        self._csv.writerow(
+            [column.name for column in self._columns if column.name != "p_id"]
+        )
+        self._p_id = -1
 
     @property
     def name(self):
         return self._name
+
+    def p_id(self):
+        return self._p_id
 
     def _type_validation(self):
         if not re.search(r"^[A-Za-z0-9_]*$", self._name):
@@ -43,10 +55,27 @@ class Table:
     def create_relationship(self, to_table: str, prefix: str, extra_fields: str = None):
         if not re.search(r"^[A-Za-z0-9_]*$", to_table):
             self._raise_error(error=f"The table name is not alpha {to_table}")
+        rel_name = self._create_rel_file(to_table, prefix, extra_fields)
         self._conn.execute(
-            f"CREATE REL TABLE {prefix}_{to_table}_{self._name}_Rel(FROM {self._name} TO {to_table}"
-            f" {',' + extra_fields if extra_fields else ''}, ONE_ONE)"
+            f"CREATE REL TABLE {rel_name} (FROM {self._name} TO {to_table}, "
+            f"_tail INT {',' + extra_fields if extra_fields else ''})"
         )
+
+    def _create_rel_file(self, to_table: str, prefix: str, extra_fields: str) -> str:
+        rel_name = f"{prefix}_{self._name}_Rel_{self._name}_{to_table}"
+        _fd = open(os.path.join("tmp_data", "rels", f"{rel_name}.csv"), "w", newline="")
+        _csv = csv.writer(_fd)
+        if rel_name not in self._csv_mapping:
+            order = ["p_id", "c_id", "_tail"] + [
+                field.lstrip().split(" ")[0] for field in extra_fields.split(",")
+            ]
+            _csv.writerow(order)
+            self._csv_mapping[rel_name.lower()] = {
+                "fd": _fd,
+                "csv": _csv,
+                "order": order,
+            }
+        return rel_name
 
     def create_relationship_group(
         self, to_table: list[str], prefix: str, extra_fields: str = None
@@ -70,112 +99,69 @@ class Table:
                 if from_to
                 else f"FROM {self._name} TO {table}"
             )
+            self._create_rel_file(table, prefix, extra_fields)
         self._conn.execute(
             f"CREATE REL TABLE GROUP {prefix}_{self._name}_Rel ({from_to}, "
             f" _tail INT {',' + extra_fields if extra_fields else ''})"
         )
 
-    def add(self, params: dict):
-        stmt = ""
-        for column in self._columns:
-            if column.name in params:
-                stmt = f"{stmt+',' if stmt else ''}{column.name}:${column.name}"
-
-        self._conn.execute(
-            query=f"CREATE (u:{self._name} {{ {stmt} }});",
-            parameters=params,
+    def save(self, params: dict):
+        self._csv.writerow(
+            [
+                params.get(column.name)
+                for column in self._columns
+                if column.name != "p_id"
+            ]
         )
+        # The table automatically adds and increment p_id but this field
+        # is used in save_relation
+        self._p_id += 1
 
-    def add_relation(
-        self, to_table: str, parent_value, child_value, file_path: str, prefix: str
-    ):
-        condition = "u1.file_path = $file_path AND u2.file_path = $file_path"
-        params = {"file_path": file_path}
-        """
-        There are a few corner cases for example:
-        a = 1
-        a = a + 1
-        So, if there are only two factors like line of code and file path in the where parameter
-        then two elements will be returned for line number 2. That's the reason why more factors
-        must be used in the SQL query, if the graph is generated.
-        """
-        if hasattr(parent_value, "lineno"):
-            for prf in self._PREFIXES:
-                params[f"u1_{prf}"] = getattr(parent_value, prf)
-                condition = f"{condition} AND u1.{prf} = $u1_{prf}"
-        if hasattr(child_value, "lineno"):
-            for prf in self._PREFIXES:
-                params[f"u2_{prf}"] = getattr(child_value, prf)
-                condition = f"{condition} AND u2.{prf} = $u2_{prf}"
-        self._conn.execute(
-            query=f"""
-                MATCH (u1:{self._name}), (u2:{to_table}) WHERE 
-                {condition}
-                CREATE (u1)-[:{prefix}_{to_table}_{self._name}_Rel {{file_path:'{file_path}'}}]->(u2)
-                """,
-            parameters=params,
-        )
-
-    def add_relation_group(
+    def save_relation(
         self,
-        stmt: dict,
+        table: str,
         parent_value,
         child_value,
+        p_id: int,
+        c_id: int,
         file_path: str,
         prefix: str,
-        extra_field: dict,
+        tail: int = 0,
+        extra_field: dict = None,
     ):
-        params = {
-            "file_path": file_path,
-            "lineno": parent_value.lineno if getattr(parent_value, "lineno") else None,
-            "_tail": 0,
-        }
-        params.update(extra_field)
-        extra_params = ",".join([f"{key}: ${key}" for key in params.keys()])
-        """
-        There are a few corner cases for example:
-        a = 1
-        a = a + 1
-        So, if there are only two factors like line of code and file path in the where parameter
-        then two elements will be returned for line number 2. That's the reason why more factors
-        must be used in the SQL query, if the graph is generated.
-        """
-        condition = ""
-        if hasattr(parent_value, "lineno"):
-            for prf in self._PREFIXES:
-                params[f"u1_{prf}"] = getattr(parent_value, prf)
-                condition = f"{condition} AND u1.{prf} = $u1_{prf}"
-        # The number 1 is the main table, let's start index from 2 for child elements
-        index = 2
-        for child in child_value:
-            if not stmt.get(type(child)):
-                continue
-            # Even if it is a relationship group, then all elements must be added in the separated
-            # iterations.
-            tmp_stmt = condition
-            # It's required to make a copy of the parameters. In the next iteration the previous
-            # will still exist, and then it drops an exceptions about that it can't find
-            # the parameters in the query
-            tmp_params = params.copy()
-            if hasattr(child, "lineno"):
-                tmp_params["lineno"] = child.lineno
-                # It has a few parameters required to identify an object and make a relationship
-                for prf in self._PREFIXES:
-                    tmp_params[f"u{index}_{prf}"] = getattr(child, prf)
-                    tmp_stmt = f"{tmp_stmt} AND u{index}.{prf} = $u{index}_{prf}"
-            self._conn.execute(
-                query=f"""
-                    MATCH (u1:{self._name}), (u{index}:{stmt.get(type(child)).TABLE_NAME}) WHERE 
-                    u1.file_path = $file_path AND u{index}.file_path = $file_path
-                    {tmp_stmt}
-                    CREATE (u1)-[u:{prefix}_{self._name}_Rel {{ {extra_params} }}]->(u{index})
-                """,
-                parameters=tmp_params,
-            )
-            index += 1
-            params["_tail"] += 1
+        rel_name = f"{prefix}_{self._name}_Rel_{self._name}_{table}"
+        if rel := self._csv_mapping.get(rel_name.lower()):
+            """
+            There are a few corner cases for example:
+            a = 1
+            a = a + 1
+            So, if there are only two factors like line of code and file path in the where parameter
+            then two elements will be returned for line number 2. That's the reason why more factors
+            must be used in the SQL query, if the graph is generated. For this reason tail has been added.
+            """
+            params = {
+                "p_id": p_id,
+                "c_id": c_id,
+                "file_path": file_path,
+                "lineno": (
+                    parent_value.lineno if hasattr(parent_value, "lineno") else None
+                ),
+                "_tail": tail,
+            }
+            if extra_field:
+                params.update(extra_field)
+            if hasattr(child_value, "lineno"):
+                params["lineno"] = child_value.lineno
+            rel["csv"].writerow([params.get(order) for order in rel["order"]])
+        else:
+            logger.error(f"Relationship missing {rel_name}")
 
     @staticmethod
     def _raise_error(error: str):
         logger.error(error)
         raise AttributeError(error)
+
+    def close_fd(self):
+        for mapping in self._csv_mapping.values():
+            mapping["fd"].close()
+        self._fd.close()

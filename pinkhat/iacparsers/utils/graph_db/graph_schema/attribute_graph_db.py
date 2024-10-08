@@ -2,31 +2,28 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.name_graph_db import NameGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
 class AttributeGraphDb(BaseGraphDb):
-    TABLE_NAME = "Attribute"
-    _rels = [
-        {
-            "to_table": NameGraphDb.TABLE_NAME,
-            "prefix": "Value",
-            "extra_fields": "lineno INT, file_path STRING",
+    TABLE_NAME: str = TableName.Attribute.value
+    _rels = {
+        "prefix": {
+            "Value": [
+                TABLE_NAME,
+                TableName.BinOp.value,
+                TableName.BoolOp.value,
+                TableName.Call.value,
+                TableName.Constant.value,
+                TableName.Name.value,
+                TableName.Subscript.value,
+            ]
         },
-        {
-            "to_table": "Call",
-            "prefix": "Value",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": TABLE_NAME,
-            "prefix": "Value",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-    ]
+        "extra_fields": "lineno INT, file_path STRING",
+    }
 
     def __init__(self, conn: Connection):
         super().__init__(conn=conn)
@@ -34,28 +31,16 @@ class AttributeGraphDb(BaseGraphDb):
             self.TABLE_NAME,
             self._conn,
             Column(name="p_id", column_type="SERIAL", primary_key=True),
-            Column(name="attr", column_type="STRING"),
             Column(name="col_offset", column_type="INT64"),
             Column(name="end_col_offset", column_type="INT64"),
             Column(name="end_lineno", column_type="INT64"),
             Column(name="lineno", column_type="INT"),
+            Column(name="attr", column_type="STRING"),
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict):
-        self._stmt = stmt
-        self._table.create()
-
-    def create_rel(self):
-        for rel in self._rels:
-            self._table.create_relationship(
-                to_table=rel.get("to_table"),
-                prefix=rel.get("prefix"),
-                extra_fields=rel.get("extra_fields"),
-            )
-
     def add(self, value: ast.Attribute, file_path: str):
-        self._table.add(
+        self._table.save(
             params={
                 "attr": value.attr,
                 "col_offset": value.col_offset,
@@ -65,14 +50,9 @@ class AttributeGraphDb(BaseGraphDb):
                 "file_path": file_path,
             }
         )
-        val = value.value
-        stmt = self._get_stmt(value=val)
-        if stmt:
-            stmt.add(value=val, file_path=file_path)
-            self._table.add_relation(
-                to_table=stmt.TABLE_NAME,
-                parent_value=value,
-                child_value=val,
-                file_path=file_path,
-                prefix="Value",
-            )
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.value,
+            file_path=file_path,
+            prefix="Value",
+        )

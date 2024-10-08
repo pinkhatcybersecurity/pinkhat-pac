@@ -2,55 +2,30 @@ import ast
 
 from kuzu import Connection
 
-from pinkhat.iacparsers.utils.graph_db.graph_schema import ConstantGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.compare_graph_db import (
-    CompareGraphDb,
-)
-from pinkhat.iacparsers.utils.graph_db.graph_schema.tuple_graph_db import TupleGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.named_expr_graph_db import (
-    NamedExprGraphDb,
-)
-from pinkhat.iacparsers.utils.graph_db.graph_schema import AttributeGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
-from pinkhat.iacparsers.utils.graph_db.graph_schema.call_graph_db import CallGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
 class ExprGraphDb(BaseGraphDb):
     TABLE_NAME: str = "Expr"
-    _rels = [
-        {
-            "to_table": CallGraphDb.TABLE_NAME,
-            "prefix": "Value",
-            "extra_fields": "lineno INT, file_path STRING",
+    _rels = {
+        "prefix": {
+            "Value": [
+                TableName.Attribute.value,
+                TableName.Await.value,
+                TableName.BinOp.value,
+                TableName.Call.value,
+                TableName.Compare.value,
+                TableName.Constant.value,
+                TableName.NamedExpr.value,
+                TableName.Tuple.value,
+                TableName.Yield.value,
+            ]
         },
-        {
-            "to_table": AttributeGraphDb.TABLE_NAME,
-            "prefix": "Value",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": NamedExprGraphDb.TABLE_NAME,
-            "prefix": "Value",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": TupleGraphDb.TABLE_NAME,
-            "prefix": "Value",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": CompareGraphDb.TABLE_NAME,
-            "prefix": "Value",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-        {
-            "to_table": ConstantGraphDb.TABLE_NAME,
-            "prefix": "Value",
-            "extra_fields": "lineno INT, file_path STRING",
-        },
-    ]
+        "extra_fields": "lineno INT, file_path STRING",
+    }
 
     def __init__(self, conn: Connection):
         super().__init__(conn=conn)
@@ -65,20 +40,8 @@ class ExprGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict):
-        self._stmt = stmt
-        self._table.create()
-
-    def create_rel(self):
-        for rel in self._rels:
-            self._table.create_relationship(
-                to_table=rel.get("to_table"),
-                prefix=rel.get("prefix"),
-                extra_fields=rel.get("extra_fields"),
-            )
-
     def add(self, value: ast.Expr, file_path: str):
-        self._table.add(
+        self._table.save(
             params={
                 "col_offset": value.col_offset,
                 "end_col_offset": value.end_col_offset,
@@ -87,14 +50,9 @@ class ExprGraphDb(BaseGraphDb):
                 "file_path": file_path,
             }
         )
-        val = value.value
-        stmt = self._get_stmt(value=val)
-        if stmt:
-            stmt.add(value=val, file_path=file_path)
-            self._table.add_relation(
-                to_table=stmt.TABLE_NAME,
-                parent_value=value,
-                child_value=val,
-                file_path=file_path,
-                prefix="Value",
-            )
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.value,
+            file_path=file_path,
+            prefix="Value",
+        )

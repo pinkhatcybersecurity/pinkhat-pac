@@ -14,19 +14,27 @@ class CallGraphDb(BaseGraphDb):
         "prefix": {
             "Arg": [
                 TABLE_NAME,
+                TableName.Attribute.value,
+                TableName.Await.value,
                 TableName.BinOp.value,
                 TableName.BoolOp.value,
-                TableName.Name.value,
-                TableName.Attribute.value,
+                TableName.Compare.value,
                 TableName.Constant.value,
-                TableName.Starred.value,
+                TableName.Dict.value,
                 TableName.JoinedStr.value,
+                TableName.List.value,
+                TableName.Name.value,
+                TableName.Starred.value,
+                TableName.Subscript.value,
                 TableName.Tuple.value,
+                TableName.UnaryOp.value,
             ],
             "Keyword": [TableName.keyword.value],
             "Func": [
-                TableName.Name.value,
+                TABLE_NAME,
                 TableName.Attribute.value,
+                TableName.Name.value,
+                TableName.Subscript.value,
             ],
         },
         "extra_fields": "lineno INT, file_path STRING",
@@ -45,20 +53,8 @@ class CallGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def initialize(self, stmt: dict):
-        self._stmt = stmt
-        self._table.create()
-
-    def create_rel(self):
-        for prefix, tables in self._rels.get("prefix", {}).items():
-            self._table.create_relationship_group(
-                to_table=tables,
-                prefix=prefix,
-                extra_fields=self._rels.get("extra_fields"),
-            )
-
     def add(self, value: ast.Call, file_path: str):
-        self._table.add(
+        self._table.save(
             params={
                 "col_offset": value.col_offset,
                 "end_col_offset": value.end_col_offset,
@@ -67,55 +63,44 @@ class CallGraphDb(BaseGraphDb):
                 "file_path": file_path,
             }
         )
-        if stmt := self._get_stmt(value=value.func):
-            stmt.add(value=value.func, file_path=file_path)
-        self._table.add_relation_group(
-            stmt=self._stmt,
+        self._save_relationship(
             parent_value=value,
-            child_value=[value.func],
+            child_value=value.func,
             file_path=file_path,
             prefix="Func",
-            extra_field={},
         )
-        # self._conn.execute(
-        #     query=f"""
-        #         MATCH (u1:{self._table.name}), (u2:{type(value.func).__name__}) WHERE
-        #         u1.lineno = $u1_lineno AND
-        #         u1.file_path = $file_path AND
-        #         u2.lineno = $u2_lineno AND
-        #         u2.file_path = $file_path
-        #         CREATE (u1)-[:Func_{type(value.func).__name__}_{self._table.name}_Rel]->(u2)
-        #         """,
-        #     parameters={
-        #         "u1_lineno": value.lineno,
-        #         "u2_lineno": value.func.lineno,
-        #         "file_path": file_path,
-        #     },
-        # )
+        # # self._conn.execute(
+        # #     query=f"""
+        # #         MATCH (u1:{self._table.name}), (u2:{type(value.func).__name__}) WHERE
+        # #         u1.lineno = $u1_lineno AND
+        # #         u1.file_path = $file_path AND
+        # #         u2.lineno = $u2_lineno AND
+        # #         u2.file_path = $file_path
+        # #         CREATE (u1)-[:Func_{type(value.func).__name__}_{self._table.name}_Rel]->(u2)
+        # #         """,
+        # #     parameters={
+        # #         "u1_lineno": value.lineno,
+        # #         "u2_lineno": value.func.lineno,
+        # #         "file_path": file_path,
+        # #     },
+        # # )
         self._parse_args(file_path=file_path, value=value)
         self._parse_keywords(file_path=file_path, value=value)
 
     def _parse_keywords(self, file_path, value):
         for keyword in value.keywords:
-            stmt = self._get_stmt(value=keyword)
-            if stmt:
-                self._table.add_relation(
-                    to_table=stmt.TABLE_NAME,
-                    parent_value=value,
-                    child_value=keyword,
-                    file_path=file_path,
-                    prefix="Keyword",
-                )
+            self._save_relationship(
+                parent_value=value,
+                child_value=keyword,
+                file_path=file_path,
+                prefix="Keyword",
+            )
 
     def _parse_args(self, file_path: str, value: ast.Call):
         for arg in value.args:
-            if stmt := self._get_stmt(value=arg):
-                stmt.add(value=arg, file_path=file_path)
-        self._table.add_relation_group(
-            stmt=self._stmt,
-            parent_value=value,
-            child_value=[arg for arg in value.args],
-            file_path=file_path,
-            prefix="Arg",
-            extra_field={},
-        )
+            self._save_relationship(
+                parent_value=value,
+                child_value=arg,
+                file_path=file_path,
+                prefix="Arg",
+            )

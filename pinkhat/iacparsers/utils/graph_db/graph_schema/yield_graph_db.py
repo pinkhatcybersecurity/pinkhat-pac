@@ -2,24 +2,24 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
-from pinkhat.iacparsers.utils.graph_db.graph_schema import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
-class ComprehensionGraphDb(BaseGraphDb):
-    TABLE_NAME: str = "Comprehension"
+class YieldGraphDb(BaseGraphDb):
+    TABLE_NAME: str = TableName.Yield.value
     _rels = {
         "prefix": {
-            "Iter": [
+            "Value": [
                 TableName.Attribute.value,
-                TableName.Call.value,
+                TableName.Await.value,
+                TableName.Constant.value,
+                TableName.Dict.value,
                 TableName.Name.value,
                 TableName.Subscript.value,
-            ],
-            "Target": [TableName.Name.value, TableName.Tuple.value],
-            "If": [TableName.Call.value, TableName.Compare.value],
+            ]
         },
         "extra_fields": "lineno INT, file_path STRING",
     }
@@ -30,35 +30,26 @@ class ComprehensionGraphDb(BaseGraphDb):
             self.TABLE_NAME,
             self._conn,
             Column(name="p_id", column_type="SERIAL", primary_key=True),
-            Column(name="is_async", column_type="INT"),
+            Column(name="col_offset", column_type="INT64"),
+            Column(name="end_col_offset", column_type="INT64"),
+            Column(name="end_lineno", column_type="INT64"),
+            Column(name="lineno", column_type="INT"),
             Column(name="file_path", column_type="STRING"),
         )
 
-    def add(self, value: ast.comprehension, file_path: str):
+    def add(self, value: ast.Yield, file_path: str):
         self._table.save(
             params={
-                "is_async": value.is_async,
+                "col_offset": value.col_offset,
+                "end_col_offset": value.end_col_offset,
+                "end_lineno": value.end_lineno,
+                "lineno": value.lineno,
                 "file_path": file_path,
-            }
-        )
-        [
-            self._save_relationship(
-                parent_value=value,
-                child_value=if_stmt,
-                file_path=file_path,
-                prefix="If",
-            )
-            for if_stmt in value.ifs
-        ]
-        self._save_relationship(
-            parent_value=value,
-            child_value=value.iter,
-            file_path=file_path,
-            prefix="Iter",
+            },
         )
         self._save_relationship(
             parent_value=value,
-            child_value=value.target,
+            child_value=value.value,
             file_path=file_path,
-            prefix="Target",
+            prefix="Value",
         )

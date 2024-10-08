@@ -2,34 +2,37 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
-from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
-class BinOpGraphDb(BaseGraphDb):
-    TABLE_NAME: str = TableName.BinOp.value
+class AnnAssignGraphDb(BaseGraphDb):
+    TABLE_NAME: str = TableName.AnnAssign.value
     _rels = {
         "prefix": {
-            "Left": [
+            "Annotation": [
                 TABLE_NAME,
                 TableName.Attribute.value,
+                TableName.BinOp.value,
                 TableName.Call.value,
-                TableName.Constant.value,
-                TableName.JoinedStr.value,
-                TableName.List.value,
                 TableName.Name.value,
                 TableName.Subscript.value,
-                TableName.Tuple.value,
             ],
-            "Right": [
-                TABLE_NAME,
+            "Target": [TableName.Attribute.value, TableName.Name.value],
+            "Value": [
                 TableName.Attribute.value,
+                TableName.Await.value,
+                TableName.BoolOp.value,
+                TableName.BinOp.value,
                 TableName.Call.value,
                 TableName.Constant.value,
-                TableName.JoinedStr.value,
+                TableName.Dict.value,
+                TableName.List.value,
+                TableName.ListComp.value,
                 TableName.Name.value,
+                TableName.Tuple.value,
                 TableName.Subscript.value,
             ],
         },
@@ -46,30 +49,36 @@ class BinOpGraphDb(BaseGraphDb):
             Column(name="end_col_offset", column_type="INT64"),
             Column(name="end_lineno", column_type="INT64"),
             Column(name="lineno", column_type="INT"),
-            Column(name="op", column_type="STRING"),
+            Column(name="simple", column_type="INT"),
             Column(name="file_path", column_type="STRING"),
         )
 
-    def add(self, value: ast.BinOp, file_path: str):
+    def add(self, value: ast.AnnAssign, file_path: str):
         self._table.save(
             params={
                 "col_offset": value.col_offset,
                 "end_col_offset": value.end_col_offset,
                 "end_lineno": value.end_lineno,
-                "op": type(value.op).__name__,
                 "lineno": value.lineno,
+                "simple": value.simple,
                 "file_path": file_path,
-            },
+            }
         )
         self._save_relationship(
             parent_value=value,
-            child_value=value.left,
+            child_value=value.target,
             file_path=file_path,
-            prefix="Left",
+            prefix="Target",
         )
         self._save_relationship(
             parent_value=value,
-            child_value=value.right,
+            child_value=value.value,
             file_path=file_path,
-            prefix="Right",
+            prefix="Value",
+        )
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.annotation,
+            file_path=file_path,
+            prefix="Annotation",
         )
