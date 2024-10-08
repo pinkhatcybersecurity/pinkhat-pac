@@ -50,13 +50,13 @@ class NamedExprGraphDb(BaseGraphDb):
         )
         self._save_relationship(
             parent_value=value,
-            child_value=value.value,
-            file_path=file_path,
-            prefix="Value",
-        )
-        self._save_relationship(
-            parent_value=value,
             child_value=value.target,
             file_path=file_path,
             prefix="Target",
+        )
+        self._save_relationship(
+            parent_value=value,
+            child_value=value.value,
+            file_path=file_path,
+            prefix="Value",
         )

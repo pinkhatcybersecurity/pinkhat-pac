@@ -44,13 +44,14 @@ class CompareGraphDb(BaseGraphDb):
                     TableName.NamedExpr.value,
                     TableName.Tuple.value,
                     TableName.Set.value,
-                    TableName.Subscript.value
+                    TableName.Subscript.value,
                 ],
                 "extra_fields": "index INT, lineno INT, op STRING, file_path STRING",
             },
         },
         "extra_fields": "lineno INT, file_path STRING",
     }
+
     def __init__(self, conn: Connection):
         super().__init__(conn=conn)
         self._table = Table(
@@ -78,7 +79,10 @@ class CompareGraphDb(BaseGraphDb):
         self._parse_comparator(value=value, file_path=file_path)
 
     def _parse_comparator(self, value: ast.Compare, file_path: str):
-        index = 0.5
+        # Start from index 0, which is connected to the left value. In the next step
+        # comparator from 0 is connected to comparator 1 and so on.
+        # Index should be increased by 0.5
+        index = 0
         for comparator in value.comparators:
             self._save_relationship(
                 parent_value=value,
@@ -86,15 +90,26 @@ class CompareGraphDb(BaseGraphDb):
                 file_path=file_path,
                 prefix="Comparator",
             )
+            if index == 0:
+                self._save_relationship_only(
+                    parent_value=value,
+                    child_value=comparator,
+                    file_path=file_path,
+                    prefix="Op",
+                    extra_field={"op": type(value.ops[index]).__name__, "index": index},
+                )
+                if len(value.comparators) == 1:
+                    continue
+                index = 0.5
             # Collect the rest of the elements. Go through the list - 1.
             # The last element is not assigned to anything. So, it can be skipped.
             ceil = math.ceil(index)
-            self._save_relationship(
+            self._save_relationship_only(
                 parent_value=value,
                 child_value=comparator,
                 file_path=file_path,
                 prefix="Op",
-                extra_field={"op": type(value.ops[ceil]).__name__, "index": ceil}
+                extra_field={"op": type(value.ops[ceil]).__name__, "index": ceil},
             )
             index += 0.5
 
@@ -109,17 +124,10 @@ class CompareGraphDb(BaseGraphDb):
         # So, if there is something like:
         # 1 < A < 2
         # then 1 and A are compared, then A and 2 are compared.
-        self._save_relationship(
+        self._save_relationship_only(
             parent_value=value,
             child_value=value.left,
             file_path=file_path,
             prefix="Op",
-            extra_field={"op": type(value.ops[0]).__name__, "index": 0}
-        )
-        self._save_relationship(
-            parent_value=value,
-            child_value=value.comparators[0],
-            file_path=file_path,
-            prefix="Op",
-            extra_field={"op": type(value.ops[0]).__name__, "index": 0}
+            extra_field={"op": type(value.ops[0]).__name__, "index": 0},
         )

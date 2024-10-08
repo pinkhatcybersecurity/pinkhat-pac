@@ -53,224 +53,85 @@ named_expr_assign = [
             "p_id": 0,
         },
         {
-            "_label": "NamedExpr",
-            "annotation": None,
-            "arg": None,
-            "attr": None,
-            "cause": None,
-            "col_offset": 7,
-            "conversion": None,
-            "end_col_offset": 20,
-            "end_lineno": 2,
-            "file_path": os.path.join(
-                "tests", "graph_ast_python", "test_files", "named_expr.py"
-            ),
-            "format_spec": None,
-            "id": None,
-            "is_async": None,
-            "kind": None,
-            "lineno": 2,
-            "n": None,
-            "name": None,
-            "op": None,
-            "p_id": 1,
-            "returns": None,
-            "s": None,
-            "type": None,
-            "type_comment": None,
-            "value": None,
-        },
-        {
-            "_label": "Value_NamedExpr_Rel_NamedExpr_NamedExpr",
-            "file_path": os.path.join(
-                "tests", "graph_ast_python", "test_files", "named_expr.py"
-            ),
-            "lineno": 2,
-        },
-    ],
-    [
-        {
-            "_label": "NamedExpr",
-            "col_offset": 1,
-            "end_col_offset": 21,
-            "end_lineno": 2,
-            "file_path": os.path.join(
-                "tests", "graph_ast_python", "test_files", "named_expr.py"
-            ),
-            "lineno": 2,
-            "p_id": 0,
-        },
-        {
             "_label": "Name",
-            "annotation": None,
-            "arg": None,
-            "attr": None,
-            "cause": None,
+            "p_id": 0,
             "col_offset": 1,
-            "conversion": None,
             "end_col_offset": 2,
             "end_lineno": 2,
+            "lineno": 2,
+            "op": None,
             "file_path": os.path.join(
                 "tests", "graph_ast_python", "test_files", "named_expr.py"
             ),
+            "conversion": None,
             "format_spec": None,
+            "kind": None,
+            "type": None,
+            "n": None,
+            "s": None,
+            "value": None,
+            "attr": None,
             "id": "z",
-            "is_async": None,
-            "kind": None,
-            "lineno": 2,
-            "n": None,
             "name": None,
-            "op": None,
+            "type_comment": None,
+            "simple": None,
+            "cause": None,
+            "level": None,
+            "module": None,
+            "annotation": None,
+            "arg": None,
+            "is_async": None,
+            "asname": None,
+        },
+        {
+            "_label": "Target_NamedExpr_Rel_NamedExpr_Name",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
+            "lineno": 2,
+        },
+    ],
+    [
+        {
+            "_label": "NamedExpr",
+            "col_offset": 1,
+            "end_col_offset": 21,
+            "end_lineno": 2,
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
+            "lineno": 2,
+            "p_id": 0,
+        },
+        {
+            "_label": "NamedExpr",
             "p_id": 2,
-            "returns": None,
-            "s": None,
-            "type": None,
-            "type_comment": None,
-            "value": None,
-        },
-        {
-            "_label": "Target_Name_NamedExpr_Rel",
-            "file_path": os.path.join(
-                "tests", "graph_ast_python", "test_files", "named_expr.py"
-            ),
-            "lineno": None,
-        },
-    ],
-    [
-        {
-            "_label": "NamedExpr",
-            "col_offset": 1,
-            "end_col_offset": 21,
-            "end_lineno": 2,
-            "file_path": os.path.join(
-                "tests", "graph_ast_python", "test_files", "named_expr.py"
-            ),
-            "lineno": 2,
-            "p_id": 0,
-        },
-        {
-            "_label": "Expr",
-            "annotation": None,
-            "arg": None,
-            "attr": None,
-            "cause": None,
-            "col_offset": 0,
-            "conversion": None,
-            "end_col_offset": 22,
-            "end_lineno": 2,
-            "file_path": os.path.join(
-                "tests", "graph_ast_python", "test_files", "named_expr.py"
-            ),
-            "format_spec": None,
-            "id": None,
-            "is_async": None,
-            "kind": None,
-            "lineno": 2,
-            "n": None,
-            "name": None,
-            "op": None,
-            "p_id": 0,
-            "returns": None,
-            "s": None,
-            "type": None,
-            "type_comment": None,
-            "value": None,
-        },
-        {
-            "_label": "Value_NamedExpr_Expr_Rel",
-            "file_path": os.path.join(
-                "tests", "graph_ast_python", "test_files", "named_expr.py"
-            ),
-            "lineno": None,
-        },
-    ],
-    [
-        {
-            "_label": "NamedExpr",
-            "col_offset": 7,
-            "end_col_offset": 20,
-            "end_lineno": 2,
-            "file_path": os.path.join(
-                "tests", "graph_ast_python", "test_files", "named_expr.py"
-            ),
-            "lineno": 2,
-            "p_id": 1,
-        },
-        {
-            "_label": "NamedExpr",
-            "annotation": None,
-            "arg": None,
-            "attr": None,
-            "cause": None,
-            "col_offset": 1,
-            "conversion": None,
-            "end_col_offset": 21,
-            "end_lineno": 2,
-            "file_path": os.path.join(
-                "tests", "graph_ast_python", "test_files", "named_expr.py"
-            ),
-            "format_spec": None,
-            "id": None,
-            "is_async": None,
-            "kind": None,
-            "lineno": 2,
-            "n": None,
-            "name": None,
-            "op": None,
-            "p_id": 0,
-            "returns": None,
-            "s": None,
-            "type": None,
-            "type_comment": None,
-            "value": None,
-        },
-        {
-            "_label": "Value_NamedExpr_Rel_NamedExpr_NamedExpr",
-            "file_path": os.path.join(
-                "tests", "graph_ast_python", "test_files", "named_expr.py"
-            ),
-            "lineno": 2,
-        },
-    ],
-    [
-        {
-            "_label": "NamedExpr",
-            "col_offset": 7,
-            "end_col_offset": 20,
-            "end_lineno": 2,
-            "file_path": os.path.join(
-                "tests", "graph_ast_python", "test_files", "named_expr.py"
-            ),
-            "lineno": 2,
-            "p_id": 1,
-        },
-        {
-            "_label": "NamedExpr",
-            "annotation": None,
-            "arg": None,
-            "attr": None,
-            "cause": None,
             "col_offset": 13,
-            "conversion": None,
             "end_col_offset": 19,
             "end_lineno": 2,
+            "lineno": 2,
             "file_path": os.path.join(
                 "tests", "graph_ast_python", "test_files", "named_expr.py"
             ),
+            "conversion": None,
             "format_spec": None,
-            "id": None,
-            "is_async": None,
             "kind": None,
-            "lineno": 2,
-            "n": None,
-            "name": None,
-            "op": None,
-            "p_id": 2,
-            "returns": None,
-            "s": None,
             "type": None,
-            "type_comment": None,
+            "n": None,
+            "s": None,
             "value": None,
+            "attr": None,
+            "id": None,
+            "name": None,
+            "type_comment": None,
+            "simple": None,
+            "cause": None,
+            "level": None,
+            "module": None,
+            "annotation": None,
+            "arg": None,
+            "is_async": None,
+            "asname": None,
         },
         {
             "_label": "Value_NamedExpr_Rel_NamedExpr_NamedExpr",
@@ -283,49 +144,64 @@ named_expr_assign = [
     [
         {
             "_label": "NamedExpr",
+            "p_id": 1,
             "col_offset": 7,
             "end_col_offset": 20,
             "end_lineno": 2,
+            "lineno": 2,
             "file_path": os.path.join(
                 "tests", "graph_ast_python", "test_files", "named_expr.py"
             ),
-            "lineno": 2,
-            "p_id": 1,
         },
         {
             "_label": "Name",
-            "annotation": None,
-            "arg": None,
-            "attr": None,
-            "cause": None,
             "col_offset": 7,
-            "conversion": None,
             "end_col_offset": 8,
             "end_lineno": 2,
             "file_path": os.path.join(
                 "tests", "graph_ast_python", "test_files", "named_expr.py"
             ),
-            "format_spec": None,
             "id": "y",
-            "is_async": None,
-            "kind": None,
             "lineno": 2,
-            "n": None,
-            "name": None,
-            "op": None,
             "p_id": 1,
-            "returns": None,
-            "s": None,
-            "type": None,
-            "type_comment": None,
-            "value": None,
         },
         {
-            "_label": "Target_Name_NamedExpr_Rel",
+            "_label": "Target_NamedExpr_Rel_NamedExpr_Name",
             "file_path": os.path.join(
                 "tests", "graph_ast_python", "test_files", "named_expr.py"
             ),
-            "lineno": None,
+            "lineno": 2,
+        },
+    ],
+    [
+        {
+            "_label": "NamedExpr",
+            "col_offset": 7,
+            "end_col_offset": 20,
+            "end_lineno": 2,
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
+            "lineno": 2,
+            "p_id": 1,
+        },
+        {
+            "_label": "NamedExpr",
+            "col_offset": 13,
+            "end_col_offset": 19,
+            "end_lineno": 2,
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
+            "lineno": 2,
+            "p_id": 2,
+        },
+        {
+            "_label": "Value_NamedExpr_Rel_NamedExpr_NamedExpr",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
+            "lineno": 2,
         },
     ],
     [
@@ -342,31 +218,14 @@ named_expr_assign = [
         },
         {
             "_label": "NamedExpr",
-            "annotation": None,
-            "arg": None,
-            "attr": None,
-            "cause": None,
-            "col_offset": 7,
-            "conversion": None,
-            "end_col_offset": 20,
+            "p_id": 0,
+            "col_offset": 1,
+            "end_col_offset": 21,
             "end_lineno": 2,
             "file_path": os.path.join(
                 "tests", "graph_ast_python", "test_files", "named_expr.py"
             ),
-            "format_spec": None,
-            "id": None,
-            "is_async": None,
-            "kind": None,
             "lineno": 2,
-            "n": None,
-            "name": None,
-            "op": None,
-            "p_id": 1,
-            "returns": None,
-            "s": None,
-            "type": None,
-            "type_comment": None,
-            "value": None,
         },
         {
             "_label": "Value_NamedExpr_Rel_NamedExpr_NamedExpr",
@@ -390,31 +249,14 @@ named_expr_assign = [
         },
         {
             "_label": "Constant",
-            "annotation": None,
-            "arg": None,
-            "attr": None,
-            "cause": None,
             "col_offset": 18,
-            "conversion": None,
             "end_col_offset": 19,
             "end_lineno": 2,
             "file_path": os.path.join(
                 "tests", "graph_ast_python", "test_files", "named_expr.py"
             ),
-            "format_spec": None,
-            "id": None,
-            "is_async": None,
-            "kind": None,
             "lineno": 2,
-            "n": "0",
-            "name": None,
-            "op": None,
             "p_id": 0,
-            "returns": None,
-            "s": "0",
-            "type": "int",
-            "type_comment": None,
-            "value": "0",
         },
         {
             "_label": "Value_NamedExpr_Rel_NamedExpr_Constant",
@@ -437,39 +279,85 @@ named_expr_assign = [
             "p_id": 2,
         },
         {
-            "_label": "Name",
-            "annotation": None,
-            "arg": None,
-            "attr": None,
-            "cause": None,
+            "_label": "Expr",
+            "p_id": 0,
+            "col_offset": 0,
+            "end_col_offset": 22,
+            "end_lineno": 2,
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
+            "lineno": 2,
+        },
+        {
+            "_label": "Value_Expr_Rel_Expr_NamedExpr",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
+            "lineno": 2,
+        },
+    ],
+    [
+        {
+            "_label": "NamedExpr",
             "col_offset": 13,
-            "conversion": None,
+            "end_col_offset": 19,
+            "end_lineno": 2,
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
+            "lineno": 2,
+            "p_id": 2,
+        },
+        {
+            "_label": "NamedExpr",
+            "col_offset": 7,
+            "end_col_offset": 20,
+            "end_lineno": 2,
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
+            "lineno": 2,
+            "p_id": 1,
+        },
+        {
+            "_label": "Value_NamedExpr_Rel_NamedExpr_NamedExpr",
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
+            "lineno": 2,
+        },
+    ],
+    [
+        {
+            "_label": "NamedExpr",
+            "col_offset": 13,
+            "end_col_offset": 19,
+            "end_lineno": 2,
+            "file_path": os.path.join(
+                "tests", "graph_ast_python", "test_files", "named_expr.py"
+            ),
+            "lineno": 2,
+            "p_id": 2,
+        },
+        {
+            "_label": "Name",
+            "col_offset": 13,
             "end_col_offset": 14,
             "end_lineno": 2,
             "file_path": os.path.join(
                 "tests", "graph_ast_python", "test_files", "named_expr.py"
             ),
-            "format_spec": None,
             "id": "x",
-            "is_async": None,
-            "kind": None,
             "lineno": 2,
-            "n": None,
-            "name": None,
-            "op": None,
-            "p_id": 0,
-            "returns": None,
-            "s": None,
-            "type": None,
-            "type_comment": None,
-            "value": None,
+            "p_id": 2,
         },
         {
-            "_label": "Target_Name_NamedExpr_Rel",
+            "_label": "Target_NamedExpr_Rel_NamedExpr_Name",
             "file_path": os.path.join(
                 "tests", "graph_ast_python", "test_files", "named_expr.py"
             ),
-            "lineno": None,
+            "lineno": 2,
         },
     ],
 ]
@@ -480,6 +368,7 @@ def test_named_expr_compare(graph_db: GraphDb, grammar: Grammar):
     file_path = os.path.join("tests", "graph_ast_python", "test_files", "named_expr.py")
     tree = grammar.simple_parser_main(file_path=file_path)
     graph_db.add_entries(tree=tree, file_path=file_path)
+    graph_db.copy_data_to_graph_db()
     df: pandas.DataFrame = graph_db.get_as_df(
         query="MATCH (a:NamedExpr)-[b:Left_Compare_Rel]-(c:Compare) RETURN * ORDER BY a.p_id"
     )
@@ -493,7 +382,8 @@ def test_named_expr_assign(graph_db: GraphDb, grammar: Grammar):
     file_path = os.path.join("tests", "graph_ast_python", "test_files", "named_expr.py")
     tree = grammar.simple_parser_main(file_path=file_path)
     graph_db.add_entries(tree=tree, file_path=file_path)
+    graph_db.copy_data_to_graph_db()
     df: pandas.DataFrame = graph_db.get_as_df(
-        query="MATCH (a:NamedExpr)-[b]-(c) WHERE a.lineno=2 RETURN * ORDER BY a.p_id"
+        query="MATCH (a:NamedExpr)-[b]-(c) WHERE a.lineno=2 RETURN * ORDER BY a.p_id, c.p_id"
     )
     compare_df_output(df=df, test_data=named_expr_assign)

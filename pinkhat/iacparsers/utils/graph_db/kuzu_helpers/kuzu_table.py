@@ -58,7 +58,7 @@ class Table:
         rel_name = self._create_rel_file(to_table, prefix, extra_fields)
         self._conn.execute(
             f"CREATE REL TABLE {rel_name} (FROM {self._name} TO {to_table}, "
-            f"_tail INT {',' + extra_fields if extra_fields else ''}, ONE_ONE)"
+            f"_tail INT {',' + extra_fields if extra_fields else ''})"
         )
 
     def _create_rel_file(self, to_table: str, prefix: str, extra_fields: str) -> str:
@@ -122,6 +122,7 @@ class Table:
         table: str,
         parent_value,
         child_value,
+        p_id: int,
         c_id: int,
         file_path: str,
         prefix: str,
@@ -139,7 +140,7 @@ class Table:
             must be used in the SQL query, if the graph is generated. For this reason tail has been added.
             """
             params = {
-                "p_id": self.p_id(),
+                "p_id": p_id,
                 "c_id": c_id,
                 "file_path": file_path,
                 "lineno": (

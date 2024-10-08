@@ -19,7 +19,7 @@ class WithGraphDb(BaseGraphDb):
             "Item": {
                 "rels": [TableName.WithItem.value],
                 "extra_fields": "index INT, lineno INT, file_path STRING",
-            }
+            },
         },
         "extra_fields": "lineno INT, file_path STRING",
     }
@@ -56,7 +56,7 @@ class WithGraphDb(BaseGraphDb):
                 child_value=item,
                 file_path=file_path,
                 prefix="Item",
-                extra_field={"index": (index:= index + 1)}
+                extra_field={"index": (index := index + 1)},
             )
             for item in value.items
         ]

@@ -51,11 +51,33 @@ class BaseGraphDb:
         extra_field: dict = None,
     ):
         if stmt := self._get_stmt(value=child_value):
+            p_id = self._table.p_id()
             stmt.add(value=child_value, file_path=file_path)
             self._table.save_relation(
                 table=stmt.TABLE_NAME,
                 parent_value=parent_value,
                 child_value=child_value,
+                p_id=p_id,
+                c_id=stmt.p_id(),
+                file_path=file_path,
+                prefix=prefix,
+                extra_field=extra_field,
+            )
+
+    def _save_relationship_only(
+        self,
+        parent_value,
+        child_value,
+        file_path: str,
+        prefix: str,
+        extra_field: dict = None,
+    ):
+        if stmt := self._get_stmt(value=child_value):
+            self._table.save_relation(
+                table=stmt.TABLE_NAME,
+                parent_value=parent_value,
+                child_value=child_value,
+                p_id=self._table.p_id(),
                 c_id=stmt.p_id(),
                 file_path=file_path,
                 prefix=prefix,
