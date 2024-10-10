@@ -18,6 +18,7 @@ class SubscriptGraphDb(BaseGraphDb):
                 TableName.Call.value,
                 TableName.Constant.value,
                 TableName.Name.value,
+                TableName.Slice.value,
                 TableName.Tuple.value,
                 TableName.UnaryOp.value,
             ],

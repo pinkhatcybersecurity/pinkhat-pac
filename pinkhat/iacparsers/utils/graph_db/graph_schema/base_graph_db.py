@@ -1,6 +1,3 @@
-import csv
-import os
-
 from kuzu import Connection
 from loguru import logger
 
@@ -83,6 +80,9 @@ class BaseGraphDb:
                 prefix=prefix,
                 extra_field=extra_field,
             )
+
+    def added_rels(self) -> set:
+        return self._table.added_rels()
 
     def close_fd(self):
         self._table.close_fd()

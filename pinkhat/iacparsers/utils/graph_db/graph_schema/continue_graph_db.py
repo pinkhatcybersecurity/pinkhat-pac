@@ -2,29 +2,14 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
-from pinkhat.iacparsers.utils.graph_db.graph_schema import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
-class ListCompGraphDb(BaseGraphDb):
-    TABLE_NAME: str = TableName.ListComp.value
-    _rels = {
-        "prefix": {
-            "Elt": [
-                TableName.Attribute.value,
-                TableName.Call.value,
-                TableName.Dict.value,
-                TableName.JoinedStr.value,
-                TableName.List.value,
-                TableName.Name.value,
-                TableName.Tuple.value,
-            ],
-            "Generator": [TableName.comprehension.value],
-        },
-        "extra_fields": "lineno INT, file_path STRING",
-    }
+class ContinueGraphDb(BaseGraphDb):
+    TABLE_NAME: str = TableName.Continue.value
 
     def __init__(self, conn: Connection):
         super().__init__(conn=conn)
@@ -39,7 +24,7 @@ class ListCompGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def add(self, value: ast.ListComp, file_path: str):
+    def add(self, value: ast.Break, file_path: str):
         self._table.save(
             params={
                 "col_offset": value.col_offset,
@@ -49,18 +34,3 @@ class ListCompGraphDb(BaseGraphDb):
                 "file_path": file_path,
             }
         )
-        self._save_relationship(
-            parent_value=value,
-            child_value=value.elt,
-            file_path=file_path,
-            prefix="Elt",
-        )
-        [
-            self._save_relationship(
-                parent_value=value,
-                child_value=generator,
-                file_path=file_path,
-                prefix="Generator",
-            )
-            for generator in value.generators
-        ]

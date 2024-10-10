@@ -2,43 +2,16 @@ import ast
 
 from kuzu import Connection
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema.assign_base_graph_db import (
+    AssignBaseGrapDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.enum_table_name import TableName
-from pinkhat.iacparsers.utils.graph_db.graph_schema.base_graph_db import BaseGraphDb
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
-class AssignGraphDb(BaseGraphDb):
+class AssignGraphDb(AssignBaseGrapDb):
     TABLE_NAME: str = TableName.Assign.value
-    _rels = {
-        "prefix": {
-            "Value": [
-                TableName.Attribute.value,
-                TableName.Await.value,
-                TableName.BinOp.value,
-                TableName.BoolOp.value,
-                TableName.Call.value,
-                TableName.Compare.value,
-                TableName.Constant.value,
-                TableName.Dict.value,
-                TableName.JoinedStr.value,
-                TableName.Lambda.value,
-                TableName.List.value,
-                TableName.ListComp.value,
-                TableName.Name.value,
-                TableName.Tuple.value,
-                TableName.Set.value,
-                TableName.Subscript.value,
-            ],
-            "Target": [
-                TableName.Attribute.value,
-                TableName.Name.value,
-                TableName.Tuple.value,
-                TableName.Subscript.value,
-            ],
-        },
-        "extra_fields": "lineno INT, file_path STRING",
-    }
 
     def __init__(self, conn: Connection):
         super().__init__(conn=conn)
@@ -65,6 +38,10 @@ class AssignGraphDb(BaseGraphDb):
                 "file_path": file_path,
             }
         )
+        self._parse_targets(value=value, file_path=file_path)
+        self._parse_value(value=value, file_path=file_path)
+
+    def _parse_targets(self, value: ast.Assign, file_path: str):
         for target in value.targets:
             self._save_relationship(
                 parent_value=value,
@@ -72,9 +49,3 @@ class AssignGraphDb(BaseGraphDb):
                 file_path=file_path,
                 prefix="Target",
             )
-        self._save_relationship(
-            parent_value=value,
-            child_value=value.value,
-            file_path=file_path,
-            prefix="Value",
-        )

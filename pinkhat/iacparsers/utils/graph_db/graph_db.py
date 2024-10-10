@@ -8,6 +8,7 @@ import pandas
 from kuzu import Connection
 from loguru import logger
 
+from pinkhat.iacparsers.utils.graph_db.graph_schema.yield_from_graph_db import YieldFromGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.alias_graph_db import AliasGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.ann_assign_grapy_db import (
     AnnAssignGraphDb,
@@ -18,14 +19,21 @@ from pinkhat.iacparsers.utils.graph_db.graph_schema.assign_graph_db import Assig
 from pinkhat.iacparsers.utils.graph_db.graph_schema.async_function_def_graph_db import (
     AsyncFunctionDefGraphDb,
 )
+from pinkhat.iacparsers.utils.graph_db.graph_schema.async_with_graph_db import (
+    AsyncWithGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.attribute_graph_db import (
     AttributeGraphDb,
+)
+from pinkhat.iacparsers.utils.graph_db.graph_schema.aug_assign_graph_db import (
+    AugAssignGraphDb,
 )
 from pinkhat.iacparsers.utils.graph_db.graph_schema.await_graph_db import AwaitGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.binop_graph_db import BinOpGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.bool_op_graph_db import (
     BoolOpGraphDb,
 )
+from pinkhat.iacparsers.utils.graph_db.graph_schema.break_graph_db import BreakGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.call_graph_db import CallGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.class_def_graph_db import (
     ClassDefGraphDb,
@@ -39,6 +47,13 @@ from pinkhat.iacparsers.utils.graph_db.graph_schema.comprehension_graph_db impor
 from pinkhat.iacparsers.utils.graph_db.graph_schema.constant_graph_db import (
     ConstantGraphDb,
 )
+from pinkhat.iacparsers.utils.graph_db.graph_schema.continue_graph_db import (
+    ContinueGraphDb,
+)
+from pinkhat.iacparsers.utils.graph_db.graph_schema.delete_graph_db import DeleteGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.dict_comp_graph_db import (
+    DictCompGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.dict_graph_db import DictGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.except_handler_graph_db import (
     ExceptHandlerGraphDb,
@@ -51,7 +66,11 @@ from pinkhat.iacparsers.utils.graph_db.graph_schema.formatted_value_graph_db imp
 from pinkhat.iacparsers.utils.graph_db.graph_schema.function_def_graph_db import (
     FunctionDefGraphDb,
 )
+from pinkhat.iacparsers.utils.graph_db.graph_schema.generator_exp_graph_db import (
+    GeneratorExpGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.global_graph_db import GlobalGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.if_exp_graph_db import IfExpGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.if_graph_db import IfGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.import_from_graph_db import (
     ImportFromGraphDb,
@@ -80,7 +99,11 @@ from pinkhat.iacparsers.utils.graph_db.graph_schema.not_eq_graph_db import NotEq
 from pinkhat.iacparsers.utils.graph_db.graph_schema.pass_graph_db import PassGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.raise_graph_db import RaiseGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.return_graph_db import ReturnGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.set_comp_graph_db import (
+    SetCompGraphDb,
+)
 from pinkhat.iacparsers.utils.graph_db.graph_schema.set_graph_db import SetGraphDb
+from pinkhat.iacparsers.utils.graph_db.graph_schema.slice_graph_db import SliceGraphDb
 from pinkhat.iacparsers.utils.graph_db.graph_schema.starred_graph_db import (
     StarredGraphDb,
 )
@@ -122,16 +145,16 @@ class GraphDb:
             ast.BinOp: BinOpGraphDb(conn=self._conn),
             ast.UnaryOp: UnaryOpGraphDb(conn=self._conn),
             ast.Lambda: LambdaGraphDb(conn=self._conn),
-            ast.IfExp: None,
+            ast.IfExp: IfExpGraphDb(conn=self._conn),
             ast.Dict: DictGraphDb(conn=self._conn),
             ast.Set: SetGraphDb(conn=self._conn),
             ast.ListComp: ListCompGraphDb(conn=self._conn),
-            ast.SetComp: None,
-            ast.DictComp: None,
-            ast.GeneratorExp: None,
+            ast.SetComp: SetCompGraphDb(conn=self._conn),
+            ast.DictComp: DictCompGraphDb(conn=self._conn),
+            ast.GeneratorExp: GeneratorExpGraphDb(conn=self._conn),
             ast.Await: AwaitGraphDb(conn=self._conn),
             ast.Yield: YieldGraphDb(conn=self._conn),
-            ast.YieldFrom: None,
+            ast.YieldFrom: YieldFromGraphDb(conn=self._conn),
             ast.Compare: CompareGraphDb(conn=self._conn),
             ast.Call: CallGraphDb(conn=self._conn),
             ast.FormattedValue: FormattedValueGraphDb(conn=self._conn),
@@ -143,23 +166,23 @@ class GraphDb:
             ast.Name: NameGraphDb(conn=self._conn),
             ast.List: ListGraphDb(conn=self._conn),
             ast.Tuple: TupleGraphDb(conn=self._conn),
-            ast.Slice: None,
+            ast.Slice: SliceGraphDb(conn=self._conn),
             ast.Module: ModuleGraphDb(conn=self._conn),
             ast.FunctionDef: FunctionDefGraphDb(conn=self._conn),
             ast.AsyncFunctionDef: AsyncFunctionDefGraphDb(conn=self._conn),
             ast.ClassDef: ClassDefGraphDb(conn=self._conn),
             ast.Return: ReturnGraphDb(conn=self._conn),
-            ast.Delete: None,
+            ast.Delete: DeleteGraphDb(conn=self._conn),
             ast.Assign: AssignGraphDb(conn=self._conn),
             ast.TypeAlias: None,
-            ast.AugAssign: None,
+            ast.AugAssign: AugAssignGraphDb(conn=self._conn),
             ast.AnnAssign: AnnAssignGraphDb(conn=self._conn),
             ast.For: ForGraphDb(conn=self._conn),
             ast.AsyncFor: None,
             ast.While: WhileGraphDb(conn=self._conn),
             ast.If: IfGraphDb(conn=self._conn),
             ast.With: WithGraphDb(conn=self._conn),
-            ast.AsyncWith: None,
+            ast.AsyncWith: AsyncWithGraphDb(conn=self._conn),
             ast.Match: None,
             ast.Raise: RaiseGraphDb(conn=self._conn),
             ast.Try: TryGraphDb(conn=self._conn),
@@ -171,8 +194,8 @@ class GraphDb:
             ast.Nonlocal: NonlocalGraphDb(conn=self._conn),
             ast.Expr: ExprGraphDb(conn=self._conn),
             ast.Pass: PassGraphDb(conn=self._conn),
-            ast.Break: None,
-            ast.Continue: None,
+            ast.Break: BreakGraphDb(conn=self._conn),
+            ast.Continue: ContinueGraphDb(conn=self._conn),
             ast.arg: ArgGraphDb(conn=self._conn),
             ast.keyword: KeywordGraphDb(conn=self._conn),
             ast.ExceptHandler: ExceptHandlerGraphDb(conn=self._conn),
@@ -221,9 +244,20 @@ class GraphDb:
 
     def copy_data_to_graph_db(self):
         [_cls.close_fd() for _cls in self._stmt.values() if _cls is not None]
+        modified_files = set()
+        [
+            modified_files.update(_cls.added_rels())
+            for _cls in self._stmt.values()
+            if _cls is not None
+        ]
+        if bool(modified_files) is False:
+            # There is no data to process
+            return
         for child in self._tmp_data_dir.rglob("*.csv"):
             if child.is_file():
                 table_name: str = f"{child.name[:-(len(child.suffix))]}"
+                if table_name.lower() not in modified_files:
+                    continue
                 try:
                     query_res = self._conn.execute(
                         f"COPY {table_name} FROM '{child}' (header=true, parallel=false)"
