@@ -15,12 +15,7 @@ class LambdaGraphDb(BaseGraphDb):
     TABLE_NAME: str = TableName.Lambda.value
     _rels = {
         "prefix": {
-            "Body": BODY_RELATIONSHIPS
-            + [
-                TableName.Attribute.value,
-                TableName.Call.value,
-                TableName.Constant.value,
-            ],
+            "Body": BODY_RELATIONSHIPS,
             "Default": [
                 TableName.arg.value,
                 TableName.Constant.value,

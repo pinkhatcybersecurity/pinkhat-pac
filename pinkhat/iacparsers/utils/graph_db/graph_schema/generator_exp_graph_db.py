@@ -8,30 +8,25 @@ from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_column import Column
 from pinkhat.iacparsers.utils.graph_db.kuzu_helpers.kuzu_table import Table
 
 
-class ReturnGraphDb(BaseGraphDb):
-    TABLE_NAME = TableName.Return.value
+class GeneratorExpGraphDb(BaseGraphDb):
+    """
+    Generator
+    ```
+    ((k, v) for k, v in self.__dict__.items())
+    ```
+    """
+
+    TABLE_NAME: str = TableName.GeneratorExp.value
     _rels = {
         "prefix": {
-            "Value": [
-                TableName.Attribute.value,
-                TableName.Await.value,
-                TableName.Name.value,
-                TableName.BinOp.value,
-                TableName.BoolOp.value,
+            "Elt": [
                 TableName.Call.value,
                 TableName.Compare.value,
                 TableName.Constant.value,
-                TableName.Dict.value,
-                TableName.DictComp.value,
-                TableName.GeneratorExp.value,
-                TableName.IfExp.value,
-                TableName.JoinedStr.value,
-                TableName.List.value,
-                TableName.ListComp.value,
+                TableName.Name.value,
                 TableName.Tuple.value,
-                TableName.Subscript.value,
-                TableName.UnaryOp.value,
-            ]
+            ],
+            "Generator": [TableName.comprehension.value],
         },
         "extra_fields": "lineno INT, file_path STRING",
     }
@@ -49,7 +44,7 @@ class ReturnGraphDb(BaseGraphDb):
             Column(name="file_path", column_type="STRING"),
         )
 
-    def add(self, value: ast.Return, file_path: str):
+    def add(self, value: ast.GeneratorExp, file_path: str):
         self._table.save(
             params={
                 "col_offset": value.col_offset,
@@ -57,11 +52,20 @@ class ReturnGraphDb(BaseGraphDb):
                 "end_lineno": value.end_lineno,
                 "lineno": value.lineno,
                 "file_path": file_path,
-            }
+            },
         )
+        [
+            self._save_relationship(
+                parent_value=value,
+                child_value=generator,
+                file_path=file_path,
+                prefix="Generator",
+            )
+            for generator in value.generators
+        ]
         self._save_relationship(
             parent_value=value,
-            child_value=value.value,
+            child_value=value.elt,
             file_path=file_path,
-            prefix="Value",
+            prefix="Elt",
         )

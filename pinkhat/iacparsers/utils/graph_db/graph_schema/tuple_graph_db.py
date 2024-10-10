@@ -22,6 +22,7 @@ class TupleGraphDb(BaseGraphDb):
                 TableName.Name.value,
                 TableName.NamedExpr.value,
                 TableName.Subscript.value,
+                TableName.Tuple.value,
             ],
             "Elt": [
                 TableName.Attribute.value,

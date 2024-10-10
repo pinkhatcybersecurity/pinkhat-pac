@@ -23,6 +23,7 @@ class Table:
             [column.name for column in self._columns if column.name != "p_id"]
         )
         self._p_id = -1
+        self._added = False  # Checks if any element has been found and saved
 
     @property
     def name(self):
@@ -74,6 +75,7 @@ class Table:
                 "fd": _fd,
                 "csv": _csv,
                 "order": order,
+                "added": False,
             }
         return rel_name
 
@@ -116,6 +118,7 @@ class Table:
         # The table automatically adds and increment p_id but this field
         # is used in save_relation
         self._p_id += 1
+        self._added = True
 
     def save_relation(
         self,
@@ -153,6 +156,7 @@ class Table:
             if hasattr(child_value, "lineno"):
                 params["lineno"] = child_value.lineno
             rel["csv"].writerow([params.get(order) for order in rel["order"]])
+            rel["added"] = True
         else:
             logger.error(f"Relationship missing {rel_name}")
 
@@ -161,7 +165,21 @@ class Table:
         logger.error(error)
         raise AttributeError(error)
 
+    def added_rels(self) -> set:
+        names = {
+            name
+            for name, value in self._csv_mapping.items()
+            if value.get("added") == True
+        }
+        if self._added:
+            names.update({self._name.lower()})
+        return set(names)
+
     def close_fd(self):
+        """
+        Function closes the opened file descriptors. During the data processing there is many opened
+        file handlers that require to be closed.
+        """
         for mapping in self._csv_mapping.values():
             mapping["fd"].close()
         self._fd.close()

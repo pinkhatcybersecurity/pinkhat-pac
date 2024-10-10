@@ -15,11 +15,17 @@ class ComprehensionGraphDb(BaseGraphDb):
             "Iter": [
                 TableName.Attribute.value,
                 TableName.Call.value,
+                TableName.List.value,
                 TableName.Name.value,
                 TableName.Subscript.value,
             ],
             "Target": [TableName.Name.value, TableName.Tuple.value],
-            "If": [TableName.Call.value, TableName.Compare.value],
+            "If": [
+                TableName.Attribute.value,
+                TableName.Call.value,
+                TableName.Compare.value,
+                TableName.Name.value,
+            ],
         },
         "extra_fields": "lineno INT, file_path STRING",
     }

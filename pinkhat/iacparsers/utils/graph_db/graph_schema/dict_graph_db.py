@@ -23,6 +23,7 @@ class DictGraphDb(BaseGraphDb):
                 TableName.AnnAssign.value,
                 TableName.Attribute.value,
                 TableName.BinOp.value,
+                TableName.BoolOp.value,
                 TableName.Call.value,
                 TableName.Constant.value,
                 TableName.JoinedStr.value,

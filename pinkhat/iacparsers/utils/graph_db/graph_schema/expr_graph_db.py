@@ -22,6 +22,7 @@ class ExprGraphDb(BaseGraphDb):
                 TableName.NamedExpr.value,
                 TableName.Tuple.value,
                 TableName.Yield.value,
+                TableName.YieldFrom.value,
             ]
         },
         "extra_fields": "lineno INT, file_path STRING",
